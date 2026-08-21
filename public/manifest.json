@@ -1,0 +1,41 @@
+{
+  "name": "Food Science AI | سامانه هوشمند علوم و صنایع غذایی",
+  "short_name": "Food Science AI",
+  "description": "سامانه هوشمند و جامع علوم و صنایع غذایی، کنترل کیفیت، آزمایشگاه و فرمولاسیون صنعتی با قابلیت کارکرد آفلاین",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#047857",
+  "theme_color": "#047857",
+  "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "fa",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "education", "utilities"],
+  "shortcuts": [
+    {
+      "name": "چت هوشمند",
+      "short_name": "چت",
+      "url": "/chat",
+      "description": "دستیار مشاوره و فرمولاسیون صنایع غذایی"
+    },
+    {
+      "name": "آزمایشگاه تخصصی",
+      "short_name": "آزمایشگاه",
+      "url": "/laboratory",
+      "description": "آنالیزهای میکروبی و شیمیایی"
+    },
+    {
+      "name": "محاسبات مهندسی",
+      "short_name": "محاسبات",
+      "url": "/calculations",
+      "description": "محاسبات ارزش غذایی و مهندسی"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="flaskGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a7f3d0"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Rounded Squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  
+  <!-- Flask Body -->
+  <path d="M224 96 h64 v64 l72 168 c16 38 -12 88 -54 88 H206 c-42 0 -70 -50 -54 -88 l72 -168 Z" fill="none" stroke="#ffffff" stroke-width="28" stroke-linejoin="round" stroke-linecap="round"/>
+  
+  <!-- Flask Liquid -->
+  <path d="M178 350 c18 -8 40 4 60 4 s42 -12 60 -4 l24 46 c4 12 -4 20 -16 20 H206 c-12 0 -20 -8 -16 -20 Z" fill="url(#flaskGrad)" opacity="0.9"/>
+  
+  <!-- Bubbles & Sparkles -->
+  <circle cx="236" cy="300" r="12" fill="#ffffff" opacity="0.8"/>
+  <circle cx="276" cy="270" r="8" fill="#ffffff" opacity="0.7"/>
+  <circle cx="250" cy="240" r="14" fill="#ffffff" opacity="0.9"/>
+  
+  <!-- Top AI Sparkle -->
+  <path d="M370 110 L380 135 L405 145 L380 155 L370 180 L360 155 L335 145 L360 135 Z" fill="#fef08a"/>
+  <path d="M140 140 L146 155 L161 161 L146 167 L140 182 L134 167 L119 161 L134 155 Z" fill="#fef08a"/>
+</svg>
