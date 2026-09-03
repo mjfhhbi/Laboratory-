@@ -153,6 +153,12 @@ export interface ScientificSource {
 export interface SourceCitation {
   sourceId: string;
   sourceTitle?: string;
+  citationShort?: string;
+  fullTitle?: string;
+  verificationGrade?: string;
+  verificationStatus?: string;
+  year?: string;
+  publisherOrJournal?: string;
   codeOrIdentifier?: string;
   sectionOrChapter?: string;
   pageNumber?: string;

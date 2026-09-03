@@ -82,6 +82,56 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     phase: 9
   },
   {
+    id: 'reagents',
+    title: 'مواد و محلول‌سازی',
+    englishTitle: 'Reagents & Solutions',
+    path: '/reagents',
+    iconName: 'Pipette',
+    description: 'بانک مواد شیمیایی، برگه‌های ایمنی SDS، رفرنس‌های CAS و محاسبات محلول‌سازی دقیق',
+    category: 'lab',
+    phase: 13
+  },
+  {
+    id: 'troubleshooting',
+    title: 'عیب‌یابی آزمایشگاهی',
+    englishTitle: 'Laboratory Troubleshooting',
+    path: '/troubleshooting',
+    iconName: 'AlertTriangle',
+    description: 'سیستم استنتاجی ریشه‌یابی خطاهای آزمایشگاه، علل، نشانه‌ها، اقدام اصلاحی و CAPA',
+    category: 'lab',
+    phase: 15
+  },
+  {
+    id: 'microbiology',
+    title: 'میکروبیولوژی مواد غذایی',
+    englishTitle: 'Food Microbiology',
+    path: '/microbiology',
+    iconName: 'Microscope',
+    description: 'بانک آزمون‌های میکروبی، میکروارگانیسم‌ها، محیط‌های کشت، رقت‌سازی، شمارش، MPN و کنترل کیفیت',
+    category: 'lab',
+    phase: 16
+  },
+  {
+    id: 'food-chemistry',
+    title: 'شیمی و آنالیز مواد غذایی',
+    englishTitle: 'Food Chemistry & Analysis',
+    path: '/food-chemistry',
+    iconName: 'Atom',
+    description: 'آزمون‌های شیمیایی، ترکیبات اصلی (رطوبت، خاکستر، پروتئین، چربی، فیبر، قندها، اسیدیته، نمک، بریکس، رنگدانه‌ها و آنتی‌اکسیدان‌ها)',
+    category: 'lab',
+    phase: 17
+  },
+  {
+    id: 'quality-control',
+    title: 'کنترل و تضمین کیفیت (QA/QC)',
+    englishTitle: 'Quality Control & QA',
+    path: '/quality-control',
+    iconName: 'ShieldCheck',
+    description: 'مدیریت نمونه‌ها، بهمن‌ها، ردیابی کالیبراسیون و معرف، حدود مجاز استاندارد، نمودار شوهارت، تحلیل روند SPC و مدیریت CAPA',
+    category: 'lab',
+    phase: 18
+  },
+  {
     id: 'sources',
     title: 'منابع علمی',
     englishTitle: 'Scientific Sources',
@@ -179,6 +229,61 @@ export const QUICK_ACCESS_ITEMS: QuickAccessItem[] = [
     category: 'lab',
     accentColor: 'rose',
     badge: 'تجهیزات'
+  },
+  {
+    id: 'reagents',
+    title: 'مواد و محلول‌سازی',
+    englishTitle: 'Reagents & Solution Prep',
+    path: '/reagents',
+    iconName: 'Pipette',
+    description: 'بانک معرف‌ها، محاسبات غلظت و حجم، پروتکل‌های استانداردسازی و چاپ لیبل GHS',
+    category: 'lab',
+    accentColor: 'emerald',
+    badge: 'محلول‌سازی'
+  },
+  {
+    id: 'troubleshooting',
+    title: 'عیب‌یابی آزمایشگاهی',
+    englishTitle: 'Lab Troubleshooting & CAPA',
+    path: '/troubleshooting',
+    iconName: 'AlertTriangle',
+    description: 'ریشه‌یابی علمی خطاها در ۱۱ دسته‌بندی با استناد به مراجع استاندارد و اقدامات اصلاحی',
+    category: 'lab',
+    accentColor: 'rose',
+    badge: 'ISO 17025'
+  },
+  {
+    id: 'microbiology',
+    title: 'میکروبیولوژی مواد غذایی',
+    englishTitle: 'Food Microbiology Lab',
+    path: '/microbiology',
+    iconName: 'Microscope',
+    description: 'بانک جامع آزمون‌ها، محیط‌های کشت، رقت‌سازی، شمارش ISO 7218، جداول MPN و کنترل کیفیت',
+    category: 'lab',
+    accentColor: 'teal',
+    badge: 'میکروبیولوژی'
+  },
+  {
+    id: 'food-chemistry',
+    title: 'شیمی مواد غذایی',
+    englishTitle: 'Food Chemistry & Analysis',
+    path: '/food-chemistry',
+    iconName: 'Atom',
+    description: 'آزمون‌های شیمیایی استاندارد INSO/AOAC: پروتئین، چربی، رطوبت، فیبر، اسیدیته، نمک، بریکس، رنگدانه‌ها و آنتی‌اکسیدان‌ها',
+    category: 'lab',
+    accentColor: 'indigo',
+    badge: 'شیمی و آنالیز'
+  },
+  {
+    id: 'quality-control',
+    title: 'کنترل و تضمین کیفیت',
+    englishTitle: 'QA/QC Management',
+    path: '/quality-control',
+    iconName: 'ShieldCheck',
+    description: 'پایش بهمن و نمونه‌ها، ثبت تکرارها، ردیابی کالیبراسیون، نمودار شوهارت، SPC و اقدامات اصلاحی (CAPA)',
+    category: 'lab',
+    accentColor: 'blue',
+    badge: 'قسمت ۱۸ (QA/QC)'
   },
   {
     id: 'sources',

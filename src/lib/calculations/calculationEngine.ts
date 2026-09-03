@@ -287,6 +287,132 @@ export function runCalculationEngineSelfTests(): {
     };
   });
 
+  // 11. Crude Fiber (INSO 316 / AOAC 962.09): m1=30.500g, m2=30.400g, m_sample=2.000g -> loss=0.100g -> 5.00%
+  runTest('T11_CRUDE_FIBER', 'صحت محاسبه فیبر خام روش وندی (AOAC 962.09 / INSO 316)', 'آزمون‌های تقریب', () => {
+    const res = runFormulaCalculation('crude_fiber_weende', { m1: 30.500, m2: 30.400, m_sample: 2.0 }, { decimals: 2 });
+    const passed = res.success && res.formattedValue === '5.00' && res.unit === '%';
+    return {
+      passed,
+      expected: '5.00%',
+      actual: `${res.formattedValue}%`,
+      detailsFa: 'سوزاندن باقیمانده هضم اسیدی/قلیایی در کوره ۵۵۰ درجه'
+    };
+  });
+
+  // 12. Carbohydrate by Difference & Energy (FAO): M=10%, P=12%, F=5%, A=3% -> Carb = 70.00%, Energy = (12*4)+(70*4)+(5*9) = 48+280+45 = 373 kcal/100g
+  runTest('T12_CARBOHYDRATE_DIFF', 'صحت محاسبه کربوهیدرات کل به روش تفاضل و کالری آت‌واتر (FAO)', 'آنالیز تقریب و ارزش تغذیه‌ای', () => {
+    const res = runFormulaCalculation('carbohydrate_by_difference', {
+      pct_moisture: 10.0,
+      pct_protein: 12.0,
+      pct_fat: 5.0,
+      pct_ash: 3.0
+    }, { decimals: 2 });
+    const passed = res.success && res.formattedValue === '70.00' && (res.metadata as any)?.energyKcalPer100g === 373;
+    return {
+      passed,
+      expected: 'Carb=70.00%, Energy=373 kcal/100g',
+      actual: `Carb=${res.formattedValue}%, Energy=${(res.metadata as any)?.energyKcalPer100g} kcal/100g`,
+      detailsFa: 'تفاضل چهار فاکتور اصلی تقریب و محاسبه انرژی متابولیکی'
+    };
+  });
+
+  // 13. Brix and Temperature Correction (ICUMSA SPS-3 / AOAC 932.12): Obs=20.0 Brix at 25°C -> deltaT=5 -> factor = 5 * (0.0007*20 + 0.06) = 5 * 0.074 = 0.37 -> Corrected = 20.37 °Brix
+  runTest('T13_BRIX_CORRECTION', 'صحت تصحیح دمایی درجه بریکس رفراکتومتر (ICUMSA SPS-3)', 'خواص فیزیکوشیمیایی', () => {
+    const res = runFormulaCalculation('brix_temperature_correction', { brix_obs: 20.0, temperature: 25.0 }, { decimals: 2 });
+    const passed = res.success && res.formattedValue === '20.37' && res.unit === '°Brix';
+    return {
+      passed,
+      expected: '20.37 °Brix',
+      actual: `${res.formattedValue} ${res.unit}`,
+      detailsFa: 'تصحیح انحراف دمای ۲۵ درجه به دمای استاندارد ۲۰ درجه'
+    };
+  });
+
+  // 14. Extraction/Process Yield: product=25kg, raw=100kg -> 25.00%
+  runTest('T14_PROCESS_YIELD', 'صحت محاسبه راندمان استخراج و فرآوری (% Yield)', 'مهندسی فرآیند', () => {
+    const res = runFormulaCalculation('process_yield', { m_product: 25.0, m_raw: 100.0 }, { decimals: 2 });
+    const passed = res.success && res.formattedValue === '25.00' && res.unit === '%';
+    return {
+      passed,
+      expected: '25.00%',
+      actual: `${res.formattedValue}%`,
+      detailsFa: 'نسبت جرم محصول نهایی به خوراک ورودی اولیه'
+    };
+  });
+
+  // 15. Analytical Spike Recovery (AOAC / EURACHEM): unspiked=2.0 ppm, spiked=11.8 ppm, added=10.0 ppm -> Recovery = (9.8/10.0)*100 = 98.00%
+  runTest('T15_SPIKE_RECOVERY', 'صحت محاسبه درصد بازیابی اسپایک و کنترل کیفیت (AOAC / EURACHEM)', 'کنترل کیفیت شیمیایی', () => {
+    const res = runFormulaCalculation('spike_recovery', { c_unspiked: 2.0, c_spiked: 11.8, c_added: 10.0 }, { decimals: 2 });
+    const passed = res.success && res.formattedValue === '98.00' && res.unit === '%';
+    return {
+      passed,
+      expected: '98.00%',
+      actual: `${res.formattedValue}%`,
+      detailsFa: 'ارزیابی خطای سیستماتیک و بازیابی آنالیت در ماتریس نمونه'
+    };
+  });
+
+  // 16. Mass Balance Evaporative Concentration: feed=1000kg @ 5% TS, target=25% TS -> concentrate = (1000*5)/25 = 200.00 kg, water evaporated = 800 kg
+  runTest('T16_MASS_BALANCE', 'صحت تراز جرم مواد جامد و تبخیر در تغلیظ (Mass Balance)', 'مهندسی فرآیند', () => {
+    const res = runFormulaCalculation('mass_balance_concentration', { m1_feed: 1000.0, s1_feed: 5.0, s2_target: 25.0 }, { decimals: 2 });
+    const passed = res.success && res.formattedValue === '200.00' && res.unit === 'kg' && (res.metadata as any)?.waterEvaporatedKg === 800;
+    return {
+      passed,
+      expected: '200.00 kg کنسانتره (800 kg آب تبخیر شده)',
+      actual: `${res.formattedValue} kg`,
+      detailsFa: 'قانون بقای جرم ماده خشک در اواپراتور'
+    };
+  });
+
+  // 17. Molarity (IUPAC): m=5.844g, MW=58.44 g/mol, V=1000 mL -> n=0.1 mol -> M = 0.1000 mol/L
+  runTest('T17_MOLARITY', 'صحت محاسبه مولاریته (Molarity - M)', 'محلول‌سازی و غلظت', () => {
+    const res = runFormulaCalculation('molarity_calc', { m_solute: 5.844, mw: 58.44, v_solution: 1000 }, { decimals: 4 });
+    const passed = res.success && res.formattedValue === '0.1000';
+    return {
+      passed,
+      expected: '0.1000 mol/L',
+      actual: `${res.formattedValue} mol/L`,
+      detailsFa: 'تبدیل جرم به مول و تقسیم بر حجم محلول'
+    };
+  });
+
+  // 18. Normality: m=4.904g H2SO4, MW=98.08, n_eq=2 (EW=49.04), V=1000 mL -> eq = 0.1 -> N = 0.1000 eq/L
+  runTest('T18_NORMALITY', 'صحت محاسبه نرمالیته و وزن اکی‌والان (Normality - N)', 'محلول‌سازی و غلظت', () => {
+    const res = runFormulaCalculation('normality_calc', { m_solute: 4.904, mw: 98.08, n_equiv: 2, v_solution: 1000 }, { decimals: 4 });
+    const passed = res.success && res.formattedValue === '0.1000';
+    return {
+      passed,
+      expected: '0.1000 eq/L (N)',
+      actual: `${res.formattedValue} N`,
+      detailsFa: 'محاسبه وزن اکی‌والان و نرمالیته بر حسب ظرفیت هم‌ارزی'
+    };
+  });
+
+  // 19. Parts per Million (ppm) & Parts per Billion (ppb)
+  runTest('T19_PPM_PPB', 'صحت محاسبات غلظت در سطح ردپا (ppm و ppb)', 'شیمی تجزیه مقادیر بسیار اندک', () => {
+    const resPpm = runFormulaCalculation('ppm_calc', { m_analyte: 5.0, m_sample: 2.0 }, { decimals: 2 }); // 5mg in 2kg -> 2.50 ppm
+    const resPpb = runFormulaCalculation('ppb_calc', { m_analyte_ug: 15.0, m_sample_kg: 3.0 }, { decimals: 2 }); // 15µg in 3kg -> 5.00 ppb
+    const passed = resPpm.success && resPpm.formattedValue === '2.50' && resPpb.success && resPpb.formattedValue === '5.00';
+    return {
+      passed,
+      expected: '2.50 ppm و 5.00 ppb',
+      actual: `${resPpm.formattedValue} ppm | ${resPpb.formattedValue} ppb`,
+      detailsFa: 'محاسبه غلظت آنالیت در سطح ردپای آلاینده‌ها و مایکوتوکسین‌ها'
+    };
+  });
+
+  // 20. pH and Henderson-Hasselbalch: pKa=4.76, [A-]=0.2, [HA]=0.1 -> pH = 4.76 + log(2) = 4.76 + 0.301 = 5.06
+  runTest('T20_PH_BUFFER', 'صحت معادله بافر هندرسون-هاسلباخ (Henderson-Hasselbalch)', 'تعادل‌های شیمیایی و بافر', () => {
+    const res = runFormulaCalculation('henderson_hasselbalch', { pka: 4.76, conc_base: 0.2, conc_acid: 0.1 }, { decimals: 2 });
+    const passed = res.success && res.formattedValue === '5.06';
+    return {
+      passed,
+      expected: '5.06 pH',
+      actual: `${res.formattedValue} pH`,
+      detailsFa: 'محاسبه pH بافر استات با نسبت ۲:۱ نمک به اسید'
+    };
+  });
+
   const passedCount = results.filter(r => r.passed).length;
   return {
     total: results.length,

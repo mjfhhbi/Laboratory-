@@ -14,8 +14,8 @@ export function formatScientificNumber(val: number, decimals: number = 2): strin
 // -------------------------------------------------------------
 export const MOISTURE_FORMULA: FormulaDefinition = {
   id: 'moisture_oven',
-  nameFa: 'درصد رطوبت و ماده خشک (روش آون)',
-  nameEn: 'Moisture & Dry Matter Content (Oven Drying)',
+  nameFa: 'درصد رطوبت (روش آون الکتریکی ۱۰۵-۱۰۲ درجه)',
+  nameEn: 'Moisture Content (Oven Drying Method)',
   category: 'proximate_analysis',
   standardReference: 'استاندارد ملی ایران ۲۴۰۶ و ۵۶۲۴ / AOAC 925.10 / ISO 712',
   standardReferenceDocId: 'INSO-2406',
@@ -35,7 +35,8 @@ export const MOISTURE_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g', 'mg'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 20.1542
     },
     {
       id: 'm1',
@@ -47,7 +48,8 @@ export const MOISTURE_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g', 'mg'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 25.1542
     },
     {
       id: 'm2',
@@ -59,7 +61,8 @@ export const MOISTURE_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g', 'mg'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 24.4042
     }
   ],
   validateInputs: (inputs) => {
@@ -100,7 +103,6 @@ export const MOISTURE_FORMULA: FormulaDefinition = {
     const { m0, m1, m2 } = inputs;
     const trace: CalculationTraceStep[] = [];
     const warnings: string[] = [];
-    const errors: string[] = [];
 
     const validation = MOISTURE_FORMULA.validateInputs(inputs);
     warnings.push(...validation.warnings);
@@ -153,7 +155,7 @@ export const MOISTURE_FORMULA: FormulaDefinition = {
       substitutedExpression: `(${lostWaterWeight.toFixed(4)} / ${sampleWeight.toFixed(4)}) \\times 100`,
       intermediateValue: moisturePercent.toFixed(4),
       unit: '%',
-      noteFa: `ماده خشک حاصل: ${dryMatterPercent.toFixed(decimals)}%`
+      noteFa: `ماده خشک متناظر: ${dryMatterPercent.toFixed(decimals)}%`
     });
 
     trace.push({
@@ -188,7 +190,183 @@ export const MOISTURE_FORMULA: FormulaDefinition = {
 };
 
 // -------------------------------------------------------------
-// 2. ASH CONTENT (% Ash / درصد خاکستر کل)
+// 2. DRY MATTER / TOTAL SOLIDS (% Dry Matter / درصد ماده خشک)
+// -------------------------------------------------------------
+export const DRY_MATTER_FORMULA: FormulaDefinition = {
+  id: 'dry_matter_calc',
+  nameFa: 'درصد ماده خشک و بریکس جامدات (Total Solids / Dry Matter %)',
+  nameEn: 'Total Solids & Dry Matter Content (%)',
+  category: 'proximate_analysis',
+  standardReference: 'استاندارد ملی ایران ۱۷۵۳ و ۶۳۷ / AOAC 925.09 / ISO 6731',
+  standardReferenceDocId: 'INSO-1753',
+  expressionLatex: '\\% \\text{Dry Matter} = \\frac{M_2 - M_0}{M_1 - M_0} \\times 100 = 100 - \\% \\text{Moisture}',
+  expressionDisplay: 'درصد ماده خشک = ((وزن ظرف و نمونه خشک - وزن ظرف خالی) / (وزن ظرف و نمونه تر - وزن ظرف خالی)) × ۱۰۰',
+  outputUnit: '% DM',
+  defaultDecimals: 2,
+  scientificNotesFa: 'ماده خشک کل (Total Solids) نشان‌دهنده مقدار کلیه ترکیبات غیر فرار (پروتئین، چربی، کربوهیدرات، مواد معدنی) موجود در ماده غذایی پس از حذف کامل رطوبت آزاد است.',
+  variables: [
+    {
+      id: 'm0',
+      symbol: 'M₀',
+      nameFa: 'جرم ظرف یا پلیت خالی خشک‌شده (تار)',
+      nameEn: 'Tare Mass of Empty Dish (g)',
+      descriptionFa: 'جرم ظرف خالی پس از تثبیت وزن',
+      category: 'mass',
+      defaultUnit: 'g',
+      allowedUnits: ['g', 'mg'],
+      min: 0.0001,
+      required: true,
+      defaultValue: 20.0000
+    },
+    {
+      id: 'm1',
+      symbol: 'M₁',
+      nameFa: 'جرم ظرف + نمونه اولیه مرطوب',
+      nameEn: 'Mass of Dish + Fresh Sample (g)',
+      descriptionFa: 'جرم ظرف حاوی نمونه قبل از آون‌گذاری',
+      category: 'mass',
+      defaultUnit: 'g',
+      allowedUnits: ['g', 'mg'],
+      min: 0.0001,
+      required: true,
+      defaultValue: 25.0000
+    },
+    {
+      id: 'm2',
+      symbol: 'M₂',
+      nameFa: 'جرم ظرف + باقیمانده خشک پس از آون',
+      nameEn: 'Mass of Dish + Dried Residue (g)',
+      descriptionFa: 'جرم ظرف حاوی ماده خشک بعد از خشک‌کردن کامل',
+      category: 'mass',
+      defaultUnit: 'g',
+      allowedUnits: ['g', 'mg'],
+      min: 0.0001,
+      required: true,
+      defaultValue: 20.6250
+    }
+  ],
+  validateInputs: (inputs) => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const { m0, m1, m2 } = inputs;
+
+    if (m0 === undefined || m1 === undefined || m2 === undefined) {
+      errors.push('تمامی مقادیر M₀، M₁ و M₂ الزامی هستند.');
+      return { valid: false, errors, warnings };
+    }
+
+    if (m0 <= 0 || m1 <= 0 || m2 <= 0) {
+      errors.push('مقادیر باید مثبت باشند.');
+    }
+
+    if (m1 <= m0) {
+      errors.push('جرم ظرف با نمونه تر (M₁) باید از ظرف خالی (M₀) بیشتر باشد.');
+    }
+
+    if (m2 < m0) {
+      errors.push('جرم بعد از آون (M₂) از ظرف خالی کمتر است.');
+    }
+
+    if (m2 > m1) {
+      errors.push('جرم خشک (M₂) نمی‌تواند بیشتر از جرم مرطوب (M₁) باشد.');
+    }
+
+    return { valid: errors.length === 0, errors, warnings };
+  },
+  execute: (inputs, options = {}) => {
+    const decimals = options.decimals ?? 2;
+    const { m0, m1, m2 } = inputs;
+    const trace: CalculationTraceStep[] = [];
+    const warnings: string[] = [];
+
+    const validation = DRY_MATTER_FORMULA.validateInputs(inputs);
+    warnings.push(...validation.warnings);
+
+    if (!validation.valid) {
+      return {
+        success: false,
+        value: null,
+        formattedValue: '-',
+        unit: '% DM',
+        decimals,
+        standardReference: DRY_MATTER_FORMULA.standardReference,
+        isScientificallyValid: false,
+        trace: [],
+        warnings,
+        errors: validation.errors,
+        evaluatedAt: new Date().toISOString()
+      };
+    }
+
+    const sampleWeight = m1! - m0!;
+    const dryWeight = m2! - m0!;
+    const dryMatterPercent = (dryWeight / sampleWeight) * 100;
+    const moisturePercent = 100 - dryMatterPercent;
+
+    trace.push({
+      stepNumber: 1,
+      titleFa: 'محاسبه جرم نمونه اولیه تر',
+      expression: 'M_{fresh} = M_1 - M_0',
+      substitutedExpression: `${m1} - ${m0}`,
+      intermediateValue: sampleWeight.toFixed(4),
+      unit: 'g',
+      noteFa: 'جرم خالص نمونه برداشته شده'
+    });
+
+    trace.push({
+      stepNumber: 2,
+      titleFa: 'محاسبه جرم باقیمانده ماده خشک',
+      expression: 'M_{dry} = M_2 - M_0',
+      substitutedExpression: `${m2} - ${m0}`,
+      intermediateValue: dryWeight.toFixed(4),
+      unit: 'g',
+      noteFa: 'جرم ترکیبات غیر فرار باقیمانده'
+    });
+
+    trace.push({
+      stepNumber: 3,
+      titleFa: 'محاسبه درصد ماده خشک (% Total Solids)',
+      expression: '\\% \\text{Dry Matter} = \\frac{M_{dry}}{M_{fresh}} \\times 100',
+      substitutedExpression: `(${dryWeight.toFixed(4)} / ${sampleWeight.toFixed(4)}) \\times 100`,
+      intermediateValue: dryMatterPercent.toFixed(4),
+      unit: '% DM',
+      noteFa: `رطوبت متناظر: ${moisturePercent.toFixed(decimals)}%`
+    });
+
+    trace.push({
+      stepNumber: 4,
+      titleFa: 'گرد کردن نهایی بر اساس استاندارد',
+      expression: `\\text{Round}(\\% \\text{Dry Matter}, ${decimals})`,
+      substitutedExpression: `Round(${dryMatterPercent.toFixed(4)}, ${decimals})`,
+      intermediateValue: formatScientificNumber(dryMatterPercent, decimals),
+      unit: '% DM',
+      noteFa: `نتیجه نهایی با ${decimals} رقم اعشار`
+    });
+
+    return {
+      success: true,
+      value: dryMatterPercent,
+      formattedValue: formatScientificNumber(dryMatterPercent, decimals),
+      unit: '% DM',
+      decimals,
+      standardReference: DRY_MATTER_FORMULA.standardReference,
+      isScientificallyValid: true,
+      trace,
+      warnings,
+      errors: [],
+      evaluatedAt: new Date().toISOString(),
+      metadata: {
+        dryMatterPercent,
+        moisturePercent,
+        dryWeightGrams: dryWeight,
+        sampleWeightGrams: sampleWeight
+      }
+    };
+  }
+};
+
+// -------------------------------------------------------------
+// 3. TOTAL ASH (% Ash / درصد خاکستر کل)
 // -------------------------------------------------------------
 export const ASH_FORMULA: FormulaDefinition = {
   id: 'ash_furnace',
@@ -213,7 +391,8 @@ export const ASH_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g', 'mg'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 18.5021
     },
     {
       id: 'm1',
@@ -225,7 +404,8 @@ export const ASH_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g', 'mg'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 23.5021
     },
     {
       id: 'm2',
@@ -237,7 +417,8 @@ export const ASH_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g', 'mg'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 18.5771
     }
   ],
   validateInputs: (inputs) => {
@@ -259,7 +440,7 @@ export const ASH_FORMULA: FormulaDefinition = {
     }
 
     if (m2 < m0) {
-      errors.push('خطای بحرانی: جرم بعد از کوره (M₂) از بوته خالی (M₀) کمتر است (کاهش غیرممکن وزن بوته)!');
+      errors.push('خطای بحرانی: جرم بعد از کوره (M₂) از بوته خالی (M₀) کمتر است!');
     }
 
     if (m2 >= m1) {
@@ -366,7 +547,7 @@ export const ASH_FORMULA: FormulaDefinition = {
 };
 
 // -------------------------------------------------------------
-// 3. CRUDE PROTEIN (% Protein - Kjeldahl / درصد پروتئین خام)
+// 4. CRUDE PROTEIN (Kjeldahl Method / پروتئین کلدال)
 // -------------------------------------------------------------
 export const PROTEIN_KJELDAHL_FORMULA: FormulaDefinition = {
   id: 'protein_kjeldahl',
@@ -385,25 +566,26 @@ export const PROTEIN_KJELDAHL_FORMULA: FormulaDefinition = {
       id: 'vs',
       symbol: 'V_s',
       nameFa: 'حجم اسید مصرفی برای تیتر نمونه (V_sample)',
-      nameEn: 'Titrant Volume for Sample',
+      nameEn: 'Titrant Volume for Sample (mL)',
       descriptionFa: 'میلی‌لیتر اسید سولفوریک یا کلریدریک مصرف شده برای نمونه',
       category: 'volume',
       defaultUnit: 'ml',
       allowedUnits: ['ml'],
       min: 0,
-      required: true
+      required: true,
+      defaultValue: 16.4
     },
     {
       id: 'vb',
       symbol: 'V_b',
       nameFa: 'حجم اسید مصرفی برای تیتر شاهد (V_blank)',
-      nameEn: 'Titrant Volume for Blank',
+      nameEn: 'Titrant Volume for Blank (mL)',
       descriptionFa: 'میلی‌لیتر اسید مصرف شده در آزمون شاهد بدون نمونه',
       category: 'volume',
       defaultUnit: 'ml',
       allowedUnits: ['ml'],
       min: 0,
-      defaultValue: 0.1,
+      defaultValue: 0.15,
       required: true
     },
     {
@@ -430,7 +612,8 @@ export const PROTEIN_KJELDAHL_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g', 'mg'],
       min: 0.001,
-      required: true
+      required: true,
+      defaultValue: 2.000
     }
   ],
   constants: [
@@ -462,20 +645,12 @@ export const PROTEIN_KJELDAHL_FORMULA: FormulaDefinition = {
       return { valid: false, errors, warnings };
     }
 
-    if (m_sample <= 0) {
-      errors.push('جرم نمونه باید مقداری مثبت و بزرگتر از صفر باشد.');
-    }
-
-    if (n_acid <= 0) {
-      errors.push('نرمالیته اسید باید مقداری مثبت باشد.');
+    if (m_sample <= 0 || n_acid <= 0) {
+      errors.push('جرم نمونه و نرمالیته اسید باید مثبت باشند.');
     }
 
     if (vs < vb) {
-      warnings.push('هشدار غیرعادی: حجم مصرفی نمونه (Vs) کمتر از حجم شاهد (Vb) است! این وضعیت منجر به نتیجه منفی نیتروژن می‌شود و نشان‌دهنده خطای آزمایشگاهی است.');
-    }
-
-    if (vs - vb > 50) {
-      warnings.push('حجم اسید مصرفی بیش از ۵۰ میلی‌لیتر است؛ برای دقت بالاتر توصیه می‌شود از بورت با ظرفیت مناسب یا رقت دقیق‌تر استفاده شود.');
+      warnings.push('هشدار: حجم مصرفی نمونه (Vs) کمتر از حجم شاهد (Vb) است (نیتروژن منفی).');
     }
 
     return { valid: errors.length === 0, errors, warnings };
@@ -507,7 +682,7 @@ export const PROTEIN_KJELDAHL_FORMULA: FormulaDefinition = {
     }
 
     const netVolume = Math.max(0, vs! - vb!);
-    const nitrogenEquiv = 0.014007; // Grams of N neutralized by 1 meq of acid
+    const nitrogenEquiv = 0.014007; // g of N per meq of acid
     const nitrogenPercent = (netVolume * n_acid! * nitrogenEquiv * 100) / m_sample!;
     const proteinPercent = nitrogenPercent * factor;
 
@@ -528,7 +703,7 @@ export const PROTEIN_KJELDAHL_FORMULA: FormulaDefinition = {
       substitutedExpression: `(${netVolume.toFixed(3)} \\times ${n_acid} \\times 0.014007 \\times 100) / ${m_sample}`,
       intermediateValue: nitrogenPercent.toFixed(4),
       unit: '%',
-      noteFa: 'اکی‌والان نیتروژن = ۰.۰۱۴۰۰۷ گرم در هر میلی‌اکی‌والان'
+      noteFa: 'اکی‌والان نیتروژن = ۰.۰۱۴۰۰۷ گرم'
     });
 
     trace.push({
@@ -573,7 +748,7 @@ export const PROTEIN_KJELDAHL_FORMULA: FormulaDefinition = {
 };
 
 // -------------------------------------------------------------
-// 4. FAT CONTENT (% Fat - Soxhlet / درصد چربی سوکسله)
+// 5. CRUDE FAT (% Fat - Soxhlet / چربی سوکسله)
 // -------------------------------------------------------------
 export const FAT_SOXHLET_FORMULA: FormulaDefinition = {
   id: 'fat_soxhlet',
@@ -598,7 +773,8 @@ export const FAT_SOXHLET_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 98.4520
     },
     {
       id: 'm2',
@@ -610,7 +786,8 @@ export const FAT_SOXHLET_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 98.8020
     },
     {
       id: 'm_sample',
@@ -622,7 +799,8 @@ export const FAT_SOXHLET_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g'],
       min: 0.0001,
-      required: true
+      required: true,
+      defaultValue: 5.000
     }
   ],
   validateInputs: (inputs) => {
@@ -641,13 +819,6 @@ export const FAT_SOXHLET_FORMULA: FormulaDefinition = {
 
     if (m2 < m1) {
       errors.push('خطای ناممکن: جرم بالن حاوی چربی (M₂) از جرم بالن خالی (M₁) کمتر است!');
-    }
-
-    const fatWeight = m2 - m1;
-    const fatPct = (fatWeight / m_sample) * 100;
-
-    if (fatPct > 100) {
-      errors.push(`خطای غیرممکن فیزیکی: درصد چربی به دست آمده (${fatPct.toFixed(2)}%) بیشتر از ۱۰۰٪ است! لطفا وزن‌های ثبت‌شده را بررسی کنید.`);
     }
 
     return { valid: errors.length === 0, errors, warnings };
@@ -731,84 +902,88 @@ export const FAT_SOXHLET_FORMULA: FormulaDefinition = {
 };
 
 // -------------------------------------------------------------
-// 5. DILUTION & CONCENTRATION (رقت و غلظت C1V1 = C2V2)
+// 6. CRUDE FIBER (Weende Method / فیبر خام روش وندی)
 // -------------------------------------------------------------
-export const DILUTION_FORMULA: FormulaDefinition = {
-  id: 'dilution_c1v1',
-  nameFa: 'معادله رقت و غلظت محلول‌ها (C₁V₁ = C₂V₂)',
-  nameEn: 'Solution Dilution & Concentration (C₁V₁ = C₂V₂)',
-  category: 'solutions_dilution',
-  standardReference: 'اصول شیمی تجزیه و محاسبات آزمایشگاهی (Skoog & West Analytical Chem)',
-  expressionLatex: 'C_1 V_1 = C_2 V_2 \\implies V_1 = \\frac{C_2 V_2}{C_1} \\quad \\text{یا} \\quad C_2 = \\frac{C_1 V_1}{V_2}',
-  expressionDisplay: 'غلظت اولیه × حجم اولیه = غلظت نهایی × حجم نهایی',
-  outputUnit: 'ml',
+export const CRUDE_FIBER_FORMULA: FormulaDefinition = {
+  id: 'crude_fiber_weende',
+  nameFa: 'درصد فیبر خام (روش استاندارد وِندی با هضم اسیدی و قلیایی)',
+  nameEn: 'Crude Fiber Content (Weende Digestion Method)',
+  category: 'proximate_analysis',
+  standardReference: 'استاندارد ملی ایران ۳۱۶ / AOAC 962.09 / ISO 6865',
+  standardReferenceDocId: 'INSO-316',
+  expressionLatex: '\\% \\text{Crude Fiber} = \\frac{M_1 - M_2}{M_{\\text{sample}}} \\times 100',
+  expressionDisplay: 'درصد فیبر خام = ((وزن باقیمانده خشک پس از هضم - وزن خاکستر پس از کوره ۵۵۰°) / وزن نمونه) × ۱۰۰',
+  outputUnit: '%',
   defaultDecimals: 2,
-  scientificNotesFa: 'قانون بقای جرم در رقت: تعداد مول یا جرم ماده حل‌شونده در فرآیند رقیق‌سازی ثابت می‌ماند.',
+  scientificNotesFa: 'نمونه چربی‌گیری شده ابتدا به مدت ۳۰ دقیقه با اسید سولفوریک ۱.۲۵٪ و سپس ۳۰ دقیقه با هیدروکسید سدیم ۱.۲۵٪ جوشانده و هضم می‌شود. باقیمانده روی بوته فیلتر خشک شده (M1) و سپس در کوره ۵۵۰ درجه سوزانده می‌شود (M2). اختلاف وزن معرف فیبر خام است.',
   variables: [
     {
-      id: 'c1',
-      symbol: 'C₁',
-      nameFa: 'غلظت محلول اولیه / غلیظ (مادر)',
-      nameEn: 'Stock Solution Concentration',
-      descriptionFa: 'غلظت استوک (مثلاً M، N، % یا mg/L)',
-      category: 'concentration',
-      defaultUnit: 'mol_l',
-      allowedUnits: ['mol_l', 'normality', 'g_l', 'mg_l', 'pct_w_v', 'ppm'],
-      min: 0.000001,
-      required: true
+      id: 'm1',
+      symbol: 'M₁',
+      nameFa: 'جرم بوته گوده + باقیمانده خشک پس از هضم (آون ۱۳۰ درجه)',
+      nameEn: 'Mass of Crucible + Dried Residue after Acid/Alkali Digestion (g)',
+      descriptionFa: 'جرم بوته گوچ/فیلتر به همراه باقیمانده آلی و معدنی پس از شستشو و آون',
+      category: 'mass',
+      defaultUnit: 'g',
+      allowedUnits: ['g'],
+      min: 0.0001,
+      required: true,
+      defaultValue: 32.4150
     },
     {
-      id: 'c2',
-      symbol: 'C₂',
-      nameFa: 'غلظت مطلوب محلول نهایی (رقیق)',
-      nameEn: 'Target Final Concentration',
-      descriptionFa: 'غلظت مورد نیاز محلول رقیق شده',
-      category: 'concentration',
-      defaultUnit: 'mol_l',
-      allowedUnits: ['mol_l', 'normality', 'g_l', 'mg_l', 'pct_w_v', 'ppm'],
-      min: 0.000001,
-      required: true
+      id: 'm2',
+      symbol: 'M₂',
+      nameFa: 'جرم بوته گوده + خاکستر باقیمانده بعد از کوره ۵۵۰ درجه',
+      nameEn: 'Mass of Crucible + Ash Residue after Muffle Furnace 550°C (g)',
+      descriptionFa: 'جرم بوته و خاکستر پس از سوختن فیبر در کوره',
+      category: 'mass',
+      defaultUnit: 'g',
+      allowedUnits: ['g'],
+      min: 0.0001,
+      required: true,
+      defaultValue: 32.3650
     },
     {
-      id: 'v2',
-      symbol: 'V₂',
-      nameFa: 'حجم نهایی محلول رقیق مورد نیاز',
-      nameEn: 'Total Final Volume',
-      descriptionFa: 'حجم بالن ژوژه یا ظرف مقصد برای تهیه محلول',
-      category: 'volume',
-      defaultUnit: 'ml',
-      allowedUnits: ['ml', 'l', 'ul'],
-      min: 0.001,
-      required: true
+      id: 'm_sample',
+      symbol: 'M_{sample}',
+      nameFa: 'جرم نمونه اولیه وزن شده (گرم)',
+      nameEn: 'Initial Sample Weight (g)',
+      descriptionFa: 'جرم نمونه اولیه قبل از هضم (معمولاً ۱ تا ۲ گرم)',
+      category: 'mass',
+      defaultUnit: 'g',
+      allowedUnits: ['g'],
+      min: 0.0001,
+      required: true,
+      defaultValue: 2.0000
     }
   ],
   validateInputs: (inputs) => {
     const errors: string[] = [];
     const warnings: string[] = [];
-    const { c1, c2, v2 } = inputs;
+    const { m1, m2, m_sample } = inputs;
 
-    if (c1 === undefined || c2 === undefined || v2 === undefined) {
-      errors.push('برای محاسبه حجم برداشت (V₁)، مقادیر C₁، C₂ و V₂ الزامی هستند.');
+    if (m1 === undefined || m2 === undefined || m_sample === undefined) {
+      errors.push('تمامی مقادیر M₁، M₂ و M_sample برای آزمون فیبر الزامی هستند.');
       return { valid: false, errors, warnings };
     }
 
-    if (c1 <= 0 || c2 <= 0 || v2 <= 0) {
-      errors.push('تمامی مقادیر غلظت و حجم باید اعدادی مثبت و بزرگتر از صفر باشند.');
+    if (m_sample <= 0 || m1 <= 0 || m2 <= 0) {
+      errors.push('مقادیر باید مثبت باشند.');
     }
 
-    if (c2 > c1) {
-      warnings.push('هشدار رقیق‌سازی: غلظت مقصد (C₂) از غلظت محلول اولیه (C₁) بیشتر است! این نشان‌دهنده غلیظ‌سازی است نه رقیق‌سازی.');
+    if (m1 < m2) {
+      errors.push('خطای غیرمنطقی: وزن قبل از کوره (M₁) از وزن بعد از کوره (M₂) کمتر است!');
     }
 
     return { valid: errors.length === 0, errors, warnings };
   },
   execute: (inputs, options = {}) => {
     const decimals = options.decimals ?? 2;
-    const { c1, c2, v2 } = inputs;
+    const { m1, m2, m_sample } = inputs;
     const trace: CalculationTraceStep[] = [];
     const warnings: string[] = [];
 
-    const validation = DILUTION_FORMULA.validateInputs(inputs);
+    const validation = CRUDE_FIBER_FORMULA.validateInputs(inputs);
     warnings.push(...validation.warnings);
 
     if (!validation.valid) {
@@ -816,9 +991,9 @@ export const DILUTION_FORMULA: FormulaDefinition = {
         success: false,
         value: null,
         formattedValue: '-',
-        unit: 'mL',
+        unit: '%',
         decimals,
-        standardReference: DILUTION_FORMULA.standardReference,
+        standardReference: CRUDE_FIBER_FORMULA.standardReference,
         isScientificallyValid: false,
         trace: [],
         warnings,
@@ -827,63 +1002,246 @@ export const DILUTION_FORMULA: FormulaDefinition = {
       };
     }
 
-    const v1 = (c2! * v2!) / c1!;
-    const solventVolume = Math.max(0, v2! - v1);
-    const dilutionFactor = c1! / c2!;
+    const fiberLoss = m1! - m2!;
+    const crudeFiberPercent = (fiberLoss / m_sample!) * 100;
 
     trace.push({
       stepNumber: 1,
-      titleFa: 'محاسبه ضریب رقت (Dilution Factor - DF)',
-      expression: 'DF = \\frac{C_1}{C_2} = \\frac{V_2}{V_1}',
-      substitutedExpression: `${c1} / ${c2}`,
-      intermediateValue: dilutionFactor.toFixed(2),
-      unit: 'X',
-      noteFa: `محلول باید به نسبت ۱ به ${dilutionFactor.toFixed(2)} رقیق گردد.`
+      titleFa: 'محاسبه جرم مواد آلی فیبری سوزانده‌شده',
+      expression: '\\Delta M_{\\text{fiber}} = M_1 - M_2',
+      substitutedExpression: `${m1} - ${m2}`,
+      intermediateValue: fiberLoss.toFixed(4),
+      unit: 'g',
+      noteFa: 'کاهش وزن حین سوزاندن در ۵۵۰ درجه'
     });
 
     trace.push({
       stepNumber: 2,
-      titleFa: 'محاسبه حجم محلول اولیه مورد نیاز برای برداشت (V₁)',
-      expression: 'V_1 = \\frac{C_2 \\times V_2}{C_1}',
-      substitutedExpression: `(${c2} \\times ${v2}) / ${c1}`,
-      intermediateValue: v1.toFixed(4),
-      unit: 'mL',
-      noteFa: `برداشت ${v1.toFixed(decimals)} میلی‌لیتر از محلول با غلظت ${c1}`
+      titleFa: 'محاسبه درصد فیبر خام در ماده غذایی',
+      expression: '\\% \\text{Crude Fiber} = \\frac{\\Delta M_{\\text{fiber}}}{M_{\\text{sample}}} \\times 100',
+      substitutedExpression: `(${fiberLoss.toFixed(4)} / ${m_sample}) \\times 100`,
+      intermediateValue: crudeFiberPercent.toFixed(4),
+      unit: '%',
+      noteFa: 'درصد فیبر خام بر مبنای وزن اولیه'
     });
 
     trace.push({
       stepNumber: 3,
-      titleFa: 'محاسبه حجم حلال افزوده (آب مقطر)',
-      expression: 'V_{solvent} = V_2 - V_1',
-      substitutedExpression: `${v2} - ${v1.toFixed(4)}`,
-      intermediateValue: solventVolume.toFixed(4),
-      unit: 'mL',
-      noteFa: `افزودن حلال تا رسیدن به خط نشان بالن ${v2} میلی‌لیتری`
+      titleFa: 'گرد کردن نهایی',
+      expression: `\\text{Round}(\\% \\text{Crude Fiber}, ${decimals})`,
+      substitutedExpression: `Round(${crudeFiberPercent.toFixed(4)}, ${decimals})`,
+      intermediateValue: formatScientificNumber(crudeFiberPercent, decimals),
+      unit: '%',
+      noteFa: `گزارش نهایی با ${decimals} رقم اعشار`
     });
 
     return {
       success: true,
-      value: v1,
-      formattedValue: formatScientificNumber(v1, decimals),
-      unit: 'mL',
+      value: crudeFiberPercent,
+      formattedValue: formatScientificNumber(crudeFiberPercent, decimals),
+      unit: '%',
       decimals,
-      standardReference: DILUTION_FORMULA.standardReference,
+      standardReference: CRUDE_FIBER_FORMULA.standardReference,
       isScientificallyValid: true,
       trace,
       warnings,
       errors: [],
       evaluatedAt: new Date().toISOString(),
       metadata: {
-        v1VolumeMl: v1,
-        solventVolumeMl: solventVolume,
-        dilutionFactor: dilutionFactor
+        fiberLossGrams: fiberLoss,
+        sampleWeightGrams: m_sample
       }
     };
   }
 };
 
 // -------------------------------------------------------------
-// 6. TITRATABLE ACIDITY (% Acidity / درصد اسیدیته قابل تیتر)
+// 7. TOTAL CARBOHYDRATE BY DIFFERENCE & CALORIES (FAO / تفاضل)
+// -------------------------------------------------------------
+export const CARBOHYDRATE_DIFFERENCE_FORMULA: FormulaDefinition = {
+  id: 'carbohydrate_by_difference',
+  nameFa: 'کربوهیدرات کل به روش تفاضل و انرژی متابولیکی (FAO / Atwater)',
+  nameEn: 'Total Carbohydrate by Difference & Energy Value (FAO / Atwater Factors)',
+  category: 'proximate_analysis',
+  standardReference: 'سازمان خواربار و کشاورزی ملل متحد (FAO Food & Nutrition Paper 77) / استاندارد ملی ایران ۵۶۲۴',
+  standardReferenceDocId: 'FAO-FNP-77',
+  expressionLatex: '\\% \\text{Carb} = 100 - (\\% \\text{Moisture} + \\% \\text{Protein} + \\% \\text{Fat} + \\% \\text{Ash})',
+  expressionDisplay: 'درصد کربوهیدرات کل = ۱۰۰ - (درصد رطوبت + درصد پروتئین + درصد چربی + درصد خاکستر)',
+  outputUnit: '%',
+  defaultDecimals: 2,
+  scientificNotesFa: 'روش استاندارد بین‌المللی FAO برای محاسبه کربوهیدرات کل. انرژی کل با استفاده از ضرایب عمومی آت‌واتر (Atwater): ۴ کیلوکالری بر گرم برای پروتئین و کربوهیدرات، و ۹ کیلوکالری بر گرم برای چربی محاسبه می‌شود.',
+  variables: [
+    {
+      id: 'pct_moisture',
+      symbol: '\\% \\text{Moisture}',
+      nameFa: 'درصد رطوبت (% Moisture)',
+      nameEn: 'Moisture Percentage (%)',
+      descriptionFa: 'درصد رطوبت به دست آمده از آزمون آون',
+      category: 'percent',
+      defaultUnit: 'percent',
+      allowedUnits: ['percent'],
+      min: 0,
+      max: 100,
+      required: true,
+      defaultValue: 12.5
+    },
+    {
+      id: 'pct_protein',
+      symbol: '\\% \\text{Protein}',
+      nameFa: 'درصد پروتئین خام (% Protein)',
+      nameEn: 'Crude Protein Percentage (%)',
+      descriptionFa: 'درصد پروتئین به دست آمده از آزمون کجلدال',
+      category: 'percent',
+      defaultUnit: 'percent',
+      allowedUnits: ['percent'],
+      min: 0,
+      max: 100,
+      required: true,
+      defaultValue: 10.2
+    },
+    {
+      id: 'pct_fat',
+      symbol: '\\% \\text{Fat}',
+      nameFa: 'درصد چربی خام (% Fat)',
+      nameEn: 'Crude Fat Percentage (%)',
+      descriptionFa: 'درصد چربی استخراج شده با سوکسله یا ژربر',
+      category: 'percent',
+      defaultUnit: 'percent',
+      allowedUnits: ['percent'],
+      min: 0,
+      max: 100,
+      required: true,
+      defaultValue: 4.8
+    },
+    {
+      id: 'pct_ash',
+      symbol: '\\% \\text{Ash}',
+      nameFa: 'درصد خاکستر کل (% Ash)',
+      nameEn: 'Total Ash Percentage (%)',
+      descriptionFa: 'درصد مواد معدنی نسوخته در کوره ۵۵۰ درجه',
+      category: 'percent',
+      defaultUnit: 'percent',
+      allowedUnits: ['percent'],
+      min: 0,
+      max: 100,
+      required: true,
+      defaultValue: 1.5
+    }
+  ],
+  validateInputs: (inputs) => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const { pct_moisture, pct_protein, pct_fat, pct_ash } = inputs;
+
+    if (pct_moisture === undefined || pct_protein === undefined || pct_fat === undefined || pct_ash === undefined) {
+      errors.push('تمامی چهار فاکتور آنالیز تقریبی (رطوبت، پروتئین، چربی، خاکستر) الزامی هستند.');
+      return { valid: false, errors, warnings };
+    }
+
+    if (pct_moisture < 0 || pct_protein < 0 || pct_fat < 0 || pct_ash < 0) {
+      errors.push('درصدهای اجزای تقریب نمی‌توانند منفی باشند.');
+    }
+
+    const sum = pct_moisture + pct_protein + pct_fat + pct_ash;
+    if (sum > 100) {
+      errors.push(`خطای مجموع تقریب: مجموع چهار جزء (${sum.toFixed(2)}%) از ۱۰۰٪ بیشتر است! کربوهیدرات منفی می‌شود.`);
+    }
+
+    return { valid: errors.length === 0, errors, warnings };
+  },
+  execute: (inputs, options = {}) => {
+    const decimals = options.decimals ?? 2;
+    const { pct_moisture, pct_protein, pct_fat, pct_ash } = inputs;
+    const trace: CalculationTraceStep[] = [];
+    const warnings: string[] = [];
+
+    const validation = CARBOHYDRATE_DIFFERENCE_FORMULA.validateInputs(inputs);
+    warnings.push(...validation.warnings);
+
+    if (!validation.valid) {
+      return {
+        success: false,
+        value: null,
+        formattedValue: '-',
+        unit: '%',
+        decimals,
+        standardReference: CARBOHYDRATE_DIFFERENCE_FORMULA.standardReference,
+        isScientificallyValid: false,
+        trace: [],
+        warnings,
+        errors: validation.errors,
+        evaluatedAt: new Date().toISOString()
+      };
+    }
+
+    const sumOther = pct_moisture! + pct_protein! + pct_fat! + pct_ash!;
+    const carbohydrate = 100 - sumOther;
+    const kcalPer100g = (pct_protein! * 4) + (carbohydrate * 4) + (pct_fat! * 9);
+    const kjPer100g = kcalPer100g * 4.184;
+
+    trace.push({
+      stepNumber: 1,
+      titleFa: 'محاسبه مجموع اجزای تعیین‌شده (رطوبت + پروتئین + چربی + خاکستر)',
+      expression: '\\sum \\text{Proximate} = \\% \\text{Moisture} + \\% \\text{Protein} + \\% \\text{Fat} + \\% \\text{Ash}',
+      substitutedExpression: `${pct_moisture} + ${pct_protein} + ${pct_fat} + ${pct_ash}`,
+      intermediateValue: sumOther.toFixed(2),
+      unit: '%',
+      noteFa: 'مجموع درصد اجزای آنالیز شده'
+    });
+
+    trace.push({
+      stepNumber: 2,
+      titleFa: 'محاسبه درصد کربوهیدرات کل به روش تفاضل',
+      expression: '\\% \\text{Carbohydrate} = 100 - \\sum \\text{Proximate}',
+      substitutedExpression: `100 - ${sumOther.toFixed(2)}`,
+      intermediateValue: carbohydrate.toFixed(4),
+      unit: '%',
+      noteFa: 'درصد کربوهیدرات کل در ۱۰۰ گرم ماده غذایی'
+    });
+
+    trace.push({
+      stepNumber: 3,
+      titleFa: 'محاسبه ارزش انرژی‌زایی بر مبنای ضرایب استاندارد آت‌واتر (Atwater)',
+      expression: '\\text{Energy} = (4 \\times \\text{Protein}) + (4 \\times \\text{Carb}) + (9 \\times \\text{Fat})',
+      substitutedExpression: `(4 \\times ${pct_protein}) + (4 \\times ${carbohydrate.toFixed(2)}) + (9 \\times ${pct_fat})`,
+      intermediateValue: kcalPer100g.toFixed(1),
+      unit: 'kcal / 100g',
+      noteFa: `معادل ${kjPer100g.toFixed(1)} kJ در ۱۰۰ گرم`
+    });
+
+    trace.push({
+      stepNumber: 4,
+      titleFa: 'گرد کردن نهایی',
+      expression: `\\text{Round}(\\% \\text{Carb}, ${decimals})`,
+      substitutedExpression: `Round(${carbohydrate.toFixed(4)}, ${decimals})`,
+      intermediateValue: formatScientificNumber(carbohydrate, decimals),
+      unit: '%',
+      noteFa: `نتیجه نهایی با ${decimals} رقم اعشار`
+    });
+
+    return {
+      success: true,
+      value: carbohydrate,
+      formattedValue: formatScientificNumber(carbohydrate, decimals),
+      unit: '%',
+      decimals,
+      standardReference: CARBOHYDRATE_DIFFERENCE_FORMULA.standardReference,
+      isScientificallyValid: true,
+      trace,
+      warnings,
+      errors: [],
+      evaluatedAt: new Date().toISOString(),
+      metadata: {
+        carbohydratePercent: carbohydrate,
+        energyKcalPer100g: kcalPer100g,
+        energyKjPer100g: kjPer100g
+      }
+    };
+  }
+};
+
+// -------------------------------------------------------------
+// 8. TITRATABLE ACIDITY (اسیدیته قابل تیتر)
 // -------------------------------------------------------------
 export const ACIDITY_FORMULA: FormulaDefinition = {
   id: 'titratable_acidity',
@@ -908,7 +1266,8 @@ export const ACIDITY_FORMULA: FormulaDefinition = {
       defaultUnit: 'ml',
       allowedUnits: ['ml'],
       min: 0,
-      required: true
+      required: true,
+      defaultValue: 4.2
     },
     {
       id: 'n_naoh',
@@ -933,7 +1292,8 @@ export const ACIDITY_FORMULA: FormulaDefinition = {
       defaultUnit: 'g',
       allowedUnits: ['g', 'ml'],
       min: 0.001,
-      required: true
+      required: true,
+      defaultValue: 10.0
     }
   ],
   constants: [
@@ -1001,7 +1361,6 @@ export const ACIDITY_FORMULA: FormulaDefinition = {
     }
 
     const acidityPercent = (v_naoh! * n_naoh! * acidFactor * 100) / m_sample!;
-    // Dornic degree for dairy (1 °D = 0.01% Lactic acid = 0.1 mL NaOH 0.1N in 10 mL milk)
     const dornicDegree = (v_naoh! * 10) / (m_sample! / 10);
 
     trace.push({
@@ -1056,210 +1415,40 @@ export const ACIDITY_FORMULA: FormulaDefinition = {
 };
 
 // -------------------------------------------------------------
-// 7. PEROXIDE VALUE (POV / عدد پراکسید روغن)
-// -------------------------------------------------------------
-export const PEROXIDE_VALUE_FORMULA: FormulaDefinition = {
-  id: 'peroxide_value',
-  nameFa: 'عدد پراکسید روغن و چربی (روش تیتر با تیوسولفات سدیم)',
-  nameEn: 'Peroxide Value (POV - Meq O₂ / kg)',
-  category: 'titration_chemistry',
-  standardReference: 'استاندارد ملی ایران ۴۱۷۹ / AOAC 965.33 / ISO 3960',
-  standardReferenceDocId: 'INSO-4179',
-  expressionLatex: '\\text{POV} = \\frac{(V_s - V_b) \\times N_{\\text{thio}} \\times 1000}{M_{\\text{fat}}}',
-  expressionDisplay: 'عدد پراکسید = ((حجم تیوسولفات نمونه - حجم تیوسولفات شاهد) × نرمالیته تیوسولفات × ۱۰۰۰) / وزن چربی',
-  outputUnit: 'meq O₂/kg',
-  defaultDecimals: 2,
-  scientificNotesFa: 'پراکسیدهای موجود در روغن پتاسیم یدید را به ید آزاد اکسید می‌کنند. ید آزاد شده با تیوسولفات سدیم در حضور نشاسته تیتر می‌شود.',
-  variables: [
-    {
-      id: 'vs',
-      symbol: 'V_s',
-      nameFa: 'حجم تیوسولفات مصرفی نمونه (میلی‌لیتر)',
-      nameEn: 'Titrant Volume for Sample (mL)',
-      descriptionFa: 'میلی‌لیتر سدیم تیوسولفات 0.01N یا 0.002N مصرف شده برای نمونه',
-      category: 'volume',
-      defaultUnit: 'ml',
-      allowedUnits: ['ml'],
-      min: 0,
-      required: true
-    },
-    {
-      id: 'vb',
-      symbol: 'V_b',
-      nameFa: 'حجم تیوسولفات مصرفی شاهد (میلی‌لیتر)',
-      nameEn: 'Titrant Volume for Blank (mL)',
-      descriptionFa: 'حجم مصرفی در آزمون شاهد بدون روغن',
-      category: 'volume',
-      defaultUnit: 'ml',
-      allowedUnits: ['ml'],
-      min: 0,
-      defaultValue: 0.05,
-      required: true
-    },
-    {
-      id: 'n_thio',
-      symbol: 'N_{thio}',
-      nameFa: 'نرمالیته محلول تیوسولفات سدیم (Na₂S₂O₃)',
-      nameEn: 'Normality of Na₂S₂O₃ Solution',
-      descriptionFa: 'نرمالیته استاندارد تیوسولفات (معمولاً 0.01 N یا 0.002 N)',
-      category: 'concentration',
-      defaultUnit: 'normality',
-      allowedUnits: ['normality'],
-      min: 0.0001,
-      defaultValue: 0.01,
-      required: true
-    },
-    {
-      id: 'm_fat',
-      symbol: 'M_{fat}',
-      nameFa: 'جرم روغن یا چربی وزن شده (گرم)',
-      nameEn: 'Sample Fat Mass (g)',
-      descriptionFa: 'وزن روغن برداشته شده در ارلن درب‌دار (حدود ۵ گرم)',
-      category: 'mass',
-      defaultUnit: 'g',
-      allowedUnits: ['g'],
-      min: 0.01,
-      required: true
-    }
-  ],
-  validateInputs: (inputs) => {
-    const errors: string[] = [];
-    const warnings: string[] = [];
-    const { vs, vb, n_thio, m_fat } = inputs;
-
-    if (vs === undefined || vb === undefined || n_thio === undefined || m_fat === undefined) {
-      errors.push('تمامی مقادیر Vs, Vb, N_thio و M_fat برای محاسبه عدد پراکسید الزامی هستند.');
-      return { valid: false, errors, warnings };
-    }
-
-    if (m_fat <= 0 || n_thio <= 0) {
-      errors.push('جرم روغن و نرمالیته تیوسولفات باید مقادیر مثبت باشند.');
-    }
-
-    if (vs < vb) {
-      warnings.push('حجم تیوسولفات نمونه کمتر از شاهد است؛ نتیجه عدد پراکسید صفر گزارش می‌شود.');
-    }
-
-    return { valid: errors.length === 0, errors, warnings };
-  },
-  execute: (inputs, options = {}) => {
-    const decimals = options.decimals ?? 2;
-    const { vs, vb, n_thio, m_fat } = inputs;
-    const trace: CalculationTraceStep[] = [];
-    const warnings: string[] = [];
-
-    const validation = PEROXIDE_VALUE_FORMULA.validateInputs(inputs);
-    warnings.push(...validation.warnings);
-
-    if (!validation.valid) {
-      return {
-        success: false,
-        value: null,
-        formattedValue: '-',
-        unit: 'meq O₂/kg',
-        decimals,
-        standardReference: PEROXIDE_VALUE_FORMULA.standardReference,
-        isScientificallyValid: false,
-        trace: [],
-        warnings,
-        errors: validation.errors,
-        evaluatedAt: new Date().toISOString()
-      };
-    }
-
-    const netVolume = Math.max(0, vs! - vb!);
-    const pov = (netVolume * n_thio! * 1000) / m_fat!;
-
-    trace.push({
-      stepNumber: 1,
-      titleFa: 'محاسبه حجم خالص تیوسولفات واکنش داده با ید آزاد',
-      expression: 'V_{net} = V_s - V_b',
-      substitutedExpression: `${vs} - ${vb}`,
-      intermediateValue: netVolume.toFixed(3),
-      unit: 'mL',
-      noteFa: 'حجم کسر شده شاهد'
-    });
-
-    trace.push({
-      stepNumber: 2,
-      titleFa: 'محاسبه عدد پراکسید بر حسب میلی‌اکی‌والان اکسیژن بر کیلوگرم',
-      expression: '\\text{POV} = \\frac{V_{net} \\times N_{thio} \\times 1000}{M_{fat}}',
-      substitutedExpression: `(${netVolume.toFixed(3)} \\times ${n_thio} \\times 1000) / ${m_fat}`,
-      intermediateValue: pov.toFixed(4),
-      unit: 'meq O₂/kg',
-      noteFa: pov > 10 
-        ? 'هشدار: عدد پراکسید بالاتر از ۱۰ نشان‌دهنده فساد اکسیداتیو پیشرفته و نامطلوب است.'
-        : 'عدد پراکسید در محدوده نرمال کیفی است.'
-    });
-
-    if (pov > 10) {
-      warnings.push(`عدد پراکسید محاسبه‌شده (${pov.toFixed(2)} meq/kg) از حد استاندارد روغن‌های خوراکی تازه (حداکثر ۱۰-۵) فراتر رفته است.`);
-    }
-
-    trace.push({
-      stepNumber: 3,
-      titleFa: 'گرد کردن نهایی بر اساس اعشار گزارش‌دهی',
-      expression: `\\text{Round}(\\text{POV}, ${decimals})`,
-      substitutedExpression: `Round(${pov.toFixed(4)}, ${decimals})`,
-      intermediateValue: formatScientificNumber(pov, decimals),
-      unit: 'meq O₂/kg',
-      noteFa: `گزارش نهایی با ${decimals} رقم اعشار`
-    });
-
-    return {
-      success: true,
-      value: pov,
-      formattedValue: formatScientificNumber(pov, decimals),
-      unit: 'meq O₂/kg',
-      decimals,
-      standardReference: PEROXIDE_VALUE_FORMULA.standardReference,
-      isScientificallyValid: true,
-      trace,
-      warnings,
-      errors: [],
-      evaluatedAt: new Date().toISOString(),
-      metadata: {
-        povValue: pov,
-        netVolumeMl: netVolume
-      }
-    };
-  }
-};
-
-// -------------------------------------------------------------
-// 8. SALT CONTENT BY MOHR TITRATION (% NaCl / درصد نمک)
+// 9. SALT CONTENT (% NaCl - Mohr Titration / نمک طعام)
 // -------------------------------------------------------------
 export const SALT_MOHR_FORMULA: FormulaDefinition = {
   id: 'salt_mohr',
-  nameFa: 'درصد کلرید سدیم / نمک طعام (روش تیتراسیون موهر با نیترات نقره)',
-  nameEn: 'Sodium Chloride (Salt) Content (Mohr Titration Method)',
+  nameFa: 'درصد نمک طعام / کلرید سدیم (روش تیتراسیون مور با نیترات نقره)',
+  nameEn: 'Salt Content (% NaCl - Mohr Method)',
   category: 'titration_chemistry',
-  standardReference: 'استاندارد ملی ایران ۱۸۰۷ و ۲۶۸۵ / AOAC 960.29 / ISO 1841-1',
+  standardReference: 'استاندارد ملی ایران ۱۸۰۷ / AOAC 935.47 / ISO 1841-1',
   standardReferenceDocId: 'INSO-1807',
   expressionLatex: '\\% \\text{NaCl} = \\frac{(V_s - V_b) \\times N_{\\text{AgNO}_3} \\times 0.05844 \\times 100}{M_{\\text{sample}}}',
   expressionDisplay: 'درصد نمک = (((حجم نیترات نقره نمونه - حجم شاهد) × نرمالیته نیترات نقره × ۰.۰۵۸۴۴ × ۱۰۰) / وزن نمونه)',
   outputUnit: '%',
   defaultDecimals: 2,
-  scientificNotesFa: 'یون‌های کلرید با نیترات نقره استاندارد در حضور شناساگر کرومات پتاسیم تا تشکیل رسوب قهوه‌ای آجری کرومات نقره تیتر می‌شوند.',
+  scientificNotesFa: 'یون‌های کلرید با نیترات نقره در حضور معرف کرومات پتاسیم واکنش داده و رسوب سفید کلرید نقره تشکیل می‌دهند. پس از پایان کلرید، اولین قطره اضافی نقره با کرومات رسوب قهوه‌ای-قرمز رنگ کرومات نقره ایجاد می‌کند.',
   variables: [
     {
       id: 'vs',
       symbol: 'V_s',
       nameFa: 'حجم نیترات نقره مصرفی برای نمونه (میلی‌لیتر)',
-      nameEn: 'AgNO₃ Volume for Sample (mL)',
-      descriptionFa: 'میلی‌لیتر محلول AgNO₃ استاندارد مصرف شده در تیتراسیون',
+      nameEn: 'Titrant Volume for Sample (mL)',
+      descriptionFa: 'میلی‌لیتر AgNO3 0.1 N مصرف شده تا ظهور رنگ آجری پایدار',
       category: 'volume',
       defaultUnit: 'ml',
       allowedUnits: ['ml'],
       min: 0,
-      required: true
+      required: true,
+      defaultValue: 8.6
     },
     {
       id: 'vb',
       symbol: 'V_b',
-      nameFa: 'حجم نیترات نقره مصرفی برای شاهد (میلی‌لیتر)',
-      nameEn: 'AgNO₃ Volume for Blank (mL)',
-      descriptionFa: 'حجم مصرفی برای آزمون شاهد بدون کلرید',
+      nameFa: 'حجم نیترات نقره مصرفی شاهد (میلی‌لیتر)',
+      nameEn: 'Titrant Volume for Blank (mL)',
+      descriptionFa: 'حجم مصرفی آزمون شاهد آب مقطر و معرف',
       category: 'volume',
       defaultUnit: 'ml',
       allowedUnits: ['ml'],
@@ -1270,9 +1459,9 @@ export const SALT_MOHR_FORMULA: FormulaDefinition = {
     {
       id: 'n_agno3',
       symbol: 'N_{\\text{AgNO}_3}',
-      nameFa: 'نرمالیته محلول نیترات نقره',
+      nameFa: 'نرمالیته محلول نیترات نقره (AgNO₃)',
       nameEn: 'Normality of AgNO₃ Solution',
-      descriptionFa: 'نرمالیته استاندارد (معمولاً 0.1N)',
+      descriptionFa: 'نرمالیته استاندارد (معمولاً 0.1 N)',
       category: 'concentration',
       defaultUnit: 'normality',
       allowedUnits: ['normality'],
@@ -1283,14 +1472,15 @@ export const SALT_MOHR_FORMULA: FormulaDefinition = {
     {
       id: 'm_sample',
       symbol: 'M_{sample}',
-      nameFa: 'جرم نمونه آزمایشی برداشته شده (گرم)',
+      nameFa: 'جرم نمونه وزن شده (گرم)',
       nameEn: 'Sample Mass (g)',
-      descriptionFa: 'جرم عصاره یا نمونه اولیه ماده غذایی (پنیر، دوغ، ترشی و ...)',
+      descriptionFa: 'وزن ماده غذایی (مانند پنیر، کنسرو، ترشی، فرآورده گوشتی)',
       category: 'mass',
       defaultUnit: 'g',
       allowedUnits: ['g'],
       min: 0.001,
-      required: true
+      required: true,
+      defaultValue: 5.00
     }
   ],
   validateInputs: (inputs) => {
@@ -1392,13 +1582,659 @@ export const SALT_MOHR_FORMULA: FormulaDefinition = {
   }
 };
 
+// -------------------------------------------------------------
+// 10. BRIX & TEMPERATURE CORRECTION (بریکس و تصحیح دمایی)
+// -------------------------------------------------------------
+export const BRIX_CORRECTION_FORMULA: FormulaDefinition = {
+  id: 'brix_temperature_correction',
+  nameFa: 'درجه بریکس و تصحیح دمایی رفراکتومتر (Brix & Temp Correction to 20°C)',
+  nameEn: 'Refractometric Brix & Temperature Correction (ICUMSA / AOAC 932.12)',
+  category: 'physical_chemical',
+  standardReference: 'کمیسیون بین‌المللی روش‌های یکنواخت آنالیز شکر (ICUMSA SPS-3 2000) / AOAC 932.12 / استاندارد ملی ایران ۳۰۸۴',
+  standardReferenceDocId: 'ICUMSA-SPS-3',
+  expressionLatex: '\\text{Brix}_{20^\\circ\\text{C}} = \\text{Brix}_{\\text{obs}} + (T - 20) \\times (0.0007 \\times \\text{Brix}_{\\text{obs}} + 0.06)',
+  expressionDisplay: 'بریکس تصحیح شده در ۲۰ درجه = بریکس خوانده‌شده + (دما - ۲۰) × (۰.۰۰۰۷ × بریکس + ۰.۰۶)',
+  outputUnit: '°Brix',
+  defaultDecimals: 2,
+  scientificNotesFa: 'ضریب شکست محلول‌های قندی به شدت تابع دما است. دمای مرجع استاندارد ۲۰ درجه سانتی‌گراد است. اگر قرائت در دمایی غیر از ۲۰ درجه انجام شود، تصحیح دمایی طبق جداول رسمی ICUMSA الزامی است.',
+  variables: [
+    {
+      id: 'brix_obs',
+      symbol: '\\text{Brix}_{\\text{obs}}',
+      nameFa: 'درجه بریکس خوانده‌شده از رفرکتومتر (°Brix)',
+      nameEn: 'Observed Refractometer Brix',
+      descriptionFa: 'درصد مواد جامد محلول خوانده شده از چشمی یا نمایشگر دیجیتال',
+      category: 'dimensionless',
+      defaultUnit: 'unitless',
+      allowedUnits: ['unitless', 'percent'],
+      min: 0,
+      max: 95,
+      required: true,
+      defaultValue: 18.5
+    },
+    {
+      id: 'temperature',
+      symbol: 'T',
+      nameFa: 'دمای نمونه حین قرائت (سلسیوس - °C)',
+      nameEn: 'Sample Temperature (°C)',
+      descriptionFa: 'دمای محیط یا نمونه بر حسب درجه سانتی‌گراد',
+      category: 'temperature',
+      defaultUnit: 'c',
+      allowedUnits: ['c', 'f'],
+      min: 5,
+      max: 60,
+      required: true,
+      defaultValue: 26.0
+    }
+  ],
+  validateInputs: (inputs) => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const { brix_obs, temperature } = inputs;
+
+    if (brix_obs === undefined || temperature === undefined) {
+      errors.push('ورود بریکس خوانده شده و دمای آزمون الزامی است.');
+      return { valid: false, errors, warnings };
+    }
+
+    if (brix_obs < 0 || brix_obs > 100) {
+      errors.push('درجه بریکس باید بین ۰ تا ۱۰۰ باشد.');
+    }
+
+    if (temperature < 5 || temperature > 50) {
+      warnings.push('دمای اندازه‌گیری خارج از بازه استاندارد ۵ تا ۵۰ درجه سانتی‌گراد است؛ دقت تصحیح ممکن است کاهش یابد.');
+    }
+
+    return { valid: errors.length === 0, errors, warnings };
+  },
+  execute: (inputs, options = {}) => {
+    const decimals = options.decimals ?? 2;
+    const { brix_obs, temperature } = inputs;
+    const trace: CalculationTraceStep[] = [];
+    const warnings: string[] = [];
+
+    const validation = BRIX_CORRECTION_FORMULA.validateInputs(inputs);
+    warnings.push(...validation.warnings);
+
+    if (!validation.valid) {
+      return {
+        success: false,
+        value: null,
+        formattedValue: '-',
+        unit: '°Brix',
+        decimals,
+        standardReference: BRIX_CORRECTION_FORMULA.standardReference,
+        isScientificallyValid: false,
+        trace: [],
+        warnings,
+        errors: validation.errors,
+        evaluatedAt: new Date().toISOString()
+      };
+    }
+
+    const deltaT = temperature! - 20.0;
+    // ICUMSA / AOAC Temperature correction approximation
+    const correctionFactor = deltaT * (0.0007 * brix_obs! + 0.06);
+    const correctedBrix = Math.max(0, brix_obs! + correctionFactor);
+
+    // Approximate specific gravity at 20/20°C: SG ≈ 1 + (Brix / (258.6 - (Brix / 258.2) * 227.1))
+    const sg = 1 + (correctedBrix / (258.6 - (correctedBrix / 258.2) * 227.1));
+    const solubleSolidsGramsPerL = (correctedBrix / 100) * sg * 1000;
+
+    trace.push({
+      stepNumber: 1,
+      titleFa: 'محاسبه انحراف دما از دمای مرجع ۲۰ درجه (ΔT)',
+      expression: '\\Delta T = T_{\\text{measured}} - 20^\\circ\\text{C}',
+      substitutedExpression: `${temperature} - 20`,
+      intermediateValue: deltaT.toFixed(1),
+      unit: '°C',
+      noteFa: deltaT >= 0 ? `دمای نمونه ${deltaT.toFixed(1)} درجه گرم‌تر از مرجع است (ضریب افزایشی)` : `دمای نمونه ${Math.abs(deltaT).toFixed(1)} درجه سردتر از مرجع است (ضریب کاهشی)`
+    });
+
+    trace.push({
+      stepNumber: 2,
+      titleFa: 'محاسبه فاکتور تصحیح دمایی ICUMSA',
+      expression: '\\Delta \\text{Brix} = \\Delta T \\times (0.0007 \\times \\text{Brix}_{\\text{obs}} + 0.06)',
+      substitutedExpression: `${deltaT.toFixed(1)} \\times (0.0007 \\times ${brix_obs} + 0.06)`,
+      intermediateValue: correctionFactor >= 0 ? `+${correctionFactor.toFixed(3)}` : correctionFactor.toFixed(3),
+      unit: '°Brix',
+      noteFa: 'فاکتور تصحیح شکست نور'
+    });
+
+    trace.push({
+      stepNumber: 3,
+      titleFa: 'محاسبه بریکس تصحیح‌شده در ۲۰ درجه سانتی‌گراد',
+      expression: '\\text{Brix}_{20^\\circ\\text{C}} = \\text{Brix}_{\\text{obs}} + \\Delta \\text{Brix}',
+      substitutedExpression: `${brix_obs} + (${correctionFactor.toFixed(3)})`,
+      intermediateValue: correctedBrix.toFixed(4),
+      unit: '°Brix',
+      noteFa: `چگالی نسبی تخمینی (SG): ${sg.toFixed(4)} | ماده محلول: ${solubleSolidsGramsPerL.toFixed(1)} g/L`
+    });
+
+    trace.push({
+      stepNumber: 4,
+      titleFa: 'گرد کردن نهایی بر اساس استاندارد',
+      expression: `\\text{Round}(\\text{Brix}_{20^\\circ\\text{C}}, ${decimals})`,
+      substitutedExpression: `Round(${correctedBrix.toFixed(4)}, ${decimals})`,
+      intermediateValue: formatScientificNumber(correctedBrix, decimals),
+      unit: '°Brix',
+      noteFa: `نتیجه نهایی با ${decimals} رقم اعشار`
+    });
+
+    return {
+      success: true,
+      value: correctedBrix,
+      formattedValue: formatScientificNumber(correctedBrix, decimals),
+      unit: '°Brix',
+      decimals,
+      standardReference: BRIX_CORRECTION_FORMULA.standardReference,
+      isScientificallyValid: true,
+      trace,
+      warnings,
+      errors: [],
+      evaluatedAt: new Date().toISOString(),
+      metadata: {
+        observedBrix: brix_obs,
+        temperatureC: temperature,
+        tempCorrection: correctionFactor,
+        correctedBrix,
+        approximateSpecificGravity: sg,
+        totalSolubleSolidsGPerL: solubleSolidsGramsPerL
+      }
+    };
+  }
+};
+
+// -------------------------------------------------------------
+// 11. PROCESS / EXTRACTION YIELD (% Yield / راندمان استخراج و فرآوری)
+// -------------------------------------------------------------
+export const YIELD_FORMULA: FormulaDefinition = {
+  id: 'process_yield',
+  nameFa: 'راندمان استخراج و بازده فرآوری (% Process / Extraction Yield)',
+  nameEn: 'Process & Extraction Yield Percentage (%)',
+  category: 'process_engineering',
+  standardReference: 'Food Process Engineering (Heldman & Singh) / Unit Operations in Food Processing (Fellows)',
+  standardReferenceDocId: 'FOOD-ENG-YIELD',
+  expressionLatex: '\\% \\text{Yield} = \\frac{M_{\\text{final product}}}{M_{\\text{raw material}}} \\times 100 = \\frac{M_{\\text{extracted analyte}}}{M_{\\text{theoretical maximum}}} \\times 100',
+  expressionDisplay: 'درصد راندمان = (جرم محصول یا عصاره نهایی / جرم ماده اولیه ورودی) × ۱۰۰',
+  outputUnit: '%',
+  defaultDecimals: 2,
+  scientificNotesFa: 'شاخص ارزیابی کارایی فرآیندهای صنعتی و پایلوت مانند روغن‌کشی، عصاره‌گیری، پنیرسازی، و کنسانتره‌سازی. نسبت خروجی مطلوب به ورودی خام.',
+  variables: [
+    {
+      id: 'm_product',
+      symbol: 'M_{\\text{product}}',
+      nameFa: 'جرم محصول تولیدی یا عصاره نهایی (kg یا g)',
+      nameEn: 'Mass of Final Product or Extract (kg or g)',
+      descriptionFa: 'مقدار خروجی واقعی تولید شده',
+      category: 'mass',
+      defaultUnit: 'kg',
+      allowedUnits: ['kg', 'g', 'mg'],
+      min: 0.0001,
+      required: true,
+      defaultValue: 18.5
+    },
+    {
+      id: 'm_raw',
+      symbol: 'M_{\\text{raw}}',
+      nameFa: 'جرم ماده اولیه ورودی یا خوراک (kg یا g)',
+      nameEn: 'Mass of Initial Raw Material (kg or g)',
+      descriptionFa: 'مقدار ورودی اولیه خام قبل از فرآوری',
+      category: 'mass',
+      defaultUnit: 'kg',
+      allowedUnits: ['kg', 'g', 'mg'],
+      min: 0.0001,
+      required: true,
+      defaultValue: 100.0
+    }
+  ],
+  validateInputs: (inputs) => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const { m_product, m_raw } = inputs;
+
+    if (m_product === undefined || m_raw === undefined) {
+      errors.push('ورود مقادیر محصول نهایی و ماده اولیه ورودی الزامی است.');
+      return { valid: false, errors, warnings };
+    }
+
+    if (m_product <= 0 || m_raw <= 0) {
+      errors.push('مقادیر باید اعدادی مثبت باشند.');
+    }
+
+    if (m_product > m_raw) {
+      warnings.push('جرم محصول نهایی از ماده اولیه ورودی بیشتر است (ممکن است آب، شکر یا حلال افزوده شده باشد).');
+    }
+
+    return { valid: errors.length === 0, errors, warnings };
+  },
+  execute: (inputs, options = {}) => {
+    const decimals = options.decimals ?? 2;
+    const { m_product, m_raw } = inputs;
+    const trace: CalculationTraceStep[] = [];
+    const warnings: string[] = [];
+
+    const validation = YIELD_FORMULA.validateInputs(inputs);
+    warnings.push(...validation.warnings);
+
+    if (!validation.valid) {
+      return {
+        success: false,
+        value: null,
+        formattedValue: '-',
+        unit: '%',
+        decimals,
+        standardReference: YIELD_FORMULA.standardReference,
+        isScientificallyValid: false,
+        trace: [],
+        warnings,
+        errors: validation.errors,
+        evaluatedAt: new Date().toISOString()
+      };
+    }
+
+    const yieldPercent = (m_product! / m_raw!) * 100;
+    const lossPercent = Math.max(0, 100 - yieldPercent);
+
+    trace.push({
+      stepNumber: 1,
+      titleFa: 'محاسبه نسبت محصول به خوراک ورودی',
+      expression: '\\text{Ratio} = \\frac{M_{\\text{product}}}{M_{\\text{raw}}}',
+      substitutedExpression: `${m_product} / ${m_raw}`,
+      intermediateValue: (m_product! / m_raw!).toFixed(4),
+      unit: 'ratio',
+      noteFa: 'کسر جرمی بازیابی شده'
+    });
+
+    trace.push({
+      stepNumber: 2,
+      titleFa: 'محاسبه راندمان استخراج / تولید درصدی (% Yield)',
+      expression: '\\% \\text{Yield} = \\text{Ratio} \\times 100',
+      substitutedExpression: `(${m_product} / ${m_raw}) \\times 100`,
+      intermediateValue: yieldPercent.toFixed(4),
+      unit: '%',
+      noteFa: `افت فرآیندی (Process Loss): ${lossPercent.toFixed(decimals)}%`
+    });
+
+    trace.push({
+      stepNumber: 3,
+      titleFa: 'گرد کردن نهایی',
+      expression: `\\text{Round}(\\% \\text{Yield}, ${decimals})`,
+      substitutedExpression: `Round(${yieldPercent.toFixed(4)}, ${decimals})`,
+      intermediateValue: formatScientificNumber(yieldPercent, decimals),
+      unit: '%',
+      noteFa: `نتیجه با ${decimals} رقم اعشار`
+    });
+
+    return {
+      success: true,
+      value: yieldPercent,
+      formattedValue: formatScientificNumber(yieldPercent, decimals),
+      unit: '%',
+      decimals,
+      standardReference: YIELD_FORMULA.standardReference,
+      isScientificallyValid: true,
+      trace,
+      warnings,
+      errors: [],
+      evaluatedAt: new Date().toISOString(),
+      metadata: {
+        yieldPercent,
+        lossPercent
+      }
+    };
+  }
+};
+
+// -------------------------------------------------------------
+// 12. ANALYTICAL SPIKE RECOVERY (% Recovery / درصد بازیابی در کنترل کیفیت)
+// -------------------------------------------------------------
+export const SPIKE_RECOVERY_FORMULA: FormulaDefinition = {
+  id: 'spike_recovery',
+  nameFa: 'درصد بازیابی در آزمون اسپایک (Analytical Spike Recovery % - QC Validation)',
+  nameEn: 'Analytical Spike Recovery Percentage (Method Validation)',
+  category: 'physical_chemical',
+  standardReference: 'دستورالعمل صحه‌گذاری روش‌های آزمون AOAC / راهنمای یوراکم (EURACHEM Guide) / ISO/IEC 17025',
+  standardReferenceDocId: 'AOAC-VAL-REC',
+  expressionLatex: '\\% \\text{Recovery} = \\frac{C_{\\text{spiked}} - C_{\\text{unspiked}}}{C_{\\text{added}}} \\times 100',
+  expressionDisplay: 'درصد بازیابی = ((غلظت نمونه اسپایک‌شده - غلظت نمونه پایه) / غلظت استاندارد افزوده شده) × ۱۰۰',
+  outputUnit: '%',
+  defaultDecimals: 2,
+  scientificNotesFa: 'شاخص کلیدی در اعتبارسنجی روش‌های آزمون شیمیایی و کنترل خطای سیستماتیک (Recovery Bias). طبق راهنمای AOAC، برای مقادیر عمده بازیابی ۹۵-۱۰۵٪ و برای سطوح ردپا (ppm/ppb) بازیابی ۸۰-۱۱۰٪ قابل قبول است.',
+  variables: [
+    {
+      id: 'c_spiked',
+      symbol: 'C_{\\text{spiked}}',
+      nameFa: 'غلظت اندازه‌گیری‌شده در نمونه اسپایک‌شده (Spiked Sample Concentration)',
+      nameEn: 'Measured Spiked Sample Concentration',
+      descriptionFa: 'نتیجه آزمون نمونه پس از افزودن مقدار معین استاندارد',
+      category: 'concentration',
+      defaultUnit: 'ppm',
+      allowedUnits: ['ppm', 'ppb', 'mg_l', 'g_l', 'percent'],
+      min: 0,
+      required: true,
+      defaultValue: 9.8
+    },
+    {
+      id: 'c_unspiked',
+      symbol: 'C_{\\text{unspiked}}',
+      nameFa: 'غلظت آنالیت در نمونه پایه و اصلی (Unspiked Sample Concentration)',
+      nameEn: 'Unspiked Base Sample Concentration',
+      descriptionFa: 'نتیجه آزمون نمونه طبیعی قبل از افزودن استاندارد (اگر صفر باشد نمونه شاهد است)',
+      category: 'concentration',
+      defaultUnit: 'ppm',
+      allowedUnits: ['ppm', 'ppb', 'mg_l', 'g_l', 'percent'],
+      min: 0,
+      defaultValue: 1.2,
+      required: true
+    },
+    {
+      id: 'c_added',
+      symbol: 'C_{\\text{added}}',
+      nameFa: 'مقدار غلظت افزوده شده استاندارد (Nominal Added / Fortified Concentration)',
+      nameEn: 'True Added Spike Concentration',
+      descriptionFa: 'غلظت تئوری استاندارد خالصی که عمداً به نمونه اضافه شده',
+      category: 'concentration',
+      defaultUnit: 'ppm',
+      allowedUnits: ['ppm', 'ppb', 'mg_l', 'g_l', 'percent'],
+      min: 0.000001,
+      required: true,
+      defaultValue: 9.0
+    }
+  ],
+  validateInputs: (inputs) => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const { c_spiked, c_unspiked, c_added } = inputs;
+
+    if (c_spiked === undefined || c_unspiked === undefined || c_added === undefined) {
+      errors.push('تمامی پارامترهای غلظت اسپایک، غلظت پایه و غلظت افزوده الزامی هستند.');
+      return { valid: false, errors, warnings };
+    }
+
+    if (c_added <= 0) {
+      errors.push('غلظت افزوده شده استاندارد باید مقداری مثبت باشد.');
+    }
+
+    if (c_spiked < c_unspiked) {
+      warnings.push('هشدار اعتبارسنجی: غلظت اسپایک‌شده از غلظت نمونه اولیه کمتر است (بازیابی منفی یا تداخل شدید ماتریس).');
+    }
+
+    return { valid: errors.length === 0, errors, warnings };
+  },
+  execute: (inputs, options = {}) => {
+    const decimals = options.decimals ?? 2;
+    const { c_spiked, c_unspiked, c_added } = inputs;
+    const trace: CalculationTraceStep[] = [];
+    const warnings: string[] = [];
+
+    const validation = SPIKE_RECOVERY_FORMULA.validateInputs(inputs);
+    warnings.push(...validation.warnings);
+
+    if (!validation.valid) {
+      return {
+        success: false,
+        value: null,
+        formattedValue: '-',
+        unit: '%',
+        decimals,
+        standardReference: SPIKE_RECOVERY_FORMULA.standardReference,
+        isScientificallyValid: false,
+        trace: [],
+        warnings,
+        errors: validation.errors,
+        evaluatedAt: new Date().toISOString()
+      };
+    }
+
+    const netFound = c_spiked! - c_unspiked!;
+    const recoveryPercent = (netFound / c_added!) * 100;
+
+    let qcStatusFa = 'مطلوب و در محدوده استاندارد (Acceptable)';
+    if (recoveryPercent < 80) {
+      qcStatusFa = 'کمتر از حد مجاز (Low Recovery / خطای منفی)';
+      warnings.push(`درصد بازیابی (${recoveryPercent.toFixed(1)}%) کمتر از حد استاندارد ۸۰٪ است؛ بررسی تداخل ماتریس و اتلاف استخراج ضروری است.`);
+    } else if (recoveryPercent > 120) {
+      qcStatusFa = 'بیشتر از حد مجاز (High Recovery / خطای مثبت)';
+      warnings.push(`درصد بازیابی (${recoveryPercent.toFixed(1)}%) بیش از ۱۲۰٪ است؛ آلودگی یا افزایش سیگنال بررسی شود.`);
+    }
+
+    trace.push({
+      stepNumber: 1,
+      titleFa: 'محاسبه مقدار خالص آنالیت بازیافت‌شده',
+      expression: 'C_{\\text{found}} = C_{\\text{spiked}} - C_{\\text{unspiked}}',
+      substitutedExpression: `${c_spiked} - ${c_unspiked}`,
+      intermediateValue: netFound.toFixed(4),
+      unit: 'ppm',
+      noteFa: 'افزایش واقعی غلظت ناشی از اسپایک'
+    });
+
+    trace.push({
+      stepNumber: 2,
+      titleFa: 'محاسبه درصد بازیابی استاندارد (% Recovery)',
+      expression: '\\% \\text{Recovery} = \\frac{C_{\\text{found}}}{C_{\\text{added}}} \\times 100',
+      substitutedExpression: `(${netFound.toFixed(4)} / ${c_added}) \\times 100`,
+      intermediateValue: recoveryPercent.toFixed(4),
+      unit: '%',
+      noteFa: `وضعیت کنترل کیفیت: ${qcStatusFa}`
+    });
+
+    trace.push({
+      stepNumber: 3,
+      titleFa: 'گرد کردن نهایی',
+      expression: `\\text{Round}(\\% \\text{Recovery}, ${decimals})`,
+      substitutedExpression: `Round(${recoveryPercent.toFixed(4)}, ${decimals})`,
+      intermediateValue: formatScientificNumber(recoveryPercent, decimals),
+      unit: '%',
+      noteFa: `نتیجه با ${decimals} رقم اعشار`
+    });
+
+    return {
+      success: true,
+      value: recoveryPercent,
+      formattedValue: formatScientificNumber(recoveryPercent, decimals),
+      unit: '%',
+      decimals,
+      standardReference: SPIKE_RECOVERY_FORMULA.standardReference,
+      isScientificallyValid: true,
+      trace,
+      warnings,
+      errors: [],
+      evaluatedAt: new Date().toISOString(),
+      metadata: {
+        recoveryPercent,
+        netFound,
+        qcStatus: qcStatusFa
+      }
+    };
+  }
+};
+
+// -------------------------------------------------------------
+// 13. MASS BALANCE & EVAPORATIVE CONCENTRATION (تغلیظ و تراز جرم)
+// -------------------------------------------------------------
+export const MASS_BALANCE_CONCENTRATION_FORMULA: FormulaDefinition = {
+  id: 'mass_balance_concentration',
+  nameFa: 'تغلیظ، تبخیر و تراز جرم مواد جامد (Evaporation & Mass Balance)',
+  nameEn: 'Evaporation, Concentration & Solids Mass Balance',
+  category: 'process_engineering',
+  standardReference: 'اصول مهندسی صنایع غذایی (Singh & Heldman, Introduction to Food Engineering) / Fellows',
+  standardReferenceDocId: 'FOOD-ENG-MASSBAL',
+  expressionLatex: 'M_1 \\times S_1 = M_2 \\times S_2 \\implies M_2 = M_1 \\times \\frac{S_1}{S_2}, \\quad W_{\\text{water evaporated}} = M_1 - M_2',
+  expressionDisplay: 'جرم ورودی × درصد ماده خشک ورودی = جرم کنسانتره × درصد ماده خشک کنسانتره',
+  outputUnit: 'kg',
+  defaultDecimals: 2,
+  scientificNotesFa: 'قانون بقای جرم ماده خشک (Solids Conservation) در فرآیندهای تبخیر، اواپراتور تحت خلاء، و تولید رب، شیر غلیظ شده و آبمیوه کنسانتره.',
+  variables: [
+    {
+      id: 'm1_feed',
+      symbol: 'M_1',
+      nameFa: 'جرم یا دبی خوراک اولیه ورودی (kg)',
+      nameEn: 'Initial Feed Mass / Flow Rate (kg)',
+      descriptionFa: 'جرم ماده اولیه رقیق ورودی به دستگاه تغلیظ‌کننده',
+      category: 'mass',
+      defaultUnit: 'kg',
+      allowedUnits: ['kg', 'ton', 'g'],
+      min: 0.001,
+      required: true,
+      defaultValue: 1000.0
+    },
+    {
+      id: 's1_feed',
+      symbol: 'S_1',
+      nameFa: 'درصد ماده خشک یا بریکس خوراک ورودی (% یا °Brix)',
+      nameEn: 'Initial Solids / Brix (% or °Brix)',
+      descriptionFa: 'بریکس یا ماده خشک مایع رقیق (مثلاً گوجه‌فرنگی ۵٪)',
+      category: 'percent',
+      defaultUnit: 'percent',
+      allowedUnits: ['percent', 'unitless'],
+      min: 0.1,
+      max: 90,
+      required: true,
+      defaultValue: 5.0
+    },
+    {
+      id: 's2_target',
+      symbol: 'S_2',
+      nameFa: 'درصد ماده خشک یا بریکس نهایی کنسانتره (% یا °Brix)',
+      nameEn: 'Target Final Solids / Brix (% or °Brix)',
+      descriptionFa: 'بریکس مطلوب محصول تغلیظ‌شده (مثلاً رب گوجه ۲۸٪)',
+      category: 'percent',
+      defaultUnit: 'percent',
+      allowedUnits: ['percent', 'unitless'],
+      min: 0.1,
+      max: 95,
+      required: true,
+      defaultValue: 28.0
+    }
+  ],
+  validateInputs: (inputs) => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const { m1_feed, s1_feed, s2_target } = inputs;
+
+    if (m1_feed === undefined || s1_feed === undefined || s2_target === undefined) {
+      errors.push('تمامی پارامترهای جرم ورودی، بریکس اولیه و بریکس هدف الزامی هستند.');
+      return { valid: false, errors, warnings };
+    }
+
+    if (m1_feed <= 0 || s1_feed <= 0 || s2_target <= 0) {
+      errors.push('مقادیر باید مثبت باشند.');
+    }
+
+    if (s1_feed >= s2_target) {
+      errors.push('خطای فرآیند تغلیظ: بریکس هدف نهایی (S₂) باید از بریکس اولیه (S₁) بیشتر باشد (در غیر این صورت رقیق‌سازی است).');
+    }
+
+    return { valid: errors.length === 0, errors, warnings };
+  },
+  execute: (inputs, options = {}) => {
+    const decimals = options.decimals ?? 2;
+    const { m1_feed, s1_feed, s2_target } = inputs;
+    const trace: CalculationTraceStep[] = [];
+    const warnings: string[] = [];
+
+    const validation = MASS_BALANCE_CONCENTRATION_FORMULA.validateInputs(inputs);
+    warnings.push(...validation.warnings);
+
+    if (!validation.valid) {
+      return {
+        success: false,
+        value: null,
+        formattedValue: '-',
+        unit: 'kg',
+        decimals,
+        standardReference: MASS_BALANCE_CONCENTRATION_FORMULA.standardReference,
+        isScientificallyValid: false,
+        trace: [],
+        warnings,
+        errors: validation.errors,
+        evaluatedAt: new Date().toISOString()
+      };
+    }
+
+    const totalSolidsKg = m1_feed! * (s1_feed! / 100);
+    const m2Concentrate = (m1_feed! * s1_feed!) / s2_target!;
+    const waterEvaporated = m1_feed! - m2Concentrate;
+    const concentrationRatio = s2_target! / s1_feed!;
+
+    trace.push({
+      stepNumber: 1,
+      titleFa: 'محاسبه جرم خالص ماده خشک ورودی (تراز ماده خشک ثابت)',
+      expression: 'M_{\\text{solids}} = M_1 \\times \\left(\\frac{S_1}{100}\\right)',
+      substitutedExpression: `${m1_feed} \\times (${s1_feed} / 100)`,
+      intermediateValue: totalSolidsKg.toFixed(2),
+      unit: 'kg solids',
+      noteFa: 'جرم ماده خشک بدون تغییر در فرآیند تبخیر'
+    });
+
+    trace.push({
+      stepNumber: 2,
+      titleFa: 'محاسبه جرم نهایی محصول کنسانتره (M₂)',
+      expression: 'M_2 = \\frac{M_1 \\times S_1}{S_2}',
+      substitutedExpression: `(${m1_feed} \\times ${s1_feed}) / ${s2_target}`,
+      intermediateValue: m2Concentrate.toFixed(2),
+      unit: 'kg',
+      noteFa: `نسبت تغلیظ (Concentration Factor): ${concentrationRatio.toFixed(2)}X`
+    });
+
+    trace.push({
+      stepNumber: 3,
+      titleFa: 'محاسبه جرم آب تبخیر شده در اواپراتور',
+      expression: 'W_{\\text{evaporated}} = M_1 - M_2',
+      substitutedExpression: `${m1_feed} - ${m2Concentrate.toFixed(2)}`,
+      intermediateValue: waterEvaporated.toFixed(2),
+      unit: 'kg water',
+      noteFa: 'میزان بخار آب خروجی از سیستم'
+    });
+
+    trace.push({
+      stepNumber: 4,
+      titleFa: 'گرد کردن نهایی',
+      expression: `\\text{Round}(M_2, ${decimals})`,
+      substitutedExpression: `Round(${m2Concentrate.toFixed(4)}, ${decimals})`,
+      intermediateValue: formatScientificNumber(m2Concentrate, decimals),
+      unit: 'kg',
+      noteFa: `نتیجه نهایی با ${decimals} رقم اعشار`
+    });
+
+    return {
+      success: true,
+      value: m2Concentrate,
+      formattedValue: formatScientificNumber(m2Concentrate, decimals),
+      unit: 'kg',
+      decimals,
+      standardReference: MASS_BALANCE_CONCENTRATION_FORMULA.standardReference,
+      isScientificallyValid: true,
+      trace,
+      warnings,
+      errors: [],
+      evaluatedAt: new Date().toISOString(),
+      metadata: {
+        concentrateMassKg: m2Concentrate,
+        waterEvaporatedKg: waterEvaporated,
+        concentrationRatio,
+        totalSolidsKg
+      }
+    };
+  }
+};
+
+// -------------------------------------------------------------
+// DEFAULT EXPORTS FOR REGISTRY
+// -------------------------------------------------------------
 export const DEFAULT_FOOD_FORMULAS: Record<string, FormulaDefinition> = {
   moisture_oven: MOISTURE_FORMULA,
+  dry_matter_calc: DRY_MATTER_FORMULA,
   ash_furnace: ASH_FORMULA,
   protein_kjeldahl: PROTEIN_KJELDAHL_FORMULA,
   fat_soxhlet: FAT_SOXHLET_FORMULA,
-  dilution_c1v1: DILUTION_FORMULA,
+  crude_fiber_weende: CRUDE_FIBER_FORMULA,
+  carbohydrate_by_difference: CARBOHYDRATE_DIFFERENCE_FORMULA,
   titratable_acidity: ACIDITY_FORMULA,
-  peroxide_value: PEROXIDE_VALUE_FORMULA,
-  salt_mohr: SALT_MOHR_FORMULA
+  salt_mohr: SALT_MOHR_FORMULA,
+  brix_temperature_correction: BRIX_CORRECTION_FORMULA,
+  process_yield: YIELD_FORMULA,
+  spike_recovery: SPIKE_RECOVERY_FORMULA,
+  mass_balance_concentration: MASS_BALANCE_CONCENTRATION_FORMULA
 };

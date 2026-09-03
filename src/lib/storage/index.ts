@@ -388,7 +388,11 @@ export async function exportOfflineBackup(): Promise<string> {
   return JSON.stringify(backupData, null, 2);
 }
 
-// Export specialized Knowledge Base repository
+// Export specialized repositories
 export * from './knowledgeBase';
 export * from './standardsStorage';
 export * from './labStorage';
+export * from './productStorage';
+export * from './experimentStorage';
+export * from './equipmentStorage';
+export * from './reagentStorage';

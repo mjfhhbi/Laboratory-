@@ -14,6 +14,11 @@ import { StandardsPage } from './app/standards/page';
 import { ProductsPage } from './app/products/page';
 import { CalculationsPage } from './app/calculations/page';
 import { EquipmentPage } from './app/equipment/page';
+import { ReagentsPage } from './app/reagents/page';
+import { LabTroubleshootingPage } from './app/troubleshooting/page';
+import { MicrobiologyPage } from './app/microbiology/page';
+import { FoodChemistryPage } from './app/food-chemistry/page';
+import { QualityControlPage } from './app/quality-control/page';
 import { SourcesPage } from './app/sources/page';
 import { SettingsPage } from './app/settings/page';
 
@@ -30,6 +35,11 @@ export default function App() {
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/calculations" element={<CalculationsPage />} />
           <Route path="/equipment" element={<EquipmentPage />} />
+          <Route path="/reagents" element={<ReagentsPage />} />
+          <Route path="/troubleshooting" element={<LabTroubleshootingPage />} />
+          <Route path="/microbiology" element={<MicrobiologyPage />} />
+          <Route path="/food-chemistry" element={<FoodChemistryPage />} />
+          <Route path="/quality-control" element={<QualityControlPage />} />
           <Route path="/sources" element={<SourcesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           {/* Catch-all route redirecting back to dashboard */}

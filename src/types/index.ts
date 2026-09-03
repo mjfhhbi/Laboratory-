@@ -120,4 +120,9 @@ export * from './foodStandard';
 export * from './laboratory';
 export * from './calculations';
 export * from './foodProduct';
+export * from './foodExperiment';
+export * from './laboratoryEquipment';
+export * from './troubleshooting';
+export * from './microbiology';
+export * from './foodChemistry';
 

@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'FoodScienceAI_Storage';
-const DB_VERSION = 5;
+const DB_VERSION = 8;
 
 export const STORES = {
   SETTINGS: 'settings',
@@ -17,7 +17,11 @@ export const STORES = {
   LAB_SESSIONS: 'lab_sessions',
   LAB_TEMPLATES: 'lab_templates',
   CUSTOM_FORMULAS: 'custom_formulas',
-  FOOD_PRODUCTS: 'food_products'
+  FOOD_PRODUCTS: 'food_products',
+  FOOD_EXPERIMENTS: 'food_experiments',
+  LAB_EQUIPMENT: 'lab_equipment',
+  CHEMICAL_REAGENTS: 'chemical_reagents',
+  PREPARED_SOLUTIONS: 'prepared_solutions'
 } as const;
 
 export type StoreName = typeof STORES[keyof typeof STORES];
@@ -133,6 +137,46 @@ export function getDb(): Promise<IDBDatabase> {
         productStore.createIndex('status', 'status', { unique: false });
         productStore.createIndex('updatedAt', 'updatedAt', { unique: false });
         productStore.createIndex('createdAt', 'createdAt', { unique: false });
+      }
+
+      // 12. Food Experiments & Laboratory Protocols Store (Part 11 of 20)
+      if (!db.objectStoreNames.contains(STORES.FOOD_EXPERIMENTS)) {
+        const expStore = db.createObjectStore(STORES.FOOD_EXPERIMENTS, { keyPath: 'id' });
+        expStore.createIndex('domain', 'domain', { unique: false });
+        expStore.createIndex('code', 'code', { unique: false });
+        expStore.createIndex('verificationStatus', 'verificationStatus', { unique: false });
+        expStore.createIndex('reliabilityGrade', 'reliabilityGrade', { unique: false });
+        expStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+        expStore.createIndex('offlineAvailable', 'offlineAvailable', { unique: false });
+      }
+
+      // 13. Laboratory Equipment & Instruments Store (Part 12 of 20)
+      if (!db.objectStoreNames.contains(STORES.LAB_EQUIPMENT)) {
+        const eqStore = db.createObjectStore(STORES.LAB_EQUIPMENT, { keyPath: 'id' });
+        eqStore.createIndex('category', 'category', { unique: false });
+        eqStore.createIndex('code', 'code', { unique: true });
+        eqStore.createIndex('calibrationStatus', 'calibrationStatus', { unique: false });
+        eqStore.createIndex('nextCalibrationDate', 'nextCalibrationDate', { unique: false });
+        eqStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+        eqStore.createIndex('offlineAvailable', 'offlineAvailable', { unique: false });
+      }
+
+      // 14. Chemical Reagents & Solutes Store (Part 13 of 20)
+      if (!db.objectStoreNames.contains(STORES.CHEMICAL_REAGENTS)) {
+        const reagentStore = db.createObjectStore(STORES.CHEMICAL_REAGENTS, { keyPath: 'id' });
+        reagentStore.createIndex('family', 'family', { unique: false });
+        reagentStore.createIndex('casNumber', 'casNumber', { unique: false });
+        reagentStore.createIndex('grade', 'grade', { unique: false });
+        reagentStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+      }
+
+      // 15. Prepared Solutions Log Store (Part 13 of 20)
+      if (!db.objectStoreNames.contains(STORES.PREPARED_SOLUTIONS)) {
+        const solStore = db.createObjectStore(STORES.PREPARED_SOLUTIONS, { keyPath: 'id' });
+        solStore.createIndex('reagentId', 'reagentId', { unique: false });
+        solStore.createIndex('status', 'status', { unique: false });
+        solStore.createIndex('expiryDate', 'expiryDate', { unique: false });
+        solStore.createIndex('createdAt', 'createdAt', { unique: false });
       }
     };
 

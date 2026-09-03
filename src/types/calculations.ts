@@ -77,20 +77,22 @@ export interface CalculationResult {
   metadata?: Record<string, unknown>;
 }
 
-export interface CalculationOptions {
-  decimals?: number;
-  targetUnit?: string;
-  inputUnits?: Record<string, string>;
-  allowUnvalidated?: boolean;
-}
-
 export type FormulaCategory = 
   | 'proximate_analysis' 
   | 'titration_chemistry' 
   | 'solutions_dilution' 
   | 'physical_chemical' 
+  | 'process_engineering'
   | 'statistical' 
   | 'custom';
+
+export interface CalculationOptions {
+  decimals?: number;
+  significantFigures?: number;
+  targetUnit?: string;
+  inputUnits?: Record<string, string>;
+  allowUnvalidated?: boolean;
+}
 
 export interface FormulaDefinition {
   id: string;

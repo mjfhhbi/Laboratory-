@@ -13,7 +13,10 @@ import {
   Copy, 
   Check, 
   Layers,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Sliders,
+  Scale
 } from 'lucide-react';
 import { 
   DEFAULT_FOOD_FORMULAS 
@@ -34,6 +37,8 @@ export const FoodFormulaCalculator: React.FC = () => {
   });
   const [inputUnits, setInputUnits] = useState<Record<string, string>>({});
   const [decimals, setDecimals] = useState<number>(2);
+  const [sigFigs, setSigFigs] = useState<number | undefined>(undefined);
+  const [precisionMode, setPrecisionMode] = useState<'decimals' | 'sigFigs'>('decimals');
   const [showTrace, setShowTrace] = useState<boolean>(true);
   const [copiedTrace, setCopiedTrace] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -46,6 +51,8 @@ export const FoodFormulaCalculator: React.FC = () => {
   const handleSelectFormula = (formula: FormulaDefinition) => {
     setSelectedFormulaId(formula.id);
     setDecimals(formula.defaultDecimals || 2);
+    setSigFigs(undefined);
+    setPrecisionMode('decimals');
     
     const initialInputs: Record<string, number | undefined> = {};
     const initialUnits: Record<string, string> = {};
@@ -59,46 +66,6 @@ export const FoodFormulaCalculator: React.FC = () => {
       formula.constants.forEach(c => {
         initialInputs[c.id] = c.value;
       });
-    }
-
-    // Specific nice defaults for standard formulas
-    if (formula.id === 'moisture_oven') {
-      initialInputs['m0'] = 20.1542;
-      initialInputs['m1'] = 25.1542;
-      initialInputs['m2'] = 24.4042;
-    } else if (formula.id === 'ash_furnace') {
-      initialInputs['m0'] = 18.5021;
-      initialInputs['m1'] = 23.5021;
-      initialInputs['m2'] = 18.5771;
-    } else if (formula.id === 'protein_kjeldahl') {
-      initialInputs['vs'] = 16.4;
-      initialInputs['vb'] = 0.15;
-      initialInputs['n_acid'] = 0.1;
-      initialInputs['m_sample'] = 2.000;
-      initialInputs['f_factor'] = 6.25;
-    } else if (formula.id === 'fat_soxhlet') {
-      initialInputs['m1'] = 98.4520;
-      initialInputs['m2'] = 98.8020;
-      initialInputs['m_sample'] = 5.000;
-    } else if (formula.id === 'dilution_c1v1') {
-      initialInputs['c1'] = 1.0;
-      initialInputs['c2'] = 0.05;
-      initialInputs['v2'] = 250;
-    } else if (formula.id === 'titratable_acidity') {
-      initialInputs['v_naoh'] = 4.2;
-      initialInputs['n_naoh'] = 0.1;
-      initialInputs['m_sample'] = 10.0;
-      initialInputs['acid_factor'] = 0.090;
-    } else if (formula.id === 'peroxide_value') {
-      initialInputs['vs'] = 2.4;
-      initialInputs['vb'] = 0.05;
-      initialInputs['n_thio'] = 0.01;
-      initialInputs['m_fat'] = 5.00;
-    } else if (formula.id === 'salt_mohr') {
-      initialInputs['vs'] = 8.6;
-      initialInputs['vb'] = 0.1;
-      initialInputs['n_agno3'] = 0.1;
-      initialInputs['m_sample'] = 5.00;
     }
 
     setInputs(initialInputs);
@@ -125,9 +92,10 @@ export const FoodFormulaCalculator: React.FC = () => {
     if (!currentFormula) return null;
     return runFormulaCalculation(selectedFormulaId, inputs, {
       decimals,
+      significantFigures: precisionMode === 'sigFigs' ? sigFigs : undefined,
       inputUnits
     });
-  }, [currentFormula, selectedFormulaId, inputs, decimals, inputUnits]);
+  }, [currentFormula, selectedFormulaId, inputs, decimals, sigFigs, precisionMode, inputUnits]);
 
   const filteredFormulas = useMemo(() => {
     if (selectedCategory === 'all') return allFormulas;
@@ -141,7 +109,7 @@ export const FoodFormulaCalculator: React.FC = () => {
       `استاندارد مرجع: ${currentFormula.standardReference}`,
       `فرمول: ${currentFormula.expressionDisplay}`,
       `نتیجه نهایی: ${result.formattedValue} ${result.unit}`,
-      `اعشار: ${result.decimals}`,
+      `دقت: ${precisionMode === 'sigFigs' ? `${sigFigs} رقم معنی‌دار` : `${decimals} رقم اعشار`}`,
       `تأییدیه علمی: ${result.isScientificallyValid ? 'معتبر و دارای رفرنس استاندارد' : 'فاقد استناد رسمی'}`,
       '--- مراحل محاسبه و ردپای ریاضی (Trace) ---',
       ...result.trace.map(t => `گام ${t.stepNumber} [${t.titleFa}]: ${t.expression} => ${t.substitutedExpression} = ${t.intermediateValue} ${t.unit}`)
@@ -154,94 +122,124 @@ export const FoodFormulaCalculator: React.FC = () => {
 
   return (
     <div className="space-y-6" id="food-formula-calculator-container">
-      {/* Category Pills & Formula Dropdown */}
+      {/* Category Pills & Formula Selection */}
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-4 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-stone-100 dark:border-stone-800">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-stone-100 dark:border-stone-800">
           <div className="flex items-center gap-2">
             <FlaskConical className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <span className="font-semibold text-stone-800 dark:text-stone-100 text-sm">
-              انتخاب فرمول استاندارد آزمون
+              بانک ماشین‌حساب‌ها و فرمول‌های معتبر صنایع غذایی
             </span>
           </div>
 
-          <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs">
+          <div className="flex flex-wrap items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
                 selectedCategory === 'all'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
               }`}
             >
-              همه آزمون‌ها ({allFormulas.length})
+              همه ({allFormulas.length})
             </button>
             <button
               onClick={() => setSelectedCategory('proximate_analysis')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
                 selectedCategory === 'proximate_analysis'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
               }`}
             >
-              آنالیز تقریب (رطوبت، خاکستر، پروتئین، چربی)
-            </button>
-            <button
-              onClick={() => setSelectedCategory('titration_chemistry')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
-                selectedCategory === 'titration_chemistry'
-                  ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
-              }`}
-            >
-              تیتراسیون و شیمیایی
+              آنالیز تقریب
             </button>
             <button
               onClick={() => setSelectedCategory('solutions_dilution')}
-              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
                 selectedCategory === 'solutions_dilution'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
               }`}
             >
-              رقت و محلول‌سازی
+              غلظت، رقت و محلول‌سازی
+            </button>
+            <button
+              onClick={() => setSelectedCategory('titration_chemistry')}
+              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                selectedCategory === 'titration_chemistry'
+                  ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
+              }`}
+            >
+              تیتراسیون و اسیدیته
+            </button>
+            <button
+              onClick={() => setSelectedCategory('physical_chemical')}
+              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                selectedCategory === 'physical_chemical'
+                  ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
+              }`}
+            >
+              فیزیکوشیمی و بریکس
+            </button>
+            <button
+              onClick={() => setSelectedCategory('process_engineering')}
+              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                selectedCategory === 'process_engineering'
+                  ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
+              }`}
+            >
+              راندمان و مهندسی فرآیند
+            </button>
+            <button
+              onClick={() => setSelectedCategory('statistical')}
+              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                selectedCategory === 'statistical'
+                  ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
+              }`}
+            >
+              صحه‌گذاری و ریکاوری
             </button>
           </div>
         </div>
 
-        {/* Formula Cards / Selection Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+        {/* Formula Selection Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 mt-3 max-h-72 overflow-y-auto p-1">
           {filteredFormulas.map((formula) => {
             const isSelected = formula.id === selectedFormulaId;
             return (
               <button
                 key={formula.id}
                 onClick={() => handleSelectFormula(formula)}
-                className={`text-right p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
+                className={`text-right p-3 rounded-xl border transition-all flex flex-col justify-between ${
                   isSelected
-                    ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-100 ring-2 ring-emerald-500/20'
+                    ? 'border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-100 ring-2 ring-emerald-500/20'
                     : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 bg-stone-50/50 dark:bg-stone-800/40 text-stone-700 dark:text-stone-300'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-mono font-bold text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-700 px-1.5 py-0.5 rounded">
-                      {formula.outputUnit || 'واحد'}
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] font-mono font-bold text-stone-500 dark:text-stone-400 bg-stone-200/70 dark:bg-stone-700 px-1.5 py-0.5 rounded">
+                      {formula.outputUnit || '-'}
                     </span>
                     {isSelected && (
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     )}
                   </div>
-                  <h4 className="font-semibold text-sm leading-tight mb-1 text-stone-900 dark:text-stone-100">
+                  <h4 className="font-semibold text-xs leading-tight mb-1 text-stone-900 dark:text-stone-100">
                     {formula.nameFa}
                   </h4>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-1 font-mono text-left dir-ltr">
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-1 font-mono text-left dir-ltr">
                     {formula.nameEn}
                   </p>
                 </div>
 
-                <div className="mt-3 pt-2 border-t border-stone-200/60 dark:border-stone-700/60 flex items-center justify-between text-xs text-stone-500">
-                  <span className="truncate max-w-[170px]">{formula.standardReference.split('/')[0]}</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">انتخاب ←</span>
+                <div className="mt-2 pt-1.5 border-t border-stone-200/60 dark:border-stone-700/60 flex items-center justify-between text-[11px] text-stone-500">
+                  <span className="truncate max-w-[140px]">{formula.standardReference.split('/')[0]}</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">انتخاب</span>
                 </div>
               </button>
             );
@@ -254,12 +252,12 @@ export const FoodFormulaCalculator: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column (Inputs & Variables) */}
           <div className="lg:col-span-7 space-y-5">
-            {/* Formula Header & Standard Reference Card */}
+            {/* Formula Header & Reference Card */}
             <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 shadow-sm space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100">
+                    <h3 className="text-base font-bold text-stone-900 dark:text-stone-100">
                       {currentFormula.nameFa}
                     </h3>
                     <span className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
@@ -309,24 +307,64 @@ export const FoodFormulaCalculator: React.FC = () => {
 
             {/* Input Variables Form */}
             <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
                   <Layers className="w-4 h-4 text-emerald-600" />
                   مقادیر و پارامترهای ورودی آزمایش
                 </h4>
-                <div className="flex items-center gap-2 text-xs text-stone-500">
-                  <span>تعداد اعشار خروجی:</span>
-                  <select
-                    value={decimals}
-                    onChange={(e) => setDecimals(Number(e.target.value))}
-                    className="bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-xs text-stone-800 dark:text-stone-200 font-semibold"
-                  >
-                    <option value={1}>۱ رقم اعشار</option>
-                    <option value={2}>۲ رقم اعشار (استاندارد)</option>
-                    <option value={3}>۳ رقم اعشار</option>
-                    <option value={4}>۴ رقم اعشار (آنالیتیکال)</option>
-                    <option value={6}>۶ رقم اعشار</option>
-                  </select>
+
+                {/* Precision & Significant Figures Controls */}
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg">
+                    <button
+                      onClick={() => setPrecisionMode('decimals')}
+                      className={`px-2 py-0.5 rounded text-xs font-medium transition-all ${
+                        precisionMode === 'decimals'
+                          ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                          : 'text-stone-500'
+                      }`}
+                    >
+                      اعشار
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPrecisionMode('sigFigs');
+                        if (!sigFigs) setSigFigs(3);
+                      }}
+                      className={`px-2 py-0.5 rounded text-xs font-medium transition-all ${
+                        precisionMode === 'sigFigs'
+                          ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                          : 'text-stone-500'
+                      }`}
+                    >
+                      ارقام معنی‌دار
+                    </button>
+                  </div>
+
+                  {precisionMode === 'decimals' ? (
+                    <select
+                      value={decimals}
+                      onChange={(e) => setDecimals(Number(e.target.value))}
+                      className="bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-xs text-stone-800 dark:text-stone-200 font-semibold"
+                    >
+                      <option value={1}>۱ رقم اعشار</option>
+                      <option value={2}>۲ رقم اعشار (استاندارد)</option>
+                      <option value={3}>۳ رقم اعشار</option>
+                      <option value={4}>۴ رقم اعشار (دقیق)</option>
+                      <option value={6}>۶ رقم اعشار</option>
+                    </select>
+                  ) : (
+                    <select
+                      value={sigFigs || 3}
+                      onChange={(e) => setSigFigs(Number(e.target.value))}
+                      className="bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-xs text-stone-800 dark:text-stone-200 font-semibold"
+                    >
+                      <option value={2}>۲ رقم معنی‌دار (Sig Figs)</option>
+                      <option value={3}>۳ رقم معنی‌دار</option>
+                      <option value={4}>۴ رقم معنی‌دار</option>
+                      <option value={5}>۵ رقم معنی‌دار</option>
+                    </select>
+                  )}
                 </div>
               </div>
 
@@ -338,9 +376,9 @@ export const FoodFormulaCalculator: React.FC = () => {
                   return (
                     <div
                       key={variable.id}
-                      className="bg-stone-50/70 dark:bg-stone-800/40 p-3.5 rounded-xl border border-stone-200/80 dark:border-stone-700/80 transition-all hover:border-emerald-300 dark:hover:border-emerald-700"
+                      className="bg-stone-50/70 dark:bg-stone-800/40 p-3.5 rounded-xl border border-stone-200/80 dark:border-stone-700/80 transition-all hover:border-emerald-300 dark:hover:border-emerald-700 space-y-2"
                     >
-                      <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <label className="text-xs font-semibold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
                           <span className="font-mono bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 px-1.5 py-0.5 rounded text-xs">
                             {variable.symbol}
@@ -355,74 +393,48 @@ export const FoodFormulaCalculator: React.FC = () => {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          step="any"
-                          value={currentVal !== undefined ? currentVal : ''}
-                          onChange={(e) => handleInputChange(variable.id, e.target.value)}
-                          placeholder={`مثلاً ${variable.defaultValue ?? '0.000'}`}
-                          className="flex-1 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-stone-100 font-mono text-left dir-ltr focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                        />
-
-                        {variable.allowedUnits && variable.allowedUnits.length > 1 ? (
+                      {/* Dropdown Options for discrete choices (e.g. Kjeldahl F-factor, Acid meq) */}
+                      {variable.options && variable.options.length > 0 ? (
+                        <div className="space-y-1.5">
                           <select
-                            value={currentUnit}
-                            onChange={(e) => handleUnitChange(variable.id, e.target.value)}
-                            className="bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg px-2.5 py-2 text-xs text-stone-700 dark:text-stone-300 font-medium"
+                            value={currentVal !== undefined ? currentVal : variable.defaultValue}
+                            onChange={(e) => handleInputChange(variable.id, e.target.value)}
+                            className="w-full bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-emerald-500"
                           >
-                            {variable.allowedUnits.map(u => (
-                              <option key={u} value={u}>{u}</option>
+                            {variable.options.map(opt => (
+                              <option key={opt.label} value={opt.value}>
+                                {opt.label}
+                              </option>
                             ))}
                           </select>
-                        ) : (
-                          <span className="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-2 rounded-lg text-xs font-mono font-medium border border-stone-300 dark:border-stone-700">
-                            {variable.defaultUnit}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            step="any"
+                            value={currentVal !== undefined ? currentVal : ''}
+                            onChange={(e) => handleInputChange(variable.id, e.target.value)}
+                            placeholder={`مثلاً ${variable.defaultValue ?? '0.000'}`}
+                            className="flex-1 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-stone-100 font-mono text-left dir-ltr focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                          />
 
-                {/* Constants / Factors Dropdown if present */}
-                {currentFormula.constants && currentFormula.constants.map((constant) => {
-                  const currentConstantVal = inputs[constant.id] ?? constant.value;
-
-                  return (
-                    <div
-                      key={constant.id}
-                      className="bg-amber-50/60 dark:bg-amber-950/20 p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/60 space-y-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
-                          <span className="font-mono bg-amber-200/80 dark:bg-amber-900/80 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded text-xs">
-                            {constant.symbol}
-                          </span>
-                          <span>{constant.nameFa}</span>
-                        </label>
-                        <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-300">
-                          مقدار: {currentConstantVal}
-                        </span>
-                      </div>
-
-                      {constant.options && (
-                        <select
-                          value={currentConstantVal}
-                          onChange={(e) => handleInputChange(constant.id, e.target.value)}
-                          className="w-full bg-white dark:bg-stone-900 border border-amber-300 dark:border-amber-800 rounded-lg px-3 py-2 text-xs text-stone-800 dark:text-stone-200 outline-none"
-                        >
-                          {constant.options.map(opt => (
-                            <option key={opt.labelFa} value={opt.value}>
-                              {opt.labelFa} (مقدار: {opt.value})
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                      {constant.descriptionFa && (
-                        <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80">
-                          {constant.descriptionFa}
-                        </p>
+                          {variable.allowedUnits && variable.allowedUnits.length > 1 ? (
+                            <select
+                              value={currentUnit}
+                              onChange={(e) => handleUnitChange(variable.id, e.target.value)}
+                              className="bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg px-2.5 py-2 text-xs text-stone-700 dark:text-stone-300 font-medium"
+                            >
+                              {variable.allowedUnits.map(u => (
+                                <option key={u} value={u}>{u}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-2 rounded-lg text-xs font-mono font-medium border border-stone-300 dark:border-stone-700">
+                              {variable.defaultUnit}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                   );
@@ -457,8 +469,8 @@ export const FoodFormulaCalculator: React.FC = () => {
                   <div className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
                     {currentFormula.nameFa}
                   </div>
-                  <div className="flex items-baseline justify-center gap-2 font-mono">
-                    <span className="text-4xl font-extrabold text-emerald-700 dark:text-emerald-300 tracking-tight">
+                  <div className="flex items-baseline justify-center gap-2 font-mono flex-wrap">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-emerald-700 dark:text-emerald-300 tracking-tight">
                       {result.formattedValue}
                     </span>
                     <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
@@ -466,7 +478,9 @@ export const FoodFormulaCalculator: React.FC = () => {
                     </span>
                   </div>
                   <div className="text-xs text-stone-500 dark:text-stone-400 pt-1">
-                    دقت محاسباتی: {result.decimals} رقم اعشار
+                    {precisionMode === 'sigFigs' 
+                      ? `دقت: ${sigFigs} رقم معنی‌دار` 
+                      : `دقت: ${result.decimals} رقم اعشار`}
                   </div>
                 </div>
               ) : (
@@ -477,7 +491,7 @@ export const FoodFormulaCalculator: React.FC = () => {
                 </div>
               )}
 
-              {/* Warnings Box (Shows Warning without auto-mutating input) */}
+              {/* Warnings Box */}
               {result && result.warnings.length > 0 && (
                 <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-xl p-3.5 space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-200">

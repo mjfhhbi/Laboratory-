@@ -33,6 +33,25 @@ import {
   Zap,
   Activity,
   FolderGit2,
+  Beaker,
+  Pipette,
+  FlaskRound,
+  FileSpreadsheet,
+  AlertTriangle,
+  Printer,
+  QrCode,
+  Tag,
+  Flame,
+  Skull,
+  ShieldAlert,
+  Microscope,
+  Bug,
+  Dna,
+  Binary,
+  CircleDot,
+  Gauge,
+  Thermometer,
+  Atom,
   LucideProps
 } from 'lucide-react';
 
@@ -42,6 +61,22 @@ interface IconHelperProps extends LucideProps {
 
 export const IconHelper: React.FC<IconHelperProps> = ({ name, ...props }) => {
   switch (name) {
+    case 'Microscope':
+      return <Microscope {...props} />;
+    case 'Bug':
+      return <Bug {...props} />;
+    case 'Dna':
+      return <Dna {...props} />;
+    case 'Binary':
+      return <Binary {...props} />;
+    case 'CircleDot':
+      return <CircleDot {...props} />;
+    case 'Gauge':
+      return <Gauge {...props} />;
+    case 'Thermometer':
+      return <Thermometer {...props} />;
+    case 'Atom':
+      return <Atom {...props} />;
     case 'LayoutDashboard':
       return <LayoutDashboard {...props} />;
     case 'MessageSquare':
@@ -58,6 +93,28 @@ export const IconHelper: React.FC<IconHelperProps> = ({ name, ...props }) => {
       return <Calculator {...props} />;
     case 'Wrench':
       return <Wrench {...props} />;
+    case 'Beaker':
+      return <Beaker {...props} />;
+    case 'Pipette':
+      return <Pipette {...props} />;
+    case 'FlaskRound':
+      return <FlaskRound {...props} />;
+    case 'FileSpreadsheet':
+      return <FileSpreadsheet {...props} />;
+    case 'AlertTriangle':
+      return <AlertTriangle {...props} />;
+    case 'Printer':
+      return <Printer {...props} />;
+    case 'QrCode':
+      return <QrCode {...props} />;
+    case 'Tag':
+      return <Tag {...props} />;
+    case 'Flame':
+      return <Flame {...props} />;
+    case 'Skull':
+      return <Skull {...props} />;
+    case 'ShieldAlert':
+      return <ShieldAlert {...props} />;
     case 'BookOpen':
       return <BookOpen {...props} />;
     case 'Settings':

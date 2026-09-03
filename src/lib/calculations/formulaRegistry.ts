@@ -1,5 +1,6 @@
 import { FormulaDefinition, CustomFormulaRecord, CalculationTraceStep } from '../../types/calculations';
 import { DEFAULT_FOOD_FORMULAS, formatScientificNumber } from './foodFormulas';
+import { SOLUTION_FORMULAS } from './solutionFormulas';
 import { evaluateExpression, tokenize, parseToRpn } from './expressionEvaluator';
 import { getAllItems, putItem, deleteItem, STORES } from '../storage/indexedDb';
 
@@ -188,6 +189,9 @@ export function getFormulaById(id: string): FormulaDefinition | undefined {
   if (DEFAULT_FOOD_FORMULAS[id]) {
     return DEFAULT_FOOD_FORMULAS[id];
   }
+  if (SOLUTION_FORMULAS[id]) {
+    return SOLUTION_FORMULAS[id];
+  }
   return customFormulasCache.get(id);
 }
 
@@ -197,6 +201,7 @@ export function getFormulaById(id: string): FormulaDefinition | undefined {
 export function getAllFormulas(): FormulaDefinition[] {
   return [
     ...Object.values(DEFAULT_FOOD_FORMULAS),
+    ...Object.values(SOLUTION_FORMULAS),
     ...Array.from(customFormulasCache.values())
   ];
 }
