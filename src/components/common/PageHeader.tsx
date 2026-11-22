@@ -53,8 +53,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
               </span>
             )}
             {badgeText && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 rounded-full">
-                <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+              <span className="inline-flex items-center text-xs font-semibold px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 rounded-md">
                 {badgeText}
               </span>
             )}

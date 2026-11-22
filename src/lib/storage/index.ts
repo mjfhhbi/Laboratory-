@@ -287,21 +287,20 @@ export async function seedOfflineKnowledgeBaseIfEmpty(): Promise<void> {
 // ==========================================
 
 export async function getStorageStatistics(): Promise<StorageStats> {
-  const [
-    conversationsCount,
-    messagesCount,
-    knowledgeItemsCount,
-    knowledgeRecordsCount,
-    scientificSourcesCount,
-    settingsCount
-  ] = await Promise.all([
-    countItems(STORES.CONVERSATIONS).catch(() => 0),
-    countItems(STORES.MESSAGES).catch(() => 0),
-    countItems(STORES.KNOWLEDGE_BASE).catch(() => 0),
-    countItems(STORES.KNOWLEDGE_RECORDS).catch(() => 0),
-    countItems(STORES.SCIENTIFIC_SOURCES).catch(() => 0),
-    countItems(STORES.SETTINGS).catch(() => 0)
-  ]);
+  const storeEntries = Object.entries(STORES) as Array<[string, typeof STORES[keyof typeof STORES]]>;
+  const countPairs = await Promise.all(
+    storeEntries.map(async ([, storeName]) => {
+      const cnt = await countItems(storeName).catch(() => 0);
+      return [storeName, cnt] as const;
+    })
+  );
+
+  const storeCounts: Record<string, number> = {};
+  let totalRecordsCount = 0;
+  for (const [storeName, cnt] of countPairs) {
+    storeCounts[storeName] = cnt;
+    totalRecordsCount += cnt;
+  }
 
   let usageBytes = 0;
   let quotaBytes = 0;
@@ -331,12 +330,15 @@ export async function getStorageStatistics(): Promise<StorageStats> {
     usageBytes,
     quotaBytes,
     usagePercentage,
-    conversationsCount,
-    messagesCount,
-    knowledgeItemsCount,
-    knowledgeRecordsCount,
-    scientificSourcesCount,
-    settingsCount,
+    conversationsCount: storeCounts[STORES.CONVERSATIONS] || 0,
+    messagesCount: storeCounts[STORES.MESSAGES] || 0,
+    knowledgeItemsCount: storeCounts[STORES.KNOWLEDGE_BASE] || 0,
+    knowledgeRecordsCount: storeCounts[STORES.KNOWLEDGE_RECORDS] || 0,
+    scientificSourcesCount: storeCounts[STORES.SCIENTIFIC_SOURCES] || 0,
+    settingsCount: storeCounts[STORES.SETTINGS] || 0,
+    activeStoresCount: storeEntries.length,
+    totalRecordsCount,
+    storeCounts,
     isPersisted
   };
 }
@@ -349,43 +351,74 @@ export async function requestPersistentStorage(): Promise<boolean> {
 }
 
 export async function clearAllOfflineData(): Promise<void> {
-  await Promise.all([
-    clearStore(STORES.CONVERSATIONS),
-    clearStore(STORES.MESSAGES),
-    clearStore(STORES.KNOWLEDGE_BASE),
-    clearStore(STORES.KNOWLEDGE_RECORDS),
-    clearStore(STORES.SCIENTIFIC_SOURCES),
-    clearStore(STORES.SYNC_QUEUE)
-  ]);
+  const storeNames = Object.values(STORES).filter((s) => s !== STORES.SETTINGS);
+  await Promise.all(storeNames.map((s) => clearStore(s).catch(() => {})));
   // Reset settings
   await putItem<UserSettings>(STORES.SETTINGS, DEFAULT_SETTINGS);
 }
 
 export async function exportOfflineBackup(): Promise<string> {
-  const [settings, conversations, messages, knowledgeBase, knowledgeRecords, scientificSources] = await Promise.all([
-    getAllItems(STORES.SETTINGS),
-    getAllItems(STORES.CONVERSATIONS),
-    getAllItems(STORES.MESSAGES),
-    getAllItems(STORES.KNOWLEDGE_BASE),
-    getAllItems(STORES.KNOWLEDGE_RECORDS),
-    getAllItems(STORES.SCIENTIFIC_SOURCES)
-  ]);
+  const storeEntries = Object.entries(STORES) as Array<[string, typeof STORES[keyof typeof STORES]]>;
+  const storesPayload: Record<string, unknown[]> = {};
+
+  await Promise.all(
+    storeEntries.map(async ([, storeName]) => {
+      storesPayload[storeName] = await getAllItems(storeName).catch(() => []);
+    })
+  );
 
   const backupData = {
-    version: 2,
+    version: 3,
     exportDate: new Date().toISOString(),
     app: 'Food Science AI',
+    storeCount: storeEntries.length,
     data: {
-      settings,
-      conversations,
-      messages,
-      knowledgeBase,
-      knowledgeRecords,
-      scientificSources
-    }
+      settings: storesPayload[STORES.SETTINGS] || [],
+      conversations: storesPayload[STORES.CONVERSATIONS] || [],
+      messages: storesPayload[STORES.MESSAGES] || [],
+      knowledgeBase: storesPayload[STORES.KNOWLEDGE_BASE] || [],
+      knowledgeRecords: storesPayload[STORES.KNOWLEDGE_RECORDS] || [],
+      scientificSources: storesPayload[STORES.SCIENTIFIC_SOURCES] || []
+    },
+    stores: storesPayload
   };
 
   return JSON.stringify(backupData, null, 2);
+}
+
+export async function importOfflineBackup(jsonString: string): Promise<{ restoredRecords: number }> {
+  const parsed = JSON.parse(jsonString);
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error('فرمت فایل پشتیبان نامعتبر است.');
+  }
+
+  let restoredRecords = 0;
+  const validStoreNames = new Set<string>(Object.values(STORES));
+
+  // Support both v3 (`stores` map across all 18 stores) and legacy v2 (`data` map)
+  const storesMap: Record<string, unknown[]> =
+    parsed.stores && typeof parsed.stores === 'object'
+      ? parsed.stores
+      : {
+          [STORES.SETTINGS]: parsed.data?.settings || [],
+          [STORES.CONVERSATIONS]: parsed.data?.conversations || [],
+          [STORES.MESSAGES]: parsed.data?.messages || [],
+          [STORES.KNOWLEDGE_BASE]: parsed.data?.knowledgeBase || [],
+          [STORES.KNOWLEDGE_RECORDS]: parsed.data?.knowledgeRecords || [],
+          [STORES.SCIENTIFIC_SOURCES]: parsed.data?.scientificSources || []
+        };
+
+  for (const [storeName, items] of Object.entries(storesMap)) {
+    if (!validStoreNames.has(storeName) || !Array.isArray(items)) continue;
+    for (const item of items) {
+      if (item && typeof item === 'object') {
+        await putItem(storeName as typeof STORES[keyof typeof STORES], item);
+        restoredRecords++;
+      }
+    }
+  }
+
+  return { restoredRecords };
 }
 
 // Export specialized repositories
@@ -396,3 +429,4 @@ export * from './productStorage';
 export * from './experimentStorage';
 export * from './equipmentStorage';
 export * from './reagentStorage';
+export * from './scientificSourcesStorage';

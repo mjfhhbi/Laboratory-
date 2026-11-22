@@ -26,6 +26,8 @@ interface LabSessionsListProps {
   onResumeSession: (session: LabSession) => void;
   onViewReport: (session: LabSession) => void;
   onDeleteSession: (sessionId: string) => void;
+  onLoadTestMock?: () => void;
+  onClearTestMocks?: () => void;
 }
 
 export const LabSessionsList: React.FC<LabSessionsListProps> = ({
@@ -33,12 +35,21 @@ export const LabSessionsList: React.FC<LabSessionsListProps> = ({
   onStartNewSession,
   onResumeSession,
   onViewReport,
-  onDeleteSession
+  onDeleteSession,
+  onLoadTestMock,
+  onClearTestMocks
 }) => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'real' | 'test_mock'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const testMockCount = sessions.filter((s) => s.isDemoOrTest || s.testTag === 'TEST-MOCK' || s.id.startsWith('test_mock_')).length;
+
   const filteredSessions = sessions.filter((s) => {
+    const isMock = !!(s.isDemoOrTest || s.testTag === 'TEST-MOCK' || s.id.startsWith('test_mock_'));
+    if (typeFilter === 'real' && isMock) return false;
+    if (typeFilter === 'test_mock' && !isMock) return false;
+
     if (filterStatus === 'active' && !(s.status === 'running' || s.status === 'paused')) {
       return false;
     }
@@ -70,66 +81,131 @@ export const LabSessionsList: React.FC<LabSessionsListProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Filter and Actions Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Status Tabs */}
-          <div className="flex bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs font-medium">
-            <button
-              type="button"
-              onClick={() => setFilterStatus('all')}
-              className={`px-3 py-1 rounded-md transition-colors ${
-                filterStatus === 'all'
-                  ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-xs font-bold'
-                  : 'text-stone-600 dark:text-stone-400'
-              }`}
-            >
-              همه ({sessions.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterStatus('active')}
-              className={`px-3 py-1 rounded-md transition-colors ${
-                filterStatus === 'active'
-                  ? 'bg-white dark:bg-stone-900 text-emerald-700 dark:text-emerald-400 shadow-xs font-bold'
-                  : 'text-stone-600 dark:text-stone-400'
-              }`}
-            >
-              در حال اجرا ({sessions.filter((s) => s.status === 'running' || s.status === 'paused').length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterStatus('completed')}
-              className={`px-3 py-1 rounded-md transition-colors ${
-                filterStatus === 'completed'
-                  ? 'bg-white dark:bg-stone-900 text-blue-700 dark:text-blue-400 shadow-xs font-bold'
-                  : 'text-stone-600 dark:text-stone-400'
-              }`}
-            >
-              تکمیل‌شده ({sessions.filter((s) => s.status === 'completed').length})
-            </button>
+      <div className="flex flex-col gap-3 bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Status Tabs */}
+            <div className="flex bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs font-medium">
+              <button
+                type="button"
+                onClick={() => setFilterStatus('all')}
+                className={`px-3 py-1 rounded-md transition-colors ${
+                  filterStatus === 'all'
+                    ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-xs font-bold'
+                    : 'text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                همه ({sessions.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterStatus('active')}
+                className={`px-3 py-1 rounded-md transition-colors ${
+                  filterStatus === 'active'
+                    ? 'bg-white dark:bg-stone-900 text-emerald-700 dark:text-emerald-400 shadow-xs font-bold'
+                    : 'text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                در حال اجرا ({sessions.filter((s) => s.status === 'running' || s.status === 'paused').length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterStatus('completed')}
+                className={`px-3 py-1 rounded-md transition-colors ${
+                  filterStatus === 'completed'
+                    ? 'bg-white dark:bg-stone-900 text-blue-700 dark:text-blue-400 shadow-xs font-bold'
+                    : 'text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                تکمیل‌شده ({sessions.filter((s) => s.status === 'completed').length})
+              </button>
+            </div>
+
+            {/* Real vs Mock Separation Tabs */}
+            <div className="flex bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs font-medium">
+              <button
+                type="button"
+                onClick={() => setTypeFilter('all')}
+                className={`px-2.5 py-1 rounded-md transition-colors ${
+                  typeFilter === 'all'
+                    ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-xs font-bold'
+                    : 'text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                کل داده‌ها
+              </button>
+              <button
+                type="button"
+                onClick={() => setTypeFilter('real')}
+                className={`px-2.5 py-1 rounded-md transition-colors ${
+                  typeFilter === 'real'
+                    ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                    : 'text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                داده‌های واقعی ({sessions.length - testMockCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setTypeFilter('test_mock')}
+                className={`px-2.5 py-1 rounded-md transition-colors ${
+                  typeFilter === 'test_mock'
+                    ? 'bg-amber-600 text-white shadow-xs font-bold'
+                    : 'text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                تست فنی [TEST] ({testMockCount})
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Mock Generator and Clear Buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {onLoadTestMock && (
+              <button
+                type="button"
+                onClick={onLoadTestMock}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition-colors flex items-center gap-1.5 shadow-2xs"
+                title="بارگذاری آزمایش نمونه کامل تستی با برچسب TEST جهت تست فنی زنجیره ۱۲ مرحله‌ای"
+              >
+                <FlaskConical className="w-3.5 h-3.5 text-amber-600" />
+                <span>بارگذاری آزمایش نمونه تستی (TEST-MOCK)</span>
+              </button>
+            )}
+
+            {testMockCount > 0 && onClearTestMocks && (
+              <button
+                type="button"
+                onClick={onClearTestMocks}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-stone-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                title="پاک‌سازی صرفاً نمونه‌های تستی بدون لمس داده‌های واقعی"
+              >
+                پاک‌سازی تست‌ها ({testMockCount})
+              </button>
+            )}
           </div>
         </div>
 
         {/* Search & New Session Button */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64">
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-stone-100 dark:border-stone-800">
+          <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-stone-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="جستجو در نمونه، کد، استاندارد..."
-              className="w-full text-xs pr-9 pl-3 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-850 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500 outline-none"
+              placeholder="جستجو در نمونه، کد، استاندارد، کارشناس..."
+              className="w-full text-xs pr-9 pl-3 py-2 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-850 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500 outline-none"
             />
           </div>
 
           <button
             type="button"
             onClick={onStartNewSession}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors flex items-center gap-1.5 shadow-xs shrink-0"
+            className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors flex items-center gap-1.5 shadow-xs shrink-0"
           >
             <Plus className="w-4 h-4" />
-            شروع آزمایش جدید
+            شروع آزمایش جدید واقعی
           </button>
         </div>
       </div>
@@ -141,30 +217,47 @@ export const LabSessionsList: React.FC<LabSessionsListProps> = ({
             <FlaskConical className="w-6 h-6" />
           </div>
           <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 mb-1">
-            آزمایشی در این بخش یافت نشد
+            آزمایشی در این دسته‌بندی یافت نشد
           </h3>
           <p className="text-xs text-stone-500 dark:text-stone-400 max-w-sm mx-auto mb-4">
-            می‌توانید یک آزمایش جدید با انتخاب استاندارد مرجع ملی یا بین‌المللی شروع نمایید.
+            می‌توانید یک آزمایش جدید واقعی شروع کنید یا برای بررسی عملکرد کامل سیستم روی «بارگذاری آزمایش نمونه تستی» کلیک کنید.
           </p>
-          <button
-            type="button"
-            onClick={onStartNewSession}
-            className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors inline-flex items-center gap-1.5 shadow-xs"
-          >
-            <Plus className="w-4 h-4" />
-            شروع اولین آزمایش
-          </button>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={onStartNewSession}
+              className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors inline-flex items-center gap-1.5 shadow-xs"
+            >
+              <Plus className="w-4 h-4" />
+              شروع آزمایش جدید واقعی
+            </button>
+            {onLoadTestMock && (
+              <button
+                type="button"
+                onClick={onLoadTestMock}
+                className="px-4 py-2 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 transition-colors inline-flex items-center gap-1.5"
+              >
+                <FlaskConical className="w-4 h-4 text-amber-600" />
+                تست کامل زنجیره (TEST-MOCK)
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredSessions.map((s) => {
             const isRunning = s.status === 'running' || s.status === 'paused';
             const isCompliant = s.standardConformance?.isCompliant;
+            const isMock = !!(s.isDemoOrTest || s.testTag === 'TEST-MOCK' || s.id.startsWith('test_mock_'));
 
             return (
               <div
                 key={s.id}
-                className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl shadow-xs p-5 hover:border-stone-300 dark:hover:border-stone-700 transition-all flex flex-col justify-between"
+                className={`bg-white dark:bg-stone-900 border rounded-xl shadow-xs p-5 transition-all flex flex-col justify-between ${
+                  isMock
+                    ? 'border-amber-200 dark:border-amber-800/60 bg-amber-50/10'
+                    : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
+                }`}
               >
                 <div>
                   {/* Card Header: Badges & Status */}
@@ -184,6 +277,12 @@ export const LabSessionsList: React.FC<LabSessionsListProps> = ({
                         />
                         {s.status === 'running' ? 'در حال اجرا' : s.status === 'paused' ? 'متوقف موقت' : 'تکمیل‌شده'}
                       </span>
+
+                      {isMock && (
+                        <span className="font-mono font-bold text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                          TEST-MOCK
+                        </span>
+                      )}
 
                       {s.standardNumber && (
                         <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">

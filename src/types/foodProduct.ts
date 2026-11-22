@@ -61,10 +61,22 @@ export interface FormulationIngredient {
 
 export interface FormulationVersion {
   id: string;
-  versionCode: string; // e.g. "F-01 (پایه)", "F-02 (پایدارکننده گزانتان)", "F-03 (کم‌کالری)"
+  versionCode: string; // e.g. "Formula v1 (مرجع)", "Formula v2", "Formula v3"
+  versionNumber?: number; // 1, 2, 3...
   title: string;
   description?: string;
   isBaseline: boolean; // آیا فرمول مرجع است
+  changeLogSummary?: string; // خلاصه تغییرات این نسخه نسبت به نسخه قبل
+  baseVersionId?: string; // شناسه نسخه مبنایی که این نسخه از آن اشتقاق یافته
+  isAiGenerated?: boolean; // آیا پیشنهاد هوش مصنوعی بوده است
+  aiPreliminaryNotice?: string; // علامتگذاری به عنوان «پیشنهاد اولیه»
+  scientificSources?: Array<{
+    title: string;
+    code?: string;
+    organization?: string;
+    claim: string;
+    relevance?: string;
+  }>;
   ingredients: FormulationIngredient[];
   totalPercentage: number; // جمع درصدها (باید ۱۰۰٪ باشد)
   totalDryMatterPercent: number; // درصد ماده خشک کل
@@ -120,6 +132,7 @@ export interface QualityControlSpec {
   maxAcceptableLimit?: number | string;
   standardReference?: string; // e.g. "INSO 2852", "AOAC 991.20"
   testingMethod: string;
+  isCriticalForSafety?: boolean;
 }
 
 export interface ShelfLifeStudyPoint {
@@ -158,6 +171,11 @@ export interface TestResultEntry {
   overallVerdict: 'passed' | 'marginal' | 'failed' | 'needs_reformulation';
   operatorOrScientist: string;
   conclusionsAndNextSteps?: string;
+  // Intelligent Lab Analysis (Part 29)
+  intelligentAnalysis?: import('../lib/products/labAnalysisEngine').IntelligentLabAnalysisReport;
+  instrumentAudit?: import('../lib/products/labAnalysisEngine').LabInstrumentAuditInfo[];
+  reagentAudit?: import('../lib/products/labAnalysisEngine').LabReagentAuditInfo[];
+  sampleAudit?: import('../lib/products/labAnalysisEngine').LabSampleAuditInfo;
 }
 
 export interface ProductDevelopmentProject {
@@ -168,6 +186,18 @@ export interface ProductDevelopmentProject {
   category: ProductCategory;
   targetObjectives: ProductTargetObjective[];
   executiveSummaryFa: string;
+  productIdea?: string; // ایده محصول، نوآوری و ارزش تمایز بازار
+  targetSpecifications?: {
+    targetPh?: string;
+    targetBrix?: string;
+    targetMoisturePercent?: string;
+    targetFatPercent?: string;
+    targetProteinPercent?: string;
+    targetTextureProfile?: string;
+    targetShelfLifeDays?: number;
+    sensoryGoals?: string;
+    microbiologicalLimits?: string;
+  };
   targetConsumerProfile?: string; // e.g. کودکان، ورزشکاران، بیماران سلیاک، عموم مصرف‌کنندگان
   standardReferences: string[]; // e.g. ["INSO 2852 (دوغ)", "Codex Stan 243"]
 
@@ -213,4 +243,159 @@ export interface ScaleConversionResult {
   }>;
   totalBatchCost: number;
   costPerKg: number;
+}
+
+// -------------------------------------------------------------
+// Part 28: Scale-up, Costing & Product Economics Types
+// -------------------------------------------------------------
+
+export type ScaleUnit = 'g' | 'kg' | 'mL' | 'L' | 'unit_count' | 'pack';
+
+export interface BatchLossBreakdown {
+  evaporationLossPercent: number; // درصد ضایعات تبخیر
+  equipmentHoldUpPercent: number; // ماند در دیواره و لوله‌کشی
+  fillingSpillagePercent: number; // ریزش و پرکنی
+  packagingRejectPercent: number; // ظروف و بسته‌های معیوب
+  totalLossPercent: number;       // جمع کل درصد ضایعات
+  calculatedYieldPercent: number; // راندمان کلی فرآیند (100 - totalLoss)
+  totalLossKg: number;           // وزن کل ضایعات به کیلوگرم
+}
+
+export interface PackagingCostItem {
+  id: string;
+  nameFa: string;
+  itemType: 'primary_container' | 'closure_cap' | 'label' | 'secondary_carton' | 'tertiary_shrink' | 'other';
+  unit: 'عدد' | 'بسته' | 'رول' | 'متر';
+  unitsPerFinishedProduct: number; // تعداد مصرف به ازای هر واحد محصول نهایی
+  unitCost: number;               // بهای خرید هر واحد بسته بندی (تومان - کاملاً قابل ویرایش)
+  scrapRejectPercent: number;     // درصد ضایعات این قلم بسته بندی در خط
+  totalQuantityRequired: number;  // تعداد کل مورد نیاز برای بچ
+  totalCost: number;              // هزینه کل این قلم در بچ
+  costPerFinishedUnit: number;    // هزینه این قلم به ازای هر واحد محصول
+}
+
+export interface EnergyUtilityCosts {
+  electricityKwh: number;
+  electricityRatePerKwh: number; // تومان/کیلووات ساعت
+  gasCubicMeters: number;
+  gasRatePerCubicMeter: number;  // تومان/متر مکعب
+  steamTons: number;
+  steamRatePerTon: number;       // تومان/تن بخار
+  waterCubicMeters: number;
+  waterRatePerCubicMeter: number;// تومان/متر مکعب آب صنعتی/RO
+  otherUtilityCost: number;      // سایر هزینه‌های تأسیسات (هوای فشرده، تبرید، تصفیه پساب)
+  totalUtilityCost: number;
+}
+
+export interface LaborCosts {
+  operatorCount: number;         // تعداد اپراتورهای خط تولید
+  hoursPerBatch: number;         // ساعت کارکرد برای این بچ
+  hourlyWageRate: number;        // نرخ دستمزد ساعتی (تومان/نفر-ساعت)
+  qaTechnicianHours: number;     // ساعت کار تکنسین کنترل کیفیت
+  qaHourlyRate: number;          // نرخ تکنسین QC
+  totalLaborCost: number;
+}
+
+export interface OverheadCosts {
+  mode: 'percentage_of_direct' | 'fixed_per_batch';
+  overheadRatePercent: number;   // درصد سربار از هزینه‌های مستقیم (تولید + مواد + بسته بندی)
+  fixedOverheadAmount: number;   // مبلغ ثابت سربار به ازای هر بچ (تومان)
+  totalOverheadCost: number;
+}
+
+export interface ProcessingMaintenanceCost {
+  maintenanceCleaningCipCost: number; // شستشو و مواد شیمیایی CIP و ضدعفونی
+  lineWearTearCost: number;           // استهلاک ابزار، فیلترها و گسکت‌ها
+  totalProcessingCost: number;
+}
+
+export interface UnitPackagingSpec {
+  unitNetContent: number;        // مقدار محتوی هر بسته (مثلا 250)
+  unitContentUnit: 'g' | 'kg' | 'mL' | 'L'; // واحد محتوی
+  densityGperMl: number;         // دانسیته محصول مایع (گرم بر میلی لیتر یا کیلوگرم بر لیتر)
+  unitsPerMasterCarton: number;  // تعداد در کارتن مادر (مثلا 24 یا 12)
+}
+
+export interface PricingEconomics {
+  targetProfitMarginPercent: number; // درصد حاشیه سود کارخانه
+  grossProfitPerUnit: number;        // سود ناخالص هر واحد
+  exFactoryPricePerUnit: number;     // قیمت فروش درب کارخانه (عمده‌فروشی اولیه)
+  distributorMarginPercent: number;  // درصد سود شرکت پخش
+  distributorPricePerUnit: number;   // قیمت تحویل به سوپرمارکت
+  retailerMarginPercent: number;     // درصد سود مغازه‌دار / خرده‌فروش
+  consumerPricePreVat: number;       // قیمت مصرف‌کننده قبل از مالیات
+  vatPercent: number;                // درصد مالیات بر ارزش افزوده (VAT)
+  consumerRetailPrice: number;       // قیمت نهایی مصرف‌کننده مندرج روی جلد (CRP)
+}
+
+export interface ProductScalingTraceStep {
+  stepNumber: number;
+  categoryFa: string;
+  titleFa: string;
+  formulaDescription: string;
+  formulaLatex?: string;
+  inputsDescription: string;
+  intermediateValues?: Record<string, string | number>;
+  resultDescription: string;
+  resultValue: string | number;
+}
+
+export interface ScaledIngredientItem {
+  id: string;
+  nameFa: string;
+  category: IngredientFunction;
+  percentage: number;
+  netRequiredKg: number;
+  grossRequiredKg: number;
+  formattedAmount: string;
+  displayUnit: string;
+  costPerKg: number;
+  totalCostInBatch: number;
+  costContributionPercent: number;
+}
+
+export interface BatchEconomicSummary {
+  rawMaterialsTotalCost: number;
+  packagingTotalCost: number;
+  energyUtilityTotalCost: number;
+  laborTotalCost: number;
+  overheadTotalCost: number;
+  processingTotalCost: number;
+  totalCogsBatchCost: number;
+  costPerKgNet: number;
+  costPerFinishedUnit: number;
+  costShares: {
+    rawMaterialsPercent: number;
+    packagingPercent: number;
+    energyPercent: number;
+    laborPercent: number;
+    overheadPercent: number;
+    processingPercent: number;
+  };
+}
+
+export interface ComprehensiveBatchScaleModel {
+  baseFormulaWeightKg: number;
+  scaleMode: 'target_output_net' | 'target_input_gross' | 'target_units_count';
+  targetValue: number;
+  targetUnit: ScaleUnit;
+  densityGperMl: number;
+  scaleFactor: number;
+  grossInputWeightKg: number;
+  netSaleableWeightKg: number;
+  lossBreakdown: BatchLossBreakdown;
+  unitSpec: UnitPackagingSpec;
+  totalFinishedUnits: number;
+  totalMasterCartons: number;
+  ingredients: ScaledIngredientItem[];
+  packagingItems: PackagingCostItem[];
+  utilityCosts: EnergyUtilityCosts;
+  laborCosts: LaborCosts;
+  overheadCosts: OverheadCosts;
+  processingCosts: ProcessingMaintenanceCost;
+  economics: BatchEconomicSummary;
+  pricing: PricingEconomics;
+  validationErrors: string[];
+  validationWarnings: string[];
+  calculationTrace: ProductScalingTraceStep[];
 }

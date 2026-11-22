@@ -1,0 +1,60 @@
+{
+  "packageId": "ir.foodscienceai.app",
+  "host": "ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app",
+  "name": "Food Science AI | سامانه هوشمند علوم و صنایع غذایی",
+  "launcherName": "FoodSci AI",
+  "display": "standalone",
+  "themeColor": "#047857",
+  "themeColorDark": "#064e3b",
+  "navigationColor": "#047857",
+  "navigationColorDark": "#064e3b",
+  "navigationDividerColor": "#065f46",
+  "navigationDividerColorDark": "#064e3b",
+  "backgroundColor": "#065f46",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/pwa-512x512.png",
+  "maskableIconUrl": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/pwa-maskable-512x512.png",
+  "monochromeIconUrl": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/pwa-maskable-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android-signing.keystore",
+    "alias": "foodscienceai"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "آزمایشگاه تخصصی",
+      "shortName": "آزمایشگاه",
+      "url": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/laboratory",
+      "chosenIconUrl": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/pwa-192x192.png"
+    },
+    {
+      "name": "محاسبات مهندسی",
+      "shortName": "محاسبات",
+      "url": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/calculations",
+      "chosenIconUrl": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/pwa-192x192.png"
+    },
+    {
+      "name": "محیط پایتون",
+      "shortName": "Python",
+      "url": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/python",
+      "chosenIconUrl": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/pwa-192x192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://ais-pre-6a6myoakvhla3xjetelp5j-246919081791.europe-west2.run.app/",
+  "minSdkVersion": 21,
+  "orientation": "any",
+  "fingerprints": []
+}

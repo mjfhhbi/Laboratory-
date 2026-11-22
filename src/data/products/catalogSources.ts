@@ -1,0 +1,301 @@
+import { RelationalSource } from '../../types/foodProductsCatalog';
+
+export const CATALOG_SOURCES_DATABASE: Record<string, RelationalSource> = {
+  'src-inso-2406': {
+    id: 'src-inso-2406',
+    titleFa: 'شیر پاستوریزه - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Pasteurized milk - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1394 (تجدیدنظر چهارم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2406:1394',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2406',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2408': {
+    id: 'src-inso-2408',
+    titleFa: 'شیر و فرآورده‌های آن - ویژگی‌های میکروبیولوژی',
+    titleEn: 'Milk and milk products - Microbiological specifications',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1398 (تجدیدنظر پنجم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2408:1398',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2408',
+    verificationStatus: 'verified_official'
+  },
+  'src-codex-206': {
+    id: 'src-codex-206',
+    titleFa: 'استاندارد عمومی کدکس برای شیر و فرآورده‌های شیری',
+    titleEn: 'General Standard for the Use of Dairy Terms (CXS 206-1999)',
+    issuingBodyOrAuthors: 'Codex Alimentarius Commission (FAO/WHO)',
+    publicationYear: '1999 (Amended 2018)',
+    documentType: 'codex_standard',
+    citationCode: 'CODEX STAN 206-1999',
+    officialReferenceOrUrl: 'https://www.fao.org/fao-who-codexalimentarius/standards/list-of-standards',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2303': {
+    id: 'src-inso-2303',
+    titleFa: 'سوسیس و کالباس - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Sausages and cooked meat products - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1397 (تجدیدنظر چهارم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2303:1397',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2303',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2304': {
+    id: 'src-inso-2304',
+    titleFa: 'فرآورده‌های گوشتی حرارت‌دیده - ویژگی‌های میکروبیولوژی',
+    titleEn: 'Heat-treated meat products - Microbiological criteria',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1399',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2304:1399',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2304',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-103': {
+    id: 'src-inso-103',
+    titleFa: 'آرد گندم - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Wheat flour - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1395 (تجدیدنظر ششم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 103:1395',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=103',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2628': {
+    id: 'src-inso-2628',
+    titleFa: 'نان‌های سنتی - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Traditional breads - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1393 (تجدیدنظر سوم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2628:1393',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2628',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-5809': {
+    id: 'src-inso-5809',
+    titleFa: 'نان‌های سنتی و حجیم - حدود آلاینده‌ها و باقیمانده آفت‌کش‌ها',
+    titleEn: 'Bread - Contaminants and pesticide residues limits',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1396',
+    documentType: 'national_standard',
+    citationCode: 'INSO 5809:1396',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=5809',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2880': {
+    id: 'src-inso-2880',
+    titleFa: 'بیسکویت - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Biscuits - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1398 (تجدیدنظر پنجم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2880:1398',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2880',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2685': {
+    id: 'src-inso-2685',
+    titleFa: 'آبمیوه‌ها - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Fruit juices - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1394 (تجدیدنظر دوم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2685:1394',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2685',
+    verificationStatus: 'verified_official'
+  },
+  'src-codex-247': {
+    id: 'src-codex-247',
+    titleFa: 'استاندارد عمومی کدکس برای آبمیوه‌ها و نکتارها',
+    titleEn: 'Codex General Standard for Fruit Juices and Nectars (CXS 247-2005)',
+    issuingBodyOrAuthors: 'Codex Alimentarius Commission (FAO/WHO)',
+    publicationYear: '2005 (Amended 2021)',
+    documentType: 'codex_standard',
+    citationCode: 'CODEX STAN 247-2005',
+    officialReferenceOrUrl: 'https://www.fao.org/fao-who-codexalimentarius/standards/list-of-standards',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-1446': {
+    id: 'src-inso-1446',
+    titleFa: 'روغن آفتابگردان خوراکی تصفیه‌شده - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Refined edible sunflower oil - Specifications',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1399 (تجدیدنظر چهارم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 1446:1399',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=1446',
+    verificationStatus: 'verified_official'
+  },
+  'src-codex-210': {
+    id: 'src-codex-210',
+    titleFa: 'استاندارد کدکس برای روغن‌های گیاهی نامگذاری‌شده',
+    titleEn: 'Codex Standard for Named Vegetable Oils (CXS 210-1999)',
+    issuingBodyOrAuthors: 'Codex Alimentarius Commission (FAO/WHO)',
+    publicationYear: '1999 (Revised 2019)',
+    documentType: 'codex_standard',
+    citationCode: 'CODEX STAN 210-1999',
+    officialReferenceOrUrl: 'https://www.fao.org/fao-who-codexalimentarius/standards/list-of-standards',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-1904': {
+    id: 'src-inso-1904',
+    titleFa: 'کنسرو ماهی تن در روغن - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Canned tuna in oil - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1397 (تجدیدنظر چهارم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 1904:1397',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=1904',
+    verificationStatus: 'verified_official'
+  },
+  'src-codex-70': {
+    id: 'src-codex-70',
+    titleFa: 'استاندارد کدکس برای کنسرو ماهی تن و بونیتو',
+    titleEn: 'Standard for Canned Tuna and Bonito (CXS 70-1981)',
+    issuingBodyOrAuthors: 'Codex Alimentarius Commission (FAO/WHO)',
+    publicationYear: '1981 (Amended 2018)',
+    documentType: 'codex_standard',
+    citationCode: 'CODEX STAN 70-1981',
+    officialReferenceOrUrl: 'https://www.fao.org/fao-who-codexalimentarius/standards/list-of-standards',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-214': {
+    id: 'src-inso-214',
+    titleFa: 'مربا، مارمالاد و ژله میوه - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Jams, jellies and marmalades - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1396 (تجدیدنظر سوم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 214:1396',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=214',
+    verificationStatus: 'verified_official'
+  },
+  'src-codex-296': {
+    id: 'src-codex-296',
+    titleFa: 'استاندارد کدکس برای مرباها، ژله‌ها و مارمالادها',
+    titleEn: 'Codex Standard for Jams, Jellies and Marmalades (CXS 296-2009)',
+    issuingBodyOrAuthors: 'Codex Alimentarius Commission (FAO/WHO)',
+    publicationYear: '2009 (Amended 2020)',
+    documentType: 'codex_standard',
+    citationCode: 'CODEX STAN 296-2009',
+    officialReferenceOrUrl: 'https://www.fao.org/fao-who-codexalimentarius/standards/list-of-standards',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-92': {
+    id: 'src-inso-92',
+    titleFa: 'عسل - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Honey - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1392 (تجدیدنظر پنجم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 92:1392',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=92',
+    verificationStatus: 'verified_official'
+  },
+  'src-codex-12': {
+    id: 'src-codex-12',
+    titleFa: 'استاندارد کدکس برای عسل طبیعی',
+    titleEn: 'Codex Standard for Honey (CXS 12-1981)',
+    issuingBodyOrAuthors: 'Codex Alimentarius Commission (FAO/WHO)',
+    publicationYear: '1981 (Revised 2001, Amended 2019)',
+    documentType: 'codex_standard',
+    citationCode: 'CODEX STAN 12-1981',
+    officialReferenceOrUrl: 'https://www.fao.org/fao-who-codexalimentarius/standards/list-of-standards',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-608': {
+    id: 'src-inso-608',
+    titleFa: 'شکلات - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Chocolate - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1398 (تجدیدنظر چهارم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 608:1398',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=608',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2450': {
+    id: 'src-inso-2450',
+    titleFa: 'بستنی - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Ice cream - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1395 (تجدیدنظر چهارم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2450:1395',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2450',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-761': {
+    id: 'src-inso-761',
+    titleFa: 'رب گوجه‌فرنگی - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Tomato paste - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1397 (تجدیدنظر پنجم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 761:1397',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=761',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-295': {
+    id: 'src-inso-295',
+    titleFa: 'حبوبات فرآوری و بسته‌بندی‌شده - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Packaged and processed pulses - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1396 (تجدیدنظر سوم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 295:1396',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=295',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-315': {
+    id: 'src-inso-315',
+    titleFa: 'ادویه‌ها و چاشنی‌ها - زردچوبه ساییده - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Spices - Ground turmeric - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1393 (تجدیدنظر دوم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 315:1393',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=315',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2441': {
+    id: 'src-inso-2441',
+    titleFa: 'آب معدنی طبیعی بسته‌بندی‌شده - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Packaged natural mineral water - Specifications',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1395 (تجدیدنظر سوم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2441:1395',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2441',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-6694': {
+    id: 'src-inso-6694',
+    titleFa: 'آب آشامیدنی بسته‌بندی‌شده - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Packaged drinking water - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1396 (تجدیدنظر اول)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 6694:1396',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=6694',
+    verificationStatus: 'verified_official'
+  },
+  'src-inso-2454': {
+    id: 'src-inso-2454',
+    titleFa: 'سس مایونز و سس‌های سالاد - ویژگی‌ها و روش‌های آزمون',
+    titleEn: 'Mayonnaise and salad dressings - Specifications and test methods',
+    issuingBodyOrAuthors: 'سازمان ملی استاندارد ایران (INSO)',
+    publicationYear: '1398 (تجدیدنظر چهارم)',
+    documentType: 'national_standard',
+    citationCode: 'INSO 2454:1398',
+    officialReferenceOrUrl: 'http://standard.isiri.gov.ir/StandardView.aspx?Id=2454',
+    verificationStatus: 'verified_official'
+  }
+};

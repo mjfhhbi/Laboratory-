@@ -16,9 +16,9 @@ export const ChatErrorBanner: React.FC<ChatErrorBannerProps> = ({
 
   return (
     <div className="mx-4 my-2 p-3 bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-200 text-xs flex items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-1 duration-200">
-      <div className="flex items-center gap-2 min-w-0">
-        <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-        <span className="truncate">{error}</span>
+      <div className="flex items-start gap-2 min-w-0">
+        <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+        <span className="leading-relaxed">{error}</span>
       </div>
 
       <div className="flex items-center gap-1 shrink-0">

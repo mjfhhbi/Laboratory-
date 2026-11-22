@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'FoodScienceAI_Storage';
-const DB_VERSION = 8;
+const DB_VERSION = 11;
 
 export const STORES = {
   SETTINGS: 'settings',
@@ -13,6 +13,7 @@ export const STORES = {
   KNOWLEDGE_BASE: 'knowledge_base',
   KNOWLEDGE_RECORDS: 'knowledge_records',
   SCIENTIFIC_SOURCES: 'scientific_sources',
+  PDF_DOCUMENTS: 'pdf_documents',
   SYNC_QUEUE: 'sync_queue',
   LAB_SESSIONS: 'lab_sessions',
   LAB_TEMPLATES: 'lab_templates',
@@ -21,7 +22,9 @@ export const STORES = {
   FOOD_EXPERIMENTS: 'food_experiments',
   LAB_EQUIPMENT: 'lab_equipment',
   CHEMICAL_REAGENTS: 'chemical_reagents',
-  PREPARED_SOLUTIONS: 'prepared_solutions'
+  PREPARED_SOLUTIONS: 'prepared_solutions',
+  RESEARCH_PROJECTS: 'research_projects',
+  STATISTICAL_DATASETS: 'statistical_datasets'
 } as const;
 
 export type StoreName = typeof STORES[keyof typeof STORES];
@@ -177,6 +180,30 @@ export function getDb(): Promise<IDBDatabase> {
         solStore.createIndex('status', 'status', { unique: false });
         solStore.createIndex('expiryDate', 'expiryDate', { unique: false });
         solStore.createIndex('createdAt', 'createdAt', { unique: false });
+      }
+
+      // 16. Scientific PDF Documents & OCR Text Store (Part 22 of 30)
+      if (!db.objectStoreNames.contains(STORES.PDF_DOCUMENTS)) {
+        const pdfStore = db.createObjectStore(STORES.PDF_DOCUMENTS, { keyPath: 'id' });
+        pdfStore.createIndex('sourceId', 'sourceId', { unique: false });
+        pdfStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+      }
+
+      // 17. Research Projects & Thesis Assistant Store (Part 25 of 30)
+      if (!db.objectStoreNames.contains(STORES.RESEARCH_PROJECTS)) {
+        const researchStore = db.createObjectStore(STORES.RESEARCH_PROJECTS, { keyPath: 'id' });
+        researchStore.createIndex('category', 'category', { unique: false });
+        researchStore.createIndex('status', 'status', { unique: false });
+        researchStore.createIndex('academicLevel', 'academicLevel', { unique: false });
+        researchStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+      }
+
+      // 18. Experimental Design & Statistical Datasets Store (Part 26 of 30)
+      if (!db.objectStoreNames.contains(STORES.STATISTICAL_DATASETS)) {
+        const statsStore = db.createObjectStore(STORES.STATISTICAL_DATASETS, { keyPath: 'id' });
+        statsStore.createIndex('designType', 'designType', { unique: false });
+        statsStore.createIndex('foodMatrix', 'foodMatrix', { unique: false });
+        statsStore.createIndex('updatedAt', 'updatedAt', { unique: false });
       }
     };
 

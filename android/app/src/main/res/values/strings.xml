@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FoodSci AI</string>
+    <string name="title_activity_main">FoodSci AI</string>
+    <string name="package_name">ir.foodscienceai.app</string>
+    <string name="custom_url_scheme">ir.foodscienceai.app</string>
+</resources>

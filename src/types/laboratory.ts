@@ -6,6 +6,8 @@
  */
 
 import { FoodStandard, AcceptableLimitSpecification, FoodStandardSector } from './foodStandard';
+import { EquipmentChecklistItem } from './laboratoryEquipment';
+import { ExperimentQCItem, LabSessionQCData } from './qualityControl';
 
 /**
  * Supported Lab Parameter Data Types
@@ -92,6 +94,52 @@ export interface LabRecordedParameterValue {
 }
 
 /**
+ * Workflow Stages for Real Laboratory Execution
+ */
+export type LabWorkflowStage =
+  | 'start_objective'       // ۱. شروع آزمایش و مشاهده هدف
+  | 'equipment_calibration' // ۲. بررسی تجهیزات و کالیبراسیون
+  | 'reagents_solutions'    // ۳. بررسی معرف‌ها و محلول‌ها
+  | 'sample_preparation'    // ۴. آماده‌سازی نمونه
+  | 'step_procedure'        // ۵. اجرای گام‌به‌گام و ورود داده
+  | 'calculation_review'    // ۶. محاسبه و بررسی نتیجه
+  | 'finalize';             // ۷. نهایی‌سازی و صدور کارنامه
+
+export interface LabLoggedError {
+  id: string;
+  errorText: string;
+  severity: 'warning' | 'critical';
+  loggedAt: string;
+  resolved?: boolean;
+}
+
+export interface LabSamplePrepData {
+  methodDescription?: string;
+  selectedMethodId?: string;
+  selectedMethodTitle?: string;
+  sampleType?: string;
+  sampleWeightGrams?: string | number;
+  sampleVolumeMl?: string | number;
+  containerUsed?: string;
+  appearanceObservation?: string;
+  homogenizationTool?: string;
+  dilutionFactor?: string | number;
+  filtrationUsed?: string;
+  extractionUsed?: string;
+  storageTemperatureRecorded?: string;
+  isPrepared: boolean;
+  preparedAt?: string;
+  notes?: string;
+  stageCompletionStatus?: {
+    sample?: boolean;
+    sampling?: boolean;
+    preparation?: boolean;
+    conditioning?: boolean;
+    analysis?: boolean;
+  };
+}
+
+/**
  * Recorded execution data for a single step in a replicate
  */
 export interface LabStepRunData {
@@ -107,6 +155,17 @@ export interface LabStepRunData {
   stepWarnings: string[];
   stepErrors: string[];
   completedAt?: string;
+
+  // Real-time Lab Data Logging Fields (قسمت ۳۴)
+  recordedTime?: string;                // ثبت زمان آزمون
+  recordedTemperature?: string | number;// ثبت دما (°C)
+  recordedWeight?: string | number;     // ثبت وزن (g)
+  recordedVolume?: string | number;     // ثبت حجم (mL)
+  recordedEquipment?: string[];         // ثبت تجهیزات استفاده‌شده
+  operatorNotes?: string;               // ثبت Operator Notes
+  loggedErrors?: LabLoggedError[];      // ثبت خطا و انحراف
+  skippedWithoutGuessing?: boolean;     // عدم اجبار به حدس زدن
+  skipReason?: string;                  // دلیل عدم اندازه‌گیری
 }
 
 /**
@@ -199,6 +258,7 @@ export interface LabSession {
   standardSnapshot?: Partial<FoodStandard>; // Snapshot of standard at session start
   
   // 3. Technical Requirements (From Standard or Custom)
+  equipmentChecklist?: EquipmentChecklistItem[];
   requiredEquipment: Array<{
     id: string;
     name: string;
@@ -220,6 +280,10 @@ export interface LabSession {
   };
   
   // 4. Protocol Steps & Workflow
+  workflowStage?: LabWorkflowStage;
+  calibrationCheckDone?: boolean;
+  reagentsCheckDone?: boolean;
+  samplePrepData?: LabSamplePrepData;
   steps: LabStepDefinition[];
   currentStepNumber: number;
   currentReplicateNumber: number;
@@ -233,12 +297,16 @@ export interface LabSession {
   completedAt?: string;
   elapsedSeconds: number;      // Total active run time in seconds
   
-  // 6. Real-time Analysis & Standard Validation Summary
+  // 6. Real-time Analysis, Quality Control (QC) & Standard Validation
   repeatabilityAnalysis?: LabRepeatabilityAnalysis;
   standardConformance?: LabStandardConformance;
+  qcItems?: ExperimentQCItem[];
+  qcData?: LabSessionQCData;
   
   // 7. System & Persistence
   isOfflineResilient: boolean;
+  isDemoOrTest?: boolean;
+  testTag?: 'TEST-MOCK' | 'REAL-DATA';
   createdAt: string;
   updatedAt: string;
 }

@@ -6,3 +6,26 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Android release secrets & Gradle outputs
+android/keystore.properties
+*.keystore
+*.jks
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+android/local.properties
+
+# Capacitor generated sync outputs (rebuilt via `npm run android:sync` or `03-sync-capacitor.ps1`)
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/src/main/res/xml/config.xml
+android/capacitor-cordova-android-plugins/
+
+# Large Pyodide binary wheels/WASM (restored with SHA-256 verification via `npm run pyodide:restore`)
+public/pyodide/*.whl
+public/pyodide/*.zip
+public/pyodide/*.wasm
+public/pyodide/pyodide.asm.js

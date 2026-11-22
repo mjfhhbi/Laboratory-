@@ -26,6 +26,7 @@ import {
   getAllFormulas 
 } from '../../lib/calculations/calculationEngine';
 import { FormulaDefinition, CalculationResult } from '../../types/calculations';
+import { KaTeXRenderer, formatToLaTeX } from '../common/KaTeXRenderer';
 
 export const FoodFormulaCalculator: React.FC = () => {
   const allFormulas = useMemo(() => getAllFormulas(), []);
@@ -41,11 +42,27 @@ export const FoodFormulaCalculator: React.FC = () => {
   const [precisionMode, setPrecisionMode] = useState<'decimals' | 'sigFigs'>('decimals');
   const [showTrace, setShowTrace] = useState<boolean>(true);
   const [copiedTrace, setCopiedTrace] = useState<boolean>(false);
+  const [copiedFormula, setCopiedFormula] = useState<boolean>(false);
+  const [copiedResult, setCopiedResult] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const currentFormula = useMemo<FormulaDefinition | undefined>(() => {
     return allFormulas.find(f => f.id === selectedFormulaId) || DEFAULT_FOOD_FORMULAS[selectedFormulaId];
   }, [allFormulas, selectedFormulaId]);
+
+  const substitutedFormulaLatex = useMemo(() => {
+    if (!currentFormula) return '';
+    let sub = currentFormula.expressionDisplay;
+    if (currentFormula.variables) {
+      for (const v of currentFormula.variables) {
+        const val = inputs[v.id] ?? inputs[v.symbol];
+        const valStr = val !== undefined ? String(val) : `[${v.symbol}]`;
+        const regex = new RegExp(`\\b${v.symbol}\\b`, 'g');
+        sub = sub.replace(regex, valStr);
+      }
+    }
+    return formatToLaTeX(sub);
+  }, [currentFormula, inputs]);
 
   // When formula changes, initialize default values
   const handleSelectFormula = (formula: FormulaDefinition) => {
@@ -132,10 +149,10 @@ export const FoodFormulaCalculator: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs">
+          <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl text-xs overflow-x-auto no-scrollbar sm:flex-wrap">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 min-h-[38px] whitespace-nowrap ${
                 selectedCategory === 'all'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
@@ -145,7 +162,7 @@ export const FoodFormulaCalculator: React.FC = () => {
             </button>
             <button
               onClick={() => setSelectedCategory('proximate_analysis')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 min-h-[38px] whitespace-nowrap ${
                 selectedCategory === 'proximate_analysis'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
@@ -155,7 +172,7 @@ export const FoodFormulaCalculator: React.FC = () => {
             </button>
             <button
               onClick={() => setSelectedCategory('solutions_dilution')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 min-h-[38px] whitespace-nowrap ${
                 selectedCategory === 'solutions_dilution'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
@@ -165,7 +182,7 @@ export const FoodFormulaCalculator: React.FC = () => {
             </button>
             <button
               onClick={() => setSelectedCategory('titration_chemistry')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 min-h-[38px] whitespace-nowrap ${
                 selectedCategory === 'titration_chemistry'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
@@ -175,7 +192,7 @@ export const FoodFormulaCalculator: React.FC = () => {
             </button>
             <button
               onClick={() => setSelectedCategory('physical_chemical')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 min-h-[38px] whitespace-nowrap ${
                 selectedCategory === 'physical_chemical'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
@@ -185,7 +202,7 @@ export const FoodFormulaCalculator: React.FC = () => {
             </button>
             <button
               onClick={() => setSelectedCategory('process_engineering')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 min-h-[38px] whitespace-nowrap ${
                 selectedCategory === 'process_engineering'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
@@ -195,7 +212,7 @@ export const FoodFormulaCalculator: React.FC = () => {
             </button>
             <button
               onClick={() => setSelectedCategory('statistical')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 min-h-[38px] whitespace-nowrap ${
                 selectedCategory === 'statistical'
                   ? 'bg-white dark:bg-stone-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
@@ -296,11 +313,32 @@ export const FoodFormulaCalculator: React.FC = () => {
                 )}
               </div>
 
-              {/* Formula Expression Box */}
-              <div className="bg-emerald-950 text-emerald-100 rounded-lg p-3 font-mono text-center text-sm shadow-inner dir-ltr">
-                <div className="text-xs text-emerald-400 mb-1 font-sans text-right dir-rtl">فرمول محاسباتی:</div>
-                <div className="font-bold tracking-wide text-emerald-200">
-                  {currentFormula.expressionDisplay}
+              {/* Formula Expression Box with KaTeX */}
+              <div className="bg-stone-900 text-stone-100 rounded-xl p-4 border border-stone-800 shadow-inner">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-stone-800 text-xs">
+                  <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>رابطه ریاضی فرمول (KaTeX Math):</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(currentFormula.expressionDisplay);
+                      setCopiedFormula(true);
+                      setTimeout(() => setCopiedFormula(false), 2000);
+                    }}
+                    className="px-2 py-0.5 rounded text-[11px] font-semibold bg-stone-800 hover:bg-stone-750 text-stone-300 transition-colors flex items-center gap-1"
+                    title="کپی فرمول"
+                  >
+                    {copiedFormula ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedFormula ? 'کپی شد' : 'کپی فرمول'}</span>
+                  </button>
+                </div>
+                <div className="py-2 overflow-x-auto scrollbar-thin text-center text-sm sm:text-base font-bold text-white tracking-wide">
+                  <KaTeXRenderer
+                    expression={currentFormula.expressionDisplay}
+                    displayMode={true}
+                  />
                 </div>
               </div>
             </div>
@@ -440,6 +478,16 @@ export const FoodFormulaCalculator: React.FC = () => {
                   );
                 })}
               </div>
+
+              {/* Step: Substituted Formula */}
+              <div className="bg-stone-50 dark:bg-stone-850 p-3.5 rounded-xl border border-stone-200 dark:border-stone-750 space-y-1.5">
+                <span className="text-[11px] font-semibold text-stone-500 block">
+                  جایگذاری مقادیر عددی در رابطه ریاضی (Substitution):
+                </span>
+                <div className="py-1 overflow-x-auto text-center">
+                  <KaTeXRenderer expression={substitutedFormulaLatex} displayMode={true} className="text-sm font-medium" />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -451,17 +499,34 @@ export const FoodFormulaCalculator: React.FC = () => {
                 <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">
                   نتیجه محاسبه آزمایشگاهی
                 </span>
-                {result?.isScientificallyValid ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full font-medium">
-                    <Check className="w-3 h-3" />
-                    نتیجه استاندارد معتبر
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full font-medium">
-                    <AlertTriangle className="w-3 h-3" />
-                    نیازمند بازبینی
-                  </span>
-                )}
+                <div className="flex items-center gap-1.5">
+                  {result?.success && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${result.formattedValue} ${result.unit}`);
+                        setCopiedResult(true);
+                        setTimeout(() => setCopiedResult(false), 2000);
+                      }}
+                      className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors flex items-center gap-1"
+                      title="کپی نتیجه"
+                    >
+                      {copiedResult ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedResult ? 'کپی شد' : 'کپی نتیجه'}</span>
+                    </button>
+                  )}
+                  {result?.isScientificallyValid ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full font-medium">
+                      <Check className="w-3 h-3" />
+                      معتبر
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full font-medium">
+                      <AlertTriangle className="w-3 h-3" />
+                      بازبینی
+                    </span>
+                  )}
+                </div>
               </div>
 
               {result?.success ? (

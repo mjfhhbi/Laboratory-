@@ -13,6 +13,38 @@ export interface ClientChatRequest {
     labPreset?: string;
     offlineMode?: boolean;
     temperature?: number;
+    attachedPdfs?: Array<{
+      id: string;
+      title: string;
+      fileName: string;
+      pageCount: number;
+      isScanned?: boolean;
+      pages: Array<{
+        pageNumber: number;
+        sectionHeading?: string;
+        text: string;
+        isOcr?: boolean;
+      }>;
+    }>;
+    pdfExtractionAction?: 'summary' | 'methodology' | 'materials_equipment' | 'parameters' | 'results' | 'tables' | 'references' | 'comparison' | 'qa';
+    ragGrounding?: {
+      intentLabelFa?: string;
+      intentType?: string;
+      evidenceLevel?: string;
+      evidenceStrategy?: string;
+      evidenceScore?: number;
+      warningNoticeFa?: string;
+      augmentedSystemInstruction?: string;
+      groundingPromptAugmentation?: string;
+      citedSources?: Array<{
+        id: string;
+        title: string;
+        standardNumber?: string;
+        sourceType: string;
+        pageNumber?: number;
+        confidenceLevel: string;
+      }>;
+    };
   };
 }
 

@@ -2,24 +2,33 @@
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Food Science AI | سامانه هوشمند علوم و صنایع غذایی</title>
-    <meta name="description" content="سامانه هوشمند و جامع علوم و صنایع غذایی، کنترل کیفیت، آزمایشگاه و فرمولاسیون" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Food Science AI</title>
+    <meta name="description" content="پلتفرم جامع و هوشمند علوم و صنایع غذایی با رابط کاربری فارسی، معماری ماژولار و پشتیبانی کامل آفلاین (PWA & IndexedDB)" />
+    <meta property="og:title" content="Food Science AI" />
+    <meta property="og:description" content="پلتفرم جامع و هوشمند علوم و صنایع غذایی با رابط کاربری فارسی، معماری ماژولار و پشتیبانی کامل آفلاین (PWA & IndexedDB)" />
+    <meta property="og:type" content="website" />
     <meta name="theme-color" content="#047857" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Food Science AI" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FoodSci AI" />
     <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   </head>
   <body class="bg-stone-50 text-stone-900 antialiased font-sans">
-    <div id="root"></div>
+    <div id="root">
+      <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,#064e3b,#065f46);color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,sans-serif;text-align:center;padding:24px;">
+        <img src="/pwa-192x192.png" alt="Food Science AI" width="84" height="84" style="border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,0.28);margin-bottom:18px;" />
+        <div style="font-size:20px;font-weight:800;letter-spacing:-0.01em;">Food Science AI</div>
+        <div style="font-size:13px;color:#a7f3d0;margin-top:6px;">دستیار هوشمند علوم و صنایع غذایی • حالت وب و آفلاین</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

@@ -1,41 +1,73 @@
 {
+  "id": "/",
   "name": "Food Science AI | سامانه هوشمند علوم و صنایع غذایی",
-  "short_name": "Food Science AI",
-  "description": "سامانه هوشمند و جامع علوم و صنایع غذایی، کنترل کیفیت، آزمایشگاه و فرمولاسیون صنعتی با قابلیت کارکرد آفلاین",
+  "short_name": "FoodSci AI",
+  "description": "سامانه هوشمند و جامع علوم و صنایع غذایی، کنترل کیفیت، آزمایشگاه، محاسبات مهندسی و اجرای آفلاین پایتون علمی (Pyodide/SciPy)",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#047857",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#065f46",
   "theme_color": "#047857",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "dir": "rtl",
   "lang": "fa",
+  "prefer_related_applications": false,
   "icons": [
     {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icon.svg",
-      "sizes": "192x192 512x512",
+      "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "categories": ["productivity", "education", "utilities"],
   "shortcuts": [
     {
-      "name": "چت هوشمند",
-      "short_name": "چت",
-      "url": "/chat",
-      "description": "دستیار مشاوره و فرمولاسیون صنایع غذایی"
-    },
-    {
       "name": "آزمایشگاه تخصصی",
       "short_name": "آزمایشگاه",
       "url": "/laboratory",
-      "description": "آنالیزهای میکروبی و شیمیایی"
+      "description": "اجرای آزمون‌های میکروبی و شیمیایی (آفلاین)",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "محاسبات مهندسی",
       "short_name": "محاسبات",
       "url": "/calculations",
-      "description": "محاسبات ارزش غذایی و مهندسی"
+      "description": "محاسبات مهندسی، ایزوترم، حرارتی و بسته‌بندی (آفلاین)",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "محیط پایتون علمی",
+      "short_name": "Python",
+      "url": "/python",
+      "description": "اجرای محلی NumPy، SciPy و مدل‌های کینتیک بدون اینترنت",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "دستیار هوشمند",
+      "short_name": "چت AI",
+      "url": "/chat",
+      "description": "مشاوره تخصصی آنلاین با Gemini و مشاهده سوابق آفلاین",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

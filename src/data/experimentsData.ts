@@ -28,6 +28,130 @@ export const VERIFIED_BENCHMARK_EXPERIMENTS: FoodExperiment[] = [
       { name: 'شناساگر فنل‌فتالئین ۱٪ در اتانول ۹۶٪', nameEn: 'Phenolphthalein Indicator 1% in Ethanol', grade: 'ACS Grade', storageCondition: 'ظرف شیشه‌ای قهوه‌ای در دمای اتاق' }
     ],
     samplePreparation: 'نمونه روغن باید کاملاً همگن، زلال و فاقد رطوبت معلق باشد. در صورت کدر بودن یا وجود رسوب، در دمای ۵۰ درجه سلسیوس ملایم گرم و از کاغذ صافی عبور داده شود.',
+    samplePrepMethods: [
+      {
+        id: 'method_chem_acid_liquid_oils',
+        methodTitleFa: 'روش ۱: آماده‌سازی روغن‌های مایع خوراکی (مستقیم)',
+        methodTitleEn: 'Method 1: Direct Preparation of Clear Liquid Edible Oils',
+        applicableMatrices: ['روغن آفتابگردان', 'روغن سویا', 'روغن ذرت', 'روغن کلزا', 'روغن زیتون تصفیه‌شده'],
+        isDefault: true,
+        source: {
+          organization: 'INSO',
+          standardNumber: 'INSO 4178',
+          clauseOrSection: 'بند ۶-۱: آماده‌سازی آزمایه روغن‌های مایع',
+          verificationStatus: 'VERIFIED'
+        },
+        sample: {
+          sampleType: 'روغن مایع خوراکی زلال و فاقد رسوب',
+          sampleAmount: '۵ الی ۱۰ گرم',
+          tolerance: '± ۰.۰۰۱ گرم با ترازوی آنالیتیکال ۴ رقمی',
+          matrixNotes: 'در صورت وجود کدورت یا رسوب موم، نمونه تا ۵۰ درجه سلسیوس به آرامی گرم و از کاغذ صافی عبور داده شود.'
+        },
+        sampling: {
+          samplingMethod: 'نمونه‌برداری تصادفی از بهر یا خط تولید مطابق استاندارد INSO 419',
+          samplingStandardRef: 'استاندارد ملی ایران شماره ۴۱۹',
+          containers: ['ظروف شیشه‌ای کهربایی دهان‌گشاد با درپوش سنباده‌ای یا تفلونی هوابند'],
+          samplingPrecautions: 'جلوگیری از هوادهی و تلاطم شدید که منجر به اکسیداسیون اولیه گردد'
+        },
+        preparation: {
+          preliminaryPrep: 'تکان دادن ملایم بطری جهت اختلاط رسوبات احتمالی در دمای ۲۰ الی ۲۵ درجه',
+          homogenization: 'اختلاط دستی با چرخش ارلن به مدت ۱ دقیقه',
+          dilution: {
+            required: false,
+            diluent: 'فاقد رقیق‌سازی (آزمایش مستقیم روی روغن خالص)'
+          },
+          filtration: {
+            required: false,
+            filterType: 'کاغذ صافی بدون خاکستر واتمن در صورت مشاهده کدورت'
+          },
+          extraction: {
+            required: false
+          }
+        },
+        conditioning: {
+          storageConditions: 'در محیط خشک، تاریک و خنک، دور از تابش مستقیم خورشید',
+          storageTime: 'حداکثر ظرف مدت ۲ ساعت پس از باز شدن پلمپ ظرف نمونه',
+          temperature: '۲۰ الی ۲۵ درجه سلسیوس (دمای آزمایشگاه)',
+          protectionFromLight: true,
+          equilibrationInstructions: 'هم‌دمایی نمونه با محیط آزمایشگاه به مدت حداقل ۳۰ دقیقه قبل از توزین'
+        },
+        analysis: {
+          handoverToProcedureNotes: 'نمونه توزین‌شده مستقیماً به ارلن ۲۵۰ میلی‌لیتر منتقل و به گام ۱ آزمون تحویل می‌گردد.',
+          readinessVerificationCriteria: [
+            'زلال بودن کامل فاز روغنی و عدم وجود قطرات آب معلق',
+            'رسیدن به تعادل دمایی ۲۰ الی ۲۵ درجه سلسیوس',
+            'توزین دقیق آزمایه با ترازوی کالیبره ۴ رقمی'
+          ],
+          preservationLimitAfterPrep: 'حداکثر ۱ ساعت در ارلن درپوش‌دار'
+        },
+        warnings: [
+          'روغن‌های اکسیدشده و حرارت‌دیده نباید در مجاورت هوای آزاد رها شوند زیرا اسیدیته سریعاً افزایش می‌یابد.',
+          'از حرارت‌دهی شدید بالای ۵۰ درجه خودداری شود چون پیوندهای استری تری‌گلیسرید هیدرولیز می‌شوند.'
+        ]
+      },
+      {
+        id: 'method_chem_acid_solid_fats',
+        methodTitleFa: 'روش ۲: آماده‌سازی چربی‌های جامد، مارگارین و کره (ذوب و حذف فاز آبی)',
+        methodTitleEn: 'Method 2: Melting & Dehydration of Solid Fats & Emulsions',
+        applicableMatrices: ['روغن نباتی هیدروژنه جامد', 'کره پاستوریزه', 'مارگارین', 'چربی حیوانی و دنبه', 'روغن پالم استئارین'],
+        isDefault: false,
+        source: {
+          organization: 'ISO',
+          standardNumber: 'ISO 660',
+          clauseOrSection: 'Clause 7.2: Preparation of solid and emulsion fats',
+          verificationStatus: 'VERIFIED'
+        },
+        sample: {
+          sampleType: 'چربی جامد یا امولسیون کره/مارگارین حاوی آب و پروتئین',
+          sampleAmount: '۱۰ الی ۲۰ گرم آزمایه مذاب‌شده',
+          tolerance: '± ۰.۰۰۱ گرم',
+          matrixNotes: 'تفکیک فاز چربی از فاز آب، نمک و پروتئین شیر پیش از تیتراسیون الزامی است.'
+        },
+        sampling: {
+          samplingMethod: 'نمونه‌برداری با بوردو (نمونه‌بردار استوانه‌ای فولادی) از عمق قالب طبق ISO 707',
+          samplingStandardRef: 'استاندارد ISO 707 / INSO 8008',
+          containers: ['بشر شیشه‌ای پیرکس مقاوم به حرارت با درپوش پارافیلم'],
+          samplingPrecautions: 'محافظت در برابر ذوب ناگهانی ناشی از نور یا دمای موضعی'
+        },
+        preparation: {
+          preliminaryPrep: 'ذوب آرام در آون یا حمام آب‌گرم با دمای ۱۰ درجه بالاتر از نقطه ذوب چربی (حداکثر ۵۰ درجه سلسیوس)',
+          homogenization: 'همزدن آرام فاز روغنی مذاب تا حصول یکنواختی کامل',
+          dilution: {
+            required: false
+          },
+          filtration: {
+            required: true,
+            filterType: 'کاغذ صافی چین‌دار در قیف گرم‌شده داخل آون ۵۰ درجه',
+            centrifugationAlternative: 'سانتریفیوژ ۳۰۰۰ دور در دقیقه به مدت ۵ دقیقه جهت شفاف‌سازی سریع فاز روغنی'
+          },
+          extraction: {
+            required: true,
+            technique: 'جداسازی فاز چربی خالص با دکانتاسیون و رطوبت‌گیری با سدیم سولفات بی‌آب (Na2SO4)',
+            extractingSolvent: 'جداسازی فیزیکی بدون حلال'
+          }
+        },
+        conditioning: {
+          storageConditions: 'نگهداری فاز روغنی جداشده در دمای ۳۰ تا ۳۵ درجه برای جلوگیری از انجماد پیش از توزین',
+          storageTime: 'آزمون تیتراسیون بلافاصله پس از شفاف‌سازی انجام گردد',
+          temperature: '۳۰ الی ۳۵ درجه سلسیوس',
+          protectionFromLight: true,
+          equilibrationInstructions: 'تثبیت دما در ۳۰-۳۵ درجه جهت حفظ سیالیت یکنواخت'
+        },
+        analysis: {
+          handoverToProcedureNotes: 'فاز چربی خالص شفاف با پیپت برداشته و در ارلن تیتراسیون وزن می‌شود.',
+          readinessVerificationCriteria: [
+            'حذف کامل فاز آبی و سرمی کره/مارگارین',
+            'عدم وجود هرگونه ذره کدورت یا قطره آب در فاز روغنی مذاب',
+            'حفظ سیالیت کامل در دمای آزمون'
+          ],
+          preservationLimitAfterPrep: 'حداکثر ۳۰ دقیقه پس از جداسازی فاز'
+        },
+        warnings: [
+          'باقی ماندن قطرات آب در نمونه چربی باعث هیدرولیز اسیدی در مجاورت گرما و خطای مثبت در عدد اسیدی می‌شود.',
+          'دمای ذوب به هیچ وجه نباید از ۵۵ درجه سلسیوس تجاوز کند.'
+        ]
+      }
+    ],
     solutionsPreparation: 'مخلوط حلال اتانول-اتر را قبل از استفاده با چند قطره معرف فنل‌فتالئین در مجاورت چند قطره محلول KOH تا ظهور رنگ صورتی بسیار کم‌رنگ خنثی کنید.',
     environmentalConditions: {
       temperatureRange: '۲۰ الی ۲۵ درجه سلسیوس',
@@ -39,17 +163,32 @@ export const VERIFIED_BENCHMARK_EXPERIMENTS: FoodExperiment[] = [
         stepNumber: 1,
         title: 'توزین نمونه آزمون',
         description: 'بسته به میزان تقریبی اسیدیته، بین ۵ الی ۱۰ گرم از نمونه روغن را با دقت ۰.۰۰۱ گرم در ارلن مایر ۲۵۰ میلی‌لیتر وزن کنید.',
-        criticalCaution: 'جرم نمونه باید متناسب با عدد اسیدی انتخاب شود تا حجم مصرفی تیترانت بین ۳ الی ۱۰ میلی‌لیتر باشد.'
+        amount: '5 - 10',
+        unit: 'گرم',
+        equipment: ['ترازوی آنالیتیکال ۰.۰۰۱g', 'ارلن ۲۵۰ میلی‌لیتر'],
+        criticalCaution: 'جرم نمونه باید متناسب با عدد اسیدی انتخاب شود تا حجم مصرفی تیترانت بین ۳ الی ۱۰ میلی‌لیتر باشد.',
+        source: 'بند ۷.۱ استاندارد INSO 4179'
       },
       {
         stepNumber: 2,
         title: 'انحلال در حلال خنثی',
-        description: 'مقدار ۵۰ الی ۱۰۰ میلی‌لیتر از مخلوط حلال خنثی‌شده اتانول-اتر را به ارلن اضافه کرده و به آرامی تکان دهید تا نمونه کاملاً حل شود.'
+        description: 'مقدار ۵۰ الی ۱۰۰ میلی‌لیتر از مخلوط حلال خنثی‌شده اتانول-اتر را به ارلن اضافه کرده و به آرامی تکان دهید تا نمونه کاملاً حل شود.',
+        amount: '50 - 100',
+        unit: 'میلی‌لیتر',
+        temperature: '20 - 25 °C',
+        warning: 'مخلوط اتانول-دی‌اتیل اتر به شدت اشتعال‌پذیر است؛ حتماً زیر هود ضد جرقه و دور از شعله انجام شود.',
+        source: 'بند ۷.۲ استاندارد INSO 4179'
       },
       {
         stepNumber: 3,
         title: 'افزودن شناساگر و تیتراسیون',
-        description: 'تعداد ۳ الی ۵ قطره معرف فنل‌فتالئین اضافه کنید. با محلول هیدروکسید پتاسیم ۰.۱ مولار تیتر کنید تا رنگ صورتی ملایم ظاهر شود که حداقل ۱۵ ثانیه پایدار بماند.'
+        description: 'تعداد ۳ الی ۵ قطره معرف فنل‌فتالئین اضافه کنید. با محلول هیدروکسید پتاسیم ۰.۱ مولار تیتر کنید تا رنگ صورتی ملایم ظاهر شود که حداقل ۱۵ ثانیه پایدار بماند.',
+        amount: '3 - 5',
+        unit: 'قطره',
+        duration: '15 ثانیه پایداری',
+        equipment: ['بورت مدرج کلاس A'],
+        criticalCaution: 'نقطه پایانی تیتراسیون پایدار ماندن رنگ صورتی بسیار کم‌رنگ به مدت حداقل ۱۵ ثانیه است.',
+        source: 'بند ۷.۳ استاندارد INSO 4179'
       }
     ],
     calculations: {
@@ -106,6 +245,128 @@ export const VERIFIED_BENCHMARK_EXPERIMENTS: FoodExperiment[] = [
     verificationStatus: 'verified_standard',
     reliabilityGrade: 'grade_a',
     tags: ['روغن‌ها و چربی‌ها', 'عدد اسیدی', 'FFA', 'INSO 4179', 'ISO 660'],
+    title: 'تعیین عدد اسیدی و اسیدیته آزاد در روغن‌ها و چربی‌های خوراکی',
+    category: 'food_chemistry',
+    product: 'روغن‌ها و چربی‌های خوراکی گیاهی و حیوانی',
+    purpose: 'تعیین مقدار اسیدهای چرب آزاد حاصل از هیدرولیز تری‌گلیسریدها در نمونه روغن و چربی و ارزیابی میزان فساد هیدرولیتیک',
+    equipmentRequirements: [
+      'ترازوی آنالیتیکال با دقت ±۰.۰۰۱ گرم کالیبره‌شده با وزنه‌های استاندارد کلاس E2',
+      'بورت مدرج کلاس A کالیبره‌شده مطابق با ISO 385 با رواداری ±۰.۰۵ میلی‌لیتر'
+    ],
+    acceptanceCriteria: {
+      criteriaList: [
+        'حداکثر عدد اسیدی مجاز در روغن آفتابگردان خوراکی تصفیه شده: ۰.۶ mg KOH/g (استاندارد ملی ایران ۱۴۴۶)',
+        'حداکثر عدد اسیدی روغن زیتون فرابکر (Extra Virgin): ۰.۸ mg KOH/g (استاندارد ملی ایران ۱۴۴۶)',
+        'حداکثر عدد اسیدی مجاز در روغن سرخ‌کردنی خانگی: ۰.۳ mg KOH/g (استاندارد ملی ایران ۴۱۵۲)'
+      ],
+      legalLimits: 'مطابق استانداردهای ملی ایران سری ۱۴۴۶ و ۴۱۵۲',
+      repeatabilityLimit: 'r = ۰.۰۵ mg KOH/g بین دو آزمون همزمان',
+      reproducibilityLimit: 'R = ۰.۱۵ mg KOH/g بین دو آزمایشگاه مجزا'
+    },
+    qcSpec: {
+      items: [
+        {
+          id: 'qc_acid_blank',
+          type: 'blank',
+          titleFa: 'آزمون شاهد حلال و معرف (Blank Test)',
+          titleEn: 'Solvent & Reagent Blank Test',
+          descriptionFa: 'تیتراسیون مخلوط حلال اتانول-دی‌اتیل اتر با شناساگر فنل‌فتالئین بدون نمونه روغن جهت تعیین حجم خطای حلال',
+          sourceReference: 'استاندارد ملی ایران شماره ۴۱۷۹ / ISO 660 بند ۷-۴',
+          acceptanceCriteria: {
+            specified: true,
+            descriptionFa: 'حجم محلول KOH مصرفی برای خنثی‌سازی حلال باید حداکثر ۰.۰۵ میلی‌لیتر باشد.',
+            sourceClause: 'بند ۷-۴ استاندارد INSO 4179',
+            comparisonType: 'max',
+            maxValue: 0.05,
+            targetValue: 0.05,
+            unit: 'mL'
+          },
+          isRequired: true
+        },
+        {
+          id: 'qc_acid_duplicate',
+          type: 'duplicate',
+          titleFa: 'آزمون تکرار موازی (Duplicate Analysis)',
+          titleEn: 'Duplicate Sample Analysis',
+          descriptionFa: 'انجام دو آزمون تیتراسیون همزمان روی دو آزمایه مجزا از نمونه روغن یکنواخت‌شده جهت سنجش حد تکرارپذیری (r)',
+          sourceReference: 'استاندارد ملی ایران شماره ۴۱۷۹ / ISO 660 بند ۹-۱',
+          acceptanceCriteria: {
+            specified: true,
+            descriptionFa: 'اختلاف مطلق بین دو نتیجه تکرار نباید از ۰.۰۵ میلی‌گرم KOH به ازای هر گرم تجاوز کند.',
+            sourceClause: 'بند ۹-۱ (حد تکرارپذیری r)',
+            comparisonType: 'max',
+            maxValue: 0.05,
+            targetValue: 0.05,
+            unit: 'mg KOH/g'
+          },
+          isRequired: true
+        },
+        {
+          id: 'qc_acid_calibration_check',
+          type: 'calibration_check',
+          titleFa: 'بررسی استانداردسازی و فاکتور تیترانت (Burette & Titrant Calibration Check)',
+          titleEn: 'Titrant Factor & Burette Verification',
+          descriptionFa: 'بررسی فاکتور نرمالیته محلول KOH 0.1M با پتاسیم هیدروژن فتالات (KHP) استاندارد اولیه',
+          sourceReference: 'استاندارد ملی ایران شماره ۴۱۷۹ / ISO 660 بند ۵-۳',
+          acceptanceCriteria: {
+            specified: true,
+            descriptionFa: 'فاکتور محلول هیدروکسید پتاسیم باید در دامنه ۰.۹۸۰ الی ۱.۰۲۰ قرار داشته باشد.',
+            sourceClause: 'بند ۵-۳ استاندارد INSO 4179',
+            comparisonType: 'range',
+            minValue: 0.98,
+            maxValue: 1.02,
+            unit: 'فاکتور'
+          },
+          isRequired: true
+        },
+        {
+          id: 'qc_acid_recovery',
+          type: 'recovery',
+          titleFa: 'آزمون بازیابی اسید اولئیک (Spike Recovery)',
+          titleEn: 'Oleic Acid Spike Recovery',
+          descriptionFa: 'افزودن مقدار مشخص اسید اولئیک استاندارد به نمونه روغن تصفیه‌شده جهت تعیین درصد بازیابی',
+          sourceReference: 'استاندارد ملی ایران شماره ۴۱۷۹',
+          acceptanceCriteria: {
+            specified: false,
+            descriptionFa: 'معیار پذیرش درصد بازیابی در متن استاندارد INSO 4179 مشخص نشده است: «قابل ارزیابی نیست»'
+          },
+          isRequired: false
+        },
+        {
+          id: 'qc_acid_reference_material',
+          type: 'reference_material',
+          titleFa: 'ماده مرجع گواهی‌شده روغنی (Certified Reference Material - CRM)',
+          titleEn: 'CRM Edible Oil Standard',
+          descriptionFa: 'آنالیز روغن مرجع گواهی‌شده با عدد اسیدی مشخص جهت صحه‌گذاری عملکرد سالانه روش',
+          sourceReference: 'استاندارد ملی ایران شماره ۴۱۷۹',
+          acceptanceCriteria: {
+            specified: false,
+            descriptionFa: 'حد عددی پذیرش برای CRM در استاندارد INSO 4179 تصریح نشده است: «قابل ارزیابی نیست»'
+          },
+          isRequired: false
+        }
+      ]
+    },
+    troubleshooting: [
+      {
+        problem: 'پایدار نماندن رنگ صورتی تیتراسیون و محو شدن سریع در کمتر از ۱۵ ثانیه',
+        cause: 'جذب دی‌اکسید کربن اتمسفر توسط محلول بازی یا خنثی نبودن مخلوط حلال اتانول-اتر',
+        solution: 'پوشاندن دهانه ارلن در طول تیتراسیون با فویل یا شیشه ساعت و خنثی‌سازی دقیق حلال بلافاصله پیش از آزمون',
+        source: 'بند ۷.۳ استاندارد INSO 4179'
+      },
+      {
+        problem: 'کدورت شدید نمونه هنگام افزودن مخلوط حلال',
+        cause: 'وجود آب در نمونه روغن یا دمای بسیار پایین حلال',
+        solution: 'گرم کردن ملایم تا ۵۰ درجه سلسیوس و استفاده از سدیم سولفات بی‌آب جهت حذف رطوبت قبل از توزین',
+        source: 'بند ۶.۲ استاندارد INSO 4179'
+      }
+    ],
+    notes: [
+      'در روغن‌های تیره و تصفیه‌نشده که تغییر رنگ فنل‌فتالئین به سختی قابل مشاهده است، می‌توان از شناساگر پتانسیومتری (الکترود شیشه‌ای pH) استفاده نمود.',
+      'محلول هیدروکسید پتاسیم باید ماهانه با محلول استاندارد پتاسیم هیدروژن فتالات (KHP) استانداردسازی مجدد گردد.'
+    ],
+    version: '1.0.0',
+    lastVerified: '2024-05-15',
     offlineAvailable: true,
     isVerifiedProtocol: true,
     createdAt: new Date().toISOString(),
@@ -134,6 +395,131 @@ export const VERIFIED_BENCHMARK_EXPERIMENTS: FoodExperiment[] = [
       { name: 'رقیق‌کننده پپتون واتر سالین (MRD)', nameEn: 'Peptone Salt Diluent', grade: 'Microbiology Grade' }
     ],
     samplePreparation: '۲۵ گرم یا میلی‌لیتر از نمونه به صورت آسپتیک وزن و با ۲۲۵ میلی‌لیتر رقیق‌کننده استریل در کیسه استومیکر به مدت ۲ دقیقه همگن می‌شود.',
+    samplePrepMethods: [
+      {
+        id: 'method_mb_solid_samples',
+        methodTitleFa: 'روش ۱: آماده‌سازی نمونه‌های جامد، گوشت، پودر و پنیر (استومیکر فیلتردار)',
+        methodTitleEn: 'Method 1: Solid & Powdered Matrices (Filter Stomacher)',
+        applicableMatrices: ['گوشت و فرآورده‌های گوشتی', 'پنیر و کشک', 'پودر شیر خشک', 'غلات و آرد', 'سبزیجات و خشکبار'],
+        isDefault: true,
+        source: {
+          organization: 'INSO',
+          standardNumber: 'INSO 356',
+          clauseOrSection: 'بند ۸-۲: آماده‌سازی سوسپانسیون اولیه نمونه‌های جامد',
+          verificationStatus: 'VERIFIED'
+        },
+        sample: {
+          sampleType: 'ماتریس غذایی جامد، پودری یا چسبنده',
+          sampleAmount: '۲۵.۰ گرم آزمایه آزمون',
+          tolerance: '± ۰.۱ گرم با ترازوی دقیق آزمایشگاهی',
+          matrixNotes: 'نمونه‌برداری از عمق و بخش‌های مختلف بسته جهت حصول نمونه نماینده واقعی'
+        },
+        sampling: {
+          samplingMethod: 'برداشت آسپتیک با کاردک یا قاشق استریل در مجاورت شعله طبق ISO 6887-1',
+          samplingStandardRef: 'استاندارد ملی ایران شماره ۳۵۶ / ISO 6887-1',
+          containers: ['کیسه استریل استومیکر فیلتردار یکبار مصرف (Stomacher Filter Bag)'],
+          samplingPrecautions: 'رعایت شرایط کاملاً آسپتیک جهت جلوگیری از ورود آلودگی متقاطع محیطی'
+        },
+        preparation: {
+          preliminaryPrep: 'خرد کردن قطعات درشت در مجاورت شعله با قیچی استریل پیش از انتقال به کیسه',
+          homogenization: 'همگن‌سازی ضربه‌ای در استومیکر با سرعت ۲۳۰ دور در دقیقه به مدت ۲ دقیقه',
+          homogenizationTimeOrCycles: '۲ دقیقه',
+          dilution: {
+            required: true,
+            diluent: 'محلول رقیق‌کننده پپتون آب نمکی استریل (MRD)',
+            dilutionRatio: '۱:۱۰ (۲۵ گرم نمونه + ۲۲۵ میلی‌لیتر رقیق‌کننده)',
+            dilutionFactor: 10,
+            procedureNotes: 'رقیق‌کننده از قبل تا دمای اتاق تعدیل شده باشد'
+          },
+          filtration: {
+            required: true,
+            filterType: 'غشای توری داخلی کیسه استومیکر (توری جداکننده ذرات درشت گوشت/سبزی)',
+            poreSize: 'مش ۲۸۰ میکرون فیلتر پلاستیکی استریل'
+          },
+          extraction: {
+            required: false
+          }
+        },
+        conditioning: {
+          storageConditions: 'نگهداری سوسپانسیون اولیه در دمای اتاق آزمایشگاه',
+          storageTime: 'تهیه رقت‌ها و تلقیح باید حداکثر ظرف مدت ۴۵ دقیقه پس از تهیه سوسپانسیون اولیه انجام گیرد',
+          temperature: '۲۰ الی ۲۵ درجه سلسیوس',
+          protectionFromLight: false,
+          equilibrationInstructions: 'اختلاط ملایم قبل از هر بار پیپتاژ'
+        },
+        analysis: {
+          handoverToProcedureNotes: '۱ میلی‌لیتر از سوسپانسیون رقیق‌شده برداشته و مستقیماً وارد لوله رقت 10^-2 و پلیت کشت می‌گردد.',
+          readinessVerificationCriteria: [
+            'سوسپانسیون کاملاً یکنواخت و بدون لخته',
+            'فیلتر شدن ذرات فیبری یا درشت توسط توری کیسه استومیکر',
+            'انجام آسپتیک تمام مراحل'
+          ],
+          preservationLimitAfterPrep: 'حداکثر ۴۵ دقیقه (جهت ممانعت از تکثیر یا مرگ سلول‌ها)'
+        },
+        warnings: [
+          'ماندن سوسپانسیون اولیه بیش از ۴۵ دقیقه موجب تکثیر باکتری‌ها و بیش‌برآوردی شدید بار میکروبی می‌شود.',
+          'در پودرهای غلیظ شونده (مانند نشاسته و صمغ‌ها) افزودن تدریجی رقیق‌کننده جهت جلوگیری از تشکیل کلوخه ضروری است.'
+        ]
+      },
+      {
+        id: 'method_mb_liquid_samples',
+        methodTitleFa: 'روش ۲: آماده‌سازی فرآورده‌های مایع، آب و شیر (پیپتاژ مستقیم)',
+        methodTitleEn: 'Method 2: Liquid Beverages, Water & Milk (Direct Pipetting)',
+        applicableMatrices: ['شیر خام و پاستوریزه', 'دوغ', 'آبمیوه‌ها', 'آب معدنی و آشامیدنی', 'شربت‌ها'],
+        isDefault: false,
+        source: {
+          organization: 'ISO',
+          standardNumber: 'ISO 6887-5',
+          clauseOrSection: 'Clause 9.1: Primary dilution of milk and liquid dairy products',
+          verificationStatus: 'VERIFIED'
+        },
+        sample: {
+          sampleType: 'مایع همگن فاقد ذرات درشت',
+          sampleAmount: '۲۵.۰ میلی‌لیتر (یا ۱.۰ میلی‌لیتر در ۹ میلی‌لیتر)',
+          tolerance: '± ۰.۱ میلی‌لیتر با پیپت سرولوژیک استریل',
+          matrixNotes: 'در شیر، دمای نمونه پیش از برداشت باید به ۲۰ تا ۲۵ درجه سلسیوس برسد.'
+        },
+        sampling: {
+          samplingMethod: 'تکان دادن شدید ظرف نمونه ۲۵ بار در قوس ۳۰ سانتی‌متری طی ۷ ثانیه طبق ISO 707',
+          samplingStandardRef: 'استاندارد ISO 707 / INSO 8008',
+          containers: ['بطری یا لوله آزمایش استریل درپیچ‌دار'],
+          samplingPrecautions: 'برداشت از میان مایع و اجتناب از برداشت کف سطحی'
+        },
+        preparation: {
+          preliminaryPrep: 'اختلاط کامل با تکان دادن متوالی',
+          homogenization: 'اختلاط روی دستگاه ورتکس به مدت ۱۵ الی ۳۰ ثانیه',
+          dilution: {
+            required: true,
+            diluent: 'پپتون آب نمکی استریل (MRD)',
+            dilutionRatio: '۱ به ۱۰ (۱ میلی‌لیتر به ۹ میلی‌لیتر یا ۲۵ به ۲۲۵)',
+            dilutionFactor: 10
+          },
+          filtration: {
+            required: false
+          },
+          extraction: {
+            required: false
+          }
+        },
+        conditioning: {
+          storageConditions: 'در دمای ۲۰ تا ۲۵ درجه سلسیوس',
+          storageTime: 'آغاز تلقیح حداکثر تا ۳۰ دقیقه پس از رقت‌سازی',
+          temperature: '۲۰ الی ۲۵ درجه سلسیوس',
+          protectionFromLight: false
+        },
+        analysis: {
+          handoverToProcedureNotes: 'مستقیماً برای تهیه رقت‌های سریالی 10^-2 تا 10^-6 و پورپلیت تحویل داده می‌شود.',
+          readinessVerificationCriteria: [
+            'مایع یکنواخت و هم‌دما با محیط',
+            'عدم وجود کف مزاحم در پیپت اندازه‌گیری'
+          ],
+          preservationLimitAfterPrep: 'حداکثر ۳۰ دقیقه'
+        },
+        warnings: [
+          'در نمونه‌های شیر سرد، چربی به دیواره ظرف می‌چسبد؛ لذا گرم‌کردن تا ۳۸ درجه و سپس خنک‌سازی تا ۲۰ درجه توصیه می‌شود.'
+        ]
+      }
+    ],
     solutionsPreparation: 'محیط PCA در اتوکلاو در ۱۲۱ درجه به مدت ۱۵ دقیقه استریل و در حمام آب‌گرم ۴۵ درجه تا زمان پورپلیت نگهداری می‌شود.',
     environmentalConditions: {
       temperatureRange: 'اتاق تمیز میکروبیولوژی طبق ISO 7218',
@@ -143,17 +529,34 @@ export const VERIFIED_BENCHMARK_EXPERIMENTS: FoodExperiment[] = [
       {
         stepNumber: 1,
         title: 'تهیه رقت‌های متوالی اعشاری',
-        description: 'از رقت اولیه 10^-1، مقدار ۱ میلی‌لیتر برداشته و به ۹ میلی‌لیتر رقیق‌کننده استریل اضافه کنید تا رقت 10^-2 تهیه شود.'
+        description: 'از رقت اولیه 10^-1، مقدار ۱ میلی‌لیتر برداشته و به ۹ میلی‌لیتر رقیق‌کننده استریل اضافه کنید تا رقت 10^-2 تهیه شود.',
+        amount: '1.0',
+        unit: 'میلی‌لیتر',
+        equipment: ['سمپلر کالیبره', 'ورتکس آزمایشگاهی'],
+        criticalCaution: 'برای هر رقت متوالی از نوک سمپلر (Tip) استریل جدید استفاده شود.',
+        source: 'بند ۹.۲ استاندارد INSO 5272-1'
       },
       {
         stepNumber: 2,
         title: 'کشت پورپلیت',
-        description: 'از هر رقت، ۱ میلی‌لیتر در دو پلیت استریل ریخته و ۱۵ میلی‌لیتر محیط PCA مذاب در ۴۵ درجه اضافه کرده و به شکل عدد ۸ انگلیسی مخلوط کنید.'
+        description: 'از هر رقت، ۱ میلی‌لیتر در دو پلیت استریل ریخته و ۱۵ میلی‌لیتر محیط PCA مذاب در ۴۵ درجه اضافه کرده و به شکل عدد ۸ انگلیسی مخلوط کنید.',
+        amount: '15',
+        unit: 'میلی‌لیتر',
+        temperature: '44 - 47 °C',
+        equipment: ['پلیت استریل ۹۰mm', 'حمام آب‌گرم ۴۵ درجه'],
+        warning: 'دمای آگار نباید از ۴۷ درجه بیشتر باشد، در غیر اینصورت سلول‌های باکتری از بین می‌روند.',
+        criticalCaution: 'مخلوط کردن نمونه با آگار بلافاصله پس از ریختن با حرکت چرخشی ۸ شکل انجام شود.',
+        source: 'بند ۹.۳ استاندارد INSO 5272-1'
       },
       {
         stepNumber: 3,
         title: 'گرماگذاری در انکوباتور',
-        description: 'پلیت‌ها را به صورت واژگون در دمای ۳۰ ± ۱ درجه سلسیوس به مدت ۷۲ ± ۳ ساعت قرار دهید.'
+        description: 'پلیت‌ها را به صورت واژگون در دمای ۳۰ ± ۱ درجه سلسیوس به مدت ۷۲ ± ۳ ساعت قرار دهید.',
+        temperature: '30 ± 1 °C',
+        duration: '72 ± 3 ساعت',
+        equipment: ['انکوباتور ۳۰ درجه سلسیوس'],
+        criticalCaution: 'پلیت‌ها باید به صورت واژگون (درپوش رو به پایین) قرار گیرند تا قطرات تعریق روی سطح آگار نریزد.',
+        source: 'بند ۹.۴ استاندارد INSO 5272-1'
       }
     ],
     calculations: {
@@ -199,6 +602,117 @@ export const VERIFIED_BENCHMARK_EXPERIMENTS: FoodExperiment[] = [
     verificationStatus: 'verified_standard',
     reliabilityGrade: 'grade_a',
     tags: ['میکروبیولوژی', 'TPC', 'پورپلیت', 'PCA', 'INSO 5272-1'],
+    title: 'شمارش کلی میکروارگانیسم‌های مزوفیل هوازی (Total Plate Count - TPC)',
+    category: 'microbiology',
+    product: 'کلیه فرآورده‌های غذایی فرآوری‌شده و خوراک دام',
+    purpose: 'شمارش کمی باکتری‌ها و میکروارگانیسم‌های مزوفیل زنده در فرآورده‌های غذایی به عنوان شاخص بهداشتی و بار میکروبی اولیه',
+    equipmentRequirements: [
+      'انکوباتور میکروبیولوژی با کنترل دمای ۱ ± ۳۰ درجه سلسیوس و کالیبراسیون سنسور دما',
+      'اتوکلاو استریلیزاسیون ۱۲۱ درجه سلسیوس با نشانگر بیولوژیکی ژئوباسیلوس استئاروترموفیلوس'
+    ],
+    acceptanceCriteria: {
+      criteriaList: [
+        'حد مجاز بار میکروبی مطابق استاندارد ملی اختصاصی هر فرآورده (مثلاً شیر پاستوریزه حداکثر ۷۵,۰۰۰ CFU/mL مطابق INSO 2406)',
+        'پلیت‌های دارای کلنی بین ۱۵ تا ۳۰۰ عدد در فرمول محاسباتی لحاظ می‌گردند (ISO 4833-1)'
+      ],
+      legalLimits: 'مطابق استانداردهای حدود میکروبی فرآورده‌های خوراکی و آشامیدنی (استاندارد ملی ایران ۲۳۹۴)',
+      repeatabilityLimit: 'اختلاف لگاریتم نتایج دو تکرار همزمان نباید از ۰.۲۵ log10 تجاوز نماید.'
+    },
+    qcSpec: {
+      items: [
+        {
+          id: 'qc_mb_blank',
+          type: 'blank',
+          titleFa: 'آزمون شاهد استریلیتی محیط و رقیق‌کننده (Negative Blank Control)',
+          titleEn: 'Sterility Negative Blank Control',
+          descriptionFa: 'ریختن محیط کشت PCA مذاب به همراه ۱ میلی‌لیتر رقیق‌کننده استریل در پلیت پتری بدون نمونه جهت اثبات عدم آلودگی',
+          sourceReference: 'استاندارد ملی ایران شماره ۵۲۷۲-۱ / ISO 4833-1 بند ۹-۵',
+          acceptanceCriteria: {
+            specified: true,
+            descriptionFa: 'عدم مشاهده هرگونه کلنی باکتریایی در پلیت شاهد منفی پس از ۷۲ ساعت (۰ CFU)',
+            sourceClause: 'بند ۹-۵ استاندارد INSO 5272-1',
+            comparisonType: 'exact_zero',
+            targetValue: 0,
+            unit: 'CFU'
+          },
+          isRequired: true
+        },
+        {
+          id: 'qc_mb_duplicate',
+          type: 'duplicate',
+          titleFa: 'آزمون پلیت‌های موازی تکرار (Duplicate Plates per Dilution)',
+          titleEn: 'Duplicate Plating Analysis',
+          descriptionFa: 'تهیه حداقل دو پلیت پورپلیت موازی برای هر رقت متوالی انتخابی',
+          sourceReference: 'استاندارد ملی ایران شماره ۵۲۷۲-۱ / ISO 4833-1 بند ۱۰-۲',
+          acceptanceCriteria: {
+            specified: true,
+            descriptionFa: 'اختلاف شمارش بین دو پلیت موازی یک رقت نباید از ۳۰٪ میانگین تجاوز کند.',
+            sourceClause: 'بند ۱۰-۲ استاندارد INSO 5272-1',
+            comparisonType: 'max_percent_diff',
+            maxDifference: 30,
+            targetValue: 30,
+            unit: '%'
+          },
+          isRequired: true
+        },
+        {
+          id: 'qc_mb_control_sample',
+          type: 'control_sample',
+          titleFa: 'نمونه کنترل مثبت زیستی (Positive Bio-Control)',
+          titleEn: 'Positive Culture Control Strain',
+          descriptionFa: 'کشت سویه باکتریایی استاندارد مرجع (مانند Bacillus subtilis یا E. coli ATCC) جهت تأیید حاصلخیزی محیط کشت PCA',
+          sourceReference: 'استاندارد ISO 11133 (کنترل کیفیت محیط‌های کشت میکروبیولوژی)',
+          acceptanceCriteria: {
+            specified: true,
+            descriptionFa: 'رشد شفاف و پربار سویه استاندارد در پلیت مثبت تأیید گردد (رشد مثبت).',
+            sourceClause: 'استاندارد ISO 11133',
+            comparisonType: 'text_match',
+            expectedText: 'مثبت'
+          },
+          isRequired: true
+        },
+        {
+          id: 'qc_mb_recovery',
+          type: 'recovery',
+          titleFa: 'آزمون درصد بازیافت میکروبی (Microbial Recovery Test)',
+          titleEn: 'Spike Recovery Rate',
+          descriptionFa: 'اسپایک میکروارگانیسم معین در ماتریس غذایی',
+          sourceReference: 'استاندارد ملی ایران شماره ۵۲۷۲-۱',
+          acceptanceCriteria: {
+            specified: false,
+            descriptionFa: 'آزمون درصد بازیابی در متن آزمون روتین استاندارد INSO 5272-1 قید نشده است: «قابل ارزیابی نیست»'
+          },
+          isRequired: false
+        },
+        {
+          id: 'qc_mb_reference_material',
+          type: 'reference_material',
+          titleFa: 'ماده مرجع میکروبیولوژی (Bioball CRM)',
+          titleEn: 'Certified Reference Strain Material',
+          descriptionFa: 'استفاده از قرص‌های کمی حاوی تعداد مشخص کلنی (BioBall CRM)',
+          sourceReference: 'استاندارد ملی ایران ۵۲۷۲-۱',
+          acceptanceCriteria: {
+            specified: false,
+            descriptionFa: 'استفاده از Bioball در استاندارد اختیاری بوده و حد پذیرش عددی تعیین نشده است: «قابل ارزیابی نیست»'
+          },
+          isRequired: false
+        }
+      ]
+    },
+    troubleshooting: [
+      {
+        problem: 'رشد کلنی‌های گسترده و پیوسته (Spreading Colonies) که شمارش را ناممکن می‌سازد',
+        cause: 'وجود رطوبت اضافی روی سطح آگار یا گرماگذاری بدون وارونه کردن پلیت‌ها',
+        solution: 'وارونه قرار دادن پلیت‌ها در طول دوره گرماگذاری و در صورت نیاز افزودن لایه پوششی نازک آگار مذاب (Overlay)',
+        source: 'بند ۹.۲ استاندارد INSO 5272-1'
+      }
+    ],
+    notes: [
+      'دمای محیط کشت آگار هنگام پورپلیت باید بین ۴۴ الی ۴۷ درجه سلسیوس باشد تا باکتری‌ها دچار شوک حرارتی و مرگ نشوند.',
+      'فاصله زمانی بین آماده‌سازی رقت‌ها و ریختن آگار نباید از ۴۵ دقیقه تجاوز کند.'
+    ],
+    version: '1.0.0',
+    lastVerified: '2024-05-15',
     offlineAvailable: true,
     isVerifiedProtocol: true,
     createdAt: new Date().toISOString(),

@@ -179,6 +179,9 @@ export async function getStandardById(id: string): Promise<FoodStandard | null> 
   }
 }
 
+// Alias for standards storage retrieval
+export { getAllStandards as getStoredStandards };
+
 /**
  * Saves (creates or updates) a Food Standard with strict validation enforcement.
  */

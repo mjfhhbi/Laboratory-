@@ -8,6 +8,11 @@
  */
 
 import { ScientificSource, SourceCitation } from './knowledgeBase';
+import { SamplePrepMethod } from './samplePreparation';
+import { ExperimentQualityControlSpec, ExperimentQCItem } from './qualityControl';
+
+export * from './samplePreparation';
+export * from './qualityControl';
 
 export type ExperimentVerificationStatus =
   | 'verified_standard'
@@ -275,9 +280,14 @@ export interface ExperimentProcedureStep {
   stepNumber: number;
   title: string;
   description: string;
-  duration?: string; // زمان استاندارد آزمون
-  temperature?: string; // دمای استاندارد آزمون
-  criticalCaution?: string; // نکته حساس و بحرانی
+  amount?: string | number; // مقدار
+  unit?: string; // واحد
+  temperature?: string; // دما
+  duration?: string; // زمان
+  equipment?: string[]; // تجهیزات
+  warning?: string; // هشدار
+  criticalCaution?: string; // نکته مهم
+  source?: string; // منبع یا بند استاندارد
 }
 
 /**
@@ -338,6 +348,140 @@ export interface ExperimentReporting {
 }
 
 /**
+ * Technical Equipment Requirement Specification
+ */
+export interface ExperimentEquipmentRequirementItem {
+  equipmentName: string;
+  specification: string;
+  calibrationRequirement?: string;
+  toleranceOrAccuracy?: string;
+}
+
+/**
+ * Quality Control Specifications
+ */
+export interface ExperimentQualityControl {
+  blanks?: string; // آزمون شاهد
+  duplicates?: string; // آزمون‌های تکرار و موازی
+  spikeRecovery?: string; // درصد بازیافت
+  validationCheck?: string; // صحه‌گذاری روش
+  limits?: string; // حدود پذیرش کنترل کیفیت
+  notes?: string; // نکات کنترل کیفی
+  items?: ExperimentQCItem[]; // فهرست ساختاریافته شاخص‌های کنترل کیفیت
+}
+
+/**
+ * Acceptance Criteria and Legal/Standard Limits
+ */
+export interface ExperimentAcceptanceCriteria {
+  criteriaList: string[]; // فهرست الزامات و حدود پذیرش
+  legalLimits?: string; // حد قانونی استاندارد ملی
+  repeatabilityLimit?: string; // حد مجاز تکرارپذیری
+  reproducibilityLimit?: string; // حد مجاز تجدیدپذیری
+  recoveryRate?: string; // درصد بازیافت مجاز
+  uncertainty?: string; // بیشینه عدم قطعیت مجاز
+}
+
+/**
+ * Troubleshooting & Diagnostic Guide Item
+ */
+export interface ExperimentTroubleshootingItem {
+  problem: string; // نشانه خطا یا مشکل آزمون
+  cause: string; // علت ریشه‌ای احتمالی
+  solution: string; // راه‌حل و اقدام اصلاحی
+  source?: string; // منبع یا استاندارد
+}
+
+/**
+ * Standard Universal Experiment Template (قالب استاندارد و جهان‌شمول آزمایش)
+ * Supports all 26 core schema fields required for scalable food science protocols:
+ * id, title, category, product, purpose, principle, scope, standardReferences,
+ * sourceReferences, equipment, equipmentRequirements, reagents, samplePreparation,
+ * solutionPreparation, procedureSteps, calculations, qualityControl, acceptanceCriteria,
+ * commonErrors, troubleshooting, safety, reporting, notes, version, lastVerified, verificationStatus
+ */
+export interface StandardExperimentTemplate {
+  // 1. شناسه یکتا
+  id: string;
+  
+  // 2. عنوان آزمایش
+  title: string;
+  
+  // 3. حوزه / دسته‌بندی تخصصی
+  category: ExperimentDomain | string;
+  
+  // 4. محصول هدف / ماتریس غذایی
+  product: string;
+  
+  // 5. هدف و مقصود آزمون
+  purpose: string;
+  
+  // 6. اصل علمی روش
+  principle: string;
+  
+  // 7. دامنه کاربرد
+  scope: string;
+  
+  // 8. استانداردهای رسمی مرجع (INSO, ISO, AOAC, etc.)
+  standardReferences: ExperimentStandardReference[];
+  
+  // 9. منابع علمی، مقالات و کتاب‌های مرجع
+  sourceReferences: SourceCitation[];
+  
+  // 10. فهرست تجهیزات و شیشه‌آلات
+  equipment: (ExperimentEquipmentItem | string)[];
+  
+  // 11. الزامات فنی و کالیبراسیون تجهیزات
+  equipmentRequirements: (ExperimentEquipmentRequirementItem | string)[];
+  
+  // 12. مواد شیمیایی و معرف‌ها
+  reagents: (ExperimentReagentItem | string)[];
+  
+  // 13. آماده‌سازی نمونه غذایی
+  samplePreparation: string;
+  samplePrepMethods?: SamplePrepMethod[];
+  
+  // 14. آماده‌سازی محلول‌ها و شناساگرها
+  solutionPreparation: string;
+  
+  // 15. گام‌های تفکیک‌شده و شماره‌دار روش آزمون
+  procedureSteps: ExperimentProcedureStep[];
+  
+  // 16. فرمول و محاسبات ریاضی
+  calculations: ExperimentCalculation;
+  
+  // 17. کنترل کیفیت آزمایشگاهی (شاهد، موازی، اسپایک)
+  qualityControl: ExperimentQualityControl | string[];
+  
+  // 18. حدود پذیرش و معیارهای قبولی
+  acceptanceCriteria: ExperimentAcceptanceCriteria | string[];
+  
+  // 19. خطاهای رایج آزمون
+  commonErrors: string[];
+  
+  // 20. راهنمای عیب‌یابی و اقدامات اصلاحی
+  troubleshooting: (ExperimentTroubleshootingItem | string)[];
+  
+  // 21. الزامات ایمنی و حفاظت فردی
+  safety: string[];
+  
+  // 22. نحوه گزارش‌دهی و ارقام بامعنی
+  reporting: ExperimentReporting | string;
+  
+  // 23. یادداشت‌ها و نکات تکمیلی
+  notes: string[];
+  
+  // 24. نسخه دستورالعمل (SOP Version)
+  version: string;
+  
+  // 25. تاریخ آخرین صحه‌گذاری و اعتبارسنجی
+  lastVerified: string;
+  
+  // 26. وضعیت اعتبار علمی (VERIFIED | SUPPORTED | UNVERIFIED)
+  verificationStatus: 'VERIFIED' | 'SUPPORTED' | 'UNVERIFIED' | ExperimentVerificationStatus;
+}
+
+/**
  * Main Laboratory Experiment Protocol Entity Schema
  */
 export interface FoodExperiment {
@@ -346,6 +490,24 @@ export interface FoodExperiment {
   titleFa: string;
   titleEn: string;
   domain: ExperimentDomain;
+  
+  // Core template primary field aliases for 100% compliance
+  title?: string;
+  category?: ExperimentDomain | string;
+  product?: string;
+  purpose?: string;
+  standardReferences?: ExperimentStandardReference[];
+  sourceReferences?: SourceCitation[];
+  equipmentRequirements?: (ExperimentEquipmentRequirementItem | string)[];
+  reagents?: (ExperimentReagentItem | string)[];
+  solutionPreparation?: string;
+  acceptanceCriteria?: ExperimentAcceptanceCriteria | string[];
+  commonErrors?: string[];
+  troubleshooting?: (ExperimentTroubleshootingItem | string)[];
+  safety?: string[];
+  notes?: string[];
+  version?: string;
+  lastVerified?: string;
   
   // 1. هدف آزمایش
   objective: string;
@@ -362,8 +524,9 @@ export interface FoodExperiment {
   // 5. مواد و معرف‌ها
   reagentsAndMaterials: ExperimentReagentItem[];
   
-  // 6. آماده‌سازی نمونه
+  // 6. آماده‌سازی نمونه (Sample Preparation - 5-Stage Pipeline)
   samplePreparation: string;
+  samplePrepMethods?: SamplePrepMethod[];
   
   // 7. آماده‌سازی محلول‌ها
   solutionsPreparation: string;
@@ -376,6 +539,10 @@ export interface FoodExperiment {
   
   // 10. محاسبات
   calculations: ExperimentCalculation;
+  
+  // کنترل کیفیت آزمایشگاهی (Quality Control)
+  qualityControl?: string[] | ExperimentQualityControl;
+  qcSpec?: ExperimentQualityControlSpec;
   
   // 11. نحوه گزارش نتیجه
   reporting: ExperimentReporting;

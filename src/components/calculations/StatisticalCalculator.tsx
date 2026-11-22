@@ -181,7 +181,7 @@ export const StatisticalCalculator: React.FC = () => {
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
                   placeholder="مثلاً %، g/L، ppm"
-                  className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-center outline-none"
+                  className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg px-2.5 py-2 text-xs font-mono text-center outline-none min-h-[42px] focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -195,7 +195,7 @@ export const StatisticalCalculator: React.FC = () => {
                   value={referenceValue !== undefined ? referenceValue : ''}
                   onChange={(e) => setReferenceValue(e.target.value === '' ? undefined : parseFloat(e.target.value))}
                   placeholder="برای محاسبه %Error"
-                  className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-center outline-none"
+                  className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg px-2.5 py-2 text-xs font-mono text-center outline-none min-h-[42px] focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -210,10 +210,10 @@ export const StatisticalCalculator: React.FC = () => {
               </h4>
               <button
                 onClick={handleAddReplicate}
-                className="flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-colors border border-emerald-200 dark:border-emerald-800"
+                className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 px-3 py-2 rounded-xl transition-colors border border-emerald-200 dark:border-emerald-800 min-h-[40px]"
               >
                 <Plus className="w-3.5 h-3.5" />
-                افزودن تکرار (Replicate)
+                <span>افزودن تکرار (Replicate)</span>
               </button>
             </div>
 
@@ -247,7 +247,7 @@ export const StatisticalCalculator: React.FC = () => {
                         step="any"
                         value={val}
                         onChange={(e) => handleUpdateReplicate(idx, e.target.value)}
-                        className="w-full bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-xs font-mono text-left dir-ltr outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="w-full bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg px-2.5 py-1.5 min-h-[38px] text-xs font-mono text-left dir-ltr outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                       <span className="text-xs text-stone-400 font-mono">{unit}</span>
                     </div>

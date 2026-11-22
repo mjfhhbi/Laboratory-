@@ -30,6 +30,18 @@ const SEED_PROJECTS: ProductDevelopmentProject[] = [
     category: 'dairy',
     targetObjectives: ['clean_label', 'novel_formulation', 'shelf_life_ext', 'texture_optimized'],
     executiveSummaryFa: 'توسعه فرمولاسیون صنعتی دوغ پروبیوتیک بدون گاز غنی‌شده با باکتری‌های پروبیوتیک پایدار و پکتین با متوکسیل بالا (HMP) جهت جلوگیری از رسوب کازئین و پدیده سینرسیس (دوفاز شدن) در طول دوره ماندگاری ۲۱ روزه یخچال.',
+    productIdea: 'تولید دوغ بدون گاز عملگرا با استفاده از سویه‌های پروبیوتیک ثبت‌شده و فیبر پری‌بیوتیک جهت ارتقای سلامت میکروبیوم روده بدون ایجاد اسیدیته بیش از حد یا سرم‌اندازی در طول زنجیره سرما.',
+    targetSpecifications: {
+      targetPh: '3.90 - 4.15',
+      targetBrix: '3.2 - 3.5° Brix',
+      targetMoisturePercent: '94.5 - 95.5%',
+      targetFatPercent: '0.50 - 0.70%',
+      targetProteinPercent: 'حداقل 1.20% (INSO 2852)',
+      targetTextureProfile: 'یکنواخت، تک‌فاز، بدون ذرات شنی، ویسکوزیته ظاهری 18-25 mPa.s',
+      targetShelfLifeDays: 21,
+      sensoryGoals: 'طعم نعنایی باطراوت، اسیدیته ملایم، پس‌مزه مطبوع، عدم وجود طعم ترش زننده یا گچی',
+      microbiologicalLimits: 'پروبیوتیک زنده حداقل 10^7 CFU/g، کپک و مخمر کمتر از 10 CFU/ml (استاندارد ۲۸۵۲)'
+    },
     targetConsumerProfile: 'عموم مصرف‌کنندگان، علاقه‌مندان به سلامت گوارش، ورزشکاران و کودکان',
     standardReferences: ['استاندارد ملی ایران ۲۸۵۲ (دوغ - ویژگی‌ها و روش‌های آزمون)', 'استاندارد ملی ایران ۱۶۳۲۳ (فرآورده‌های پروبیوتیک)'],
     productionScale: 'pilot',
@@ -39,10 +51,12 @@ const SEED_PROJECTS: ProductDevelopmentProject[] = [
     formulations: [
       {
         id: 'form_doogh_v1',
-        versionCode: 'F-01 (فرمول مرجع - پکتین HMP)',
+        versionCode: 'Formula v1 (مرجع - پکتین HMP)',
+        versionNumber: 1,
         title: 'فرمولاسیون پایه با پایدارکننده پکتین',
         description: 'فرمول استاندارد با ماست ست و پکتین متوکسیل بالا برای جلوگیری از سرم‌اندازی در pH اسیدی',
         isBaseline: true,
+        changeLogSummary: 'نسخه مرجع پایه اولیه پروژه با استفاده از پکتین HMP به عنوان پایدارکننده اصلی.',
         ingredients: [
           {
             id: 'ing_d1',
@@ -116,10 +130,13 @@ const SEED_PROJECTS: ProductDevelopmentProject[] = [
       },
       {
         id: 'form_doogh_v2',
-        versionCode: 'F-02 (پایدارکننده دوگانه زانتان + ژلان)',
+        versionCode: 'Formula v2 (آزمایشی - پایدارکننده دوگانه زانتان + ژلان)',
+        versionNumber: 2,
         title: 'فرمول آزمایشی با شبکه هیدروکلوئیدی دوگانه',
         description: 'جایگزینی پکتین با ترکیب زانتان و ژلان برای کاهش هزینه و بهبود ویسکوزیته در دهان',
         isBaseline: false,
+        baseVersionId: 'form_doogh_v1',
+        changeLogSummary: 'حذف پکتین HMP و جایگزینی با ترکیب هم‌افزای زانتان (۰.۱۲٪) و ژلان LA (۰.۰۸٪)؛ کاهش ۱۳.۵٪ در بهای تمام‌شده مواد اولیه.',
         ingredients: [
           {
             id: 'ing_d2_1',
@@ -187,6 +204,84 @@ const SEED_PROJECTS: ProductDevelopmentProject[] = [
         notes: 'هزینه تمام‌شده مواد اولیه ۱۳.۵٪ کاهش یافته است.',
         createdAt: '2026-08-16T11:20:00.000Z',
         updatedAt: '2026-08-16T11:20:00.000Z'
+      },
+      {
+        id: 'form_doogh_v3',
+        versionCode: 'Formula v3 (بهینه صنعتی - اینولین پری‌بیوتیک و استویا Reb-A)',
+        versionNumber: 3,
+        title: 'فرمولاسیون سین‌بیوتیک ارتقایافته با اینولین و پکتین بهینه',
+        description: 'غنی‌سازی با فیبر پری‌بیوتیک ریشه کاسنی و تعدیل پکتین برای دستیابی به بافت مخملی و افزایش ماندگاری به ۳۰ روز',
+        isBaseline: false,
+        baseVersionId: 'form_doogh_v1',
+        changeLogSummary: 'افزودن ۱.۵۰٪ اینولین پری‌بیوتیک به عنوان فیبر محلول و بهبوددهنده حس دهانی، تعدیل پکتین به ۰.۳۵٪، کاهش نمک به ۰.۶۵٪ و افزایش بریکس به ۳.۸°.',
+        ingredients: [
+          {
+            id: 'ing_d3_1',
+            nameFa: 'ماست پاستوریزه کم‌چرب (۱.۵٪ چربی)',
+            category: 'solvent_base',
+            percentage: 35.0,
+            dryMatterPercent: 11.5,
+            costPerKg: 38000
+          },
+          {
+            id: 'ing_d3_2',
+            nameFa: 'آب تصفیه شده RO',
+            category: 'solvent_base',
+            percentage: 62.45,
+            dryMatterPercent: 0,
+            costPerKg: 500
+          },
+          {
+            id: 'ing_d3_3',
+            nameFa: 'فیبر پری‌بیوتیک اینولین خوراکی (Inulin HD)',
+            category: 'carbohydrate_sugar',
+            percentage: 1.50,
+            dryMatterPercent: 96,
+            brixContribution: 80,
+            costPerKg: 320000,
+            notes: 'پری‌بیوتیک سینرژیک با سویه‌های پروبیوتیک'
+          },
+          {
+            id: 'ing_d3_4',
+            nameFa: 'نمک طعام تصفیه شده یددار',
+            category: 'salt_mineral',
+            percentage: 0.65,
+            dryMatterPercent: 100,
+            costPerKg: 12000
+          },
+          {
+            id: 'ing_d3_5',
+            nameFa: 'پایدارکننده پکتین با متوکسیل بالا (HMP)',
+            category: 'stabilizer_hydrocolloid',
+            percentage: 0.35,
+            dryMatterPercent: 95,
+            costPerKg: 850000,
+            insNumber: 'INS 440'
+          },
+          {
+            id: 'ing_d3_6',
+            nameFa: 'عصاره هیدروالکلی طبیعی نعناع فلفلی',
+            category: 'flavor_aroma',
+            percentage: 0.03,
+            dryMatterPercent: 15,
+            costPerKg: 1200000
+          },
+          {
+            id: 'ing_d3_7',
+            nameFa: 'کشت لیوفیلیزه پروبیوتیک',
+            category: 'fortifier_vitamin',
+            percentage: 0.02,
+            dryMatterPercent: 100,
+            costPerKg: 4500000
+          }
+        ],
+        totalPercentage: 100.0,
+        totalDryMatterPercent: 6.13,
+        estimatedBrix: 3.8,
+        estimatedCostPerKg: 19800,
+        notes: 'بافت خامه‌ای بسیار باکیفیت و ارتقای ارزش تغذیه‌ای محصول با برچسب سین‌بیوتیک (Synbiotic)',
+        createdAt: '2026-08-18T14:30:00.000Z',
+        updatedAt: '2026-08-18T14:30:00.000Z'
       }
     ],
     processStages: [

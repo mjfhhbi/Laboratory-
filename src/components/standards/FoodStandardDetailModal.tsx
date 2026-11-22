@@ -114,13 +114,13 @@ ${standard.errorsAndSafetyWarnings || '-'}
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-stone-900/70 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-stone-900/70 backdrop-blur-xs overflow-y-auto">
       <div
-        className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[96vh] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Header */}
-        <div className="p-5 sm:p-6 border-b border-stone-200 dark:border-stone-800 flex items-start justify-between gap-4 bg-stone-50/70 dark:bg-stone-800/30">
+        <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-800 flex items-start justify-between gap-3 sm:gap-4 bg-stone-50/70 dark:bg-stone-800/30">
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
               {/* Jurisdiction Badge */}
@@ -214,7 +214,9 @@ ${standard.errorsAndSafetyWarnings || '-'}
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors"
+              className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+              title="بستن"
+              aria-label="بستن"
             >
               <X className="w-5 h-5" />
             </button>
@@ -360,7 +362,7 @@ ${standard.errorsAndSafetyWarnings || '-'}
                 <span>۸. مشخصات و محدوده‌های قابل قبول ({standard.acceptableLimits.length} پارامتر)</span>
               </h3>
               <div className="overflow-x-auto rounded-2xl border border-stone-200 dark:border-stone-800">
-                <table className="w-full text-xs text-right divide-y divide-stone-200 dark:divide-stone-800">
+                <table className="w-full text-xs text-right divide-y divide-stone-200 dark:divide-stone-800 min-w-[500px]">
                   <thead className="bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold">
                     <tr>
                       <th className="py-2.5 px-3">نام ویژگی / پارامتر</th>

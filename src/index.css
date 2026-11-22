@@ -97,3 +97,73 @@
   opacity: 0.9;
 }
 
+/* ============================================================
+   SCIENTIFIC FORMULA & KATEX RESPONSIVE OVERFLOW RULES (Part 38)
+   ============================================================ */
+
+/* Ensure KaTeX never breaks the horizontal viewport on mobile */
+.katex-display {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  max-width: 100% !important;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.25rem !important;
+  margin: 0.5rem 0 !important;
+  direction: ltr !important;
+  text-align: center !important;
+}
+
+.katex {
+  direction: ltr !important;
+  unicode-bidi: isolate;
+  font-size: 1.05em;
+}
+
+@media (max-width: 640px) {
+  .katex {
+    font-size: 0.92em;
+  }
+}
+
+.katex-math-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================
+   RESPONSIVE SCIENTIFIC TABLE & PROSE HELPERS
+   ============================================================ */
+
+.responsive-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0.75rem;
+}
+
+.scientific-prose {
+  line-height: 1.85;
+  font-size: 0.875rem;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 640px) {
+  .scientific-prose {
+    font-size: 0.9375rem;
+    line-height: 1.8;
+  }
+}
+
+/* Hide scrollbar for clean horizontal tabs while keeping touch scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+

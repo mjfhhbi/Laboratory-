@@ -289,25 +289,31 @@ export function validateStepRun(
     };
   }
 
-  // 1. Validate each defined parameter
-  for (const param of stepDef.parameters) {
-    const recorded = stepRun.parameterValues[param.id];
-    const val = recorded ? recorded.value : undefined;
+  // 1. Validate each defined parameter (unless explicitly skipped with documented reason)
+  if (stepRun.skippedWithoutGuessing) {
+    warnings.push(
+      `عدم اندازه‌گیری با ذکر علت: "${stepRun.skipReason || 'طبق صلاحدید فنی بدون نیاز به سنجش عددی'}". عدم اجبار به ورود مقدار حدسی اعمال شد.`
+    );
+  } else {
+    for (const param of stepDef.parameters) {
+      const recorded = stepRun.parameterValues[param.id];
+      const val = recorded ? recorded.value : undefined;
 
-    // Find linked standard limit if exists
-    let matchedLimit: AcceptableLimitSpecification | undefined;
-    if (standard && standard.acceptableLimits && param.standardLimitKey) {
-      matchedLimit = standard.acceptableLimits.find(
-        (l) => l.id === param.standardLimitKey || l.parameterNameFa === param.standardLimitKey
-      );
-    }
+      // Find linked standard limit if exists
+      let matchedLimit: AcceptableLimitSpecification | undefined;
+      if (standard && standard.acceptableLimits && param.standardLimitKey) {
+        matchedLimit = standard.acceptableLimits.find(
+          (l) => l.id === param.standardLimitKey || l.parameterNameFa === param.standardLimitKey
+        );
+      }
 
-    const paramRes = validateParameterValue(param, val, matchedLimit);
-    if (!paramRes.isValid) {
-      errors.push(...paramRes.errors);
-      blockingReasons.push(...paramRes.errors);
+      const paramRes = validateParameterValue(param, val, matchedLimit);
+      if (!paramRes.isValid) {
+        errors.push(...paramRes.errors);
+        blockingReasons.push(...paramRes.errors);
+      }
+      warnings.push(...paramRes.warnings);
     }
-    warnings.push(...paramRes.warnings);
   }
 
   // 2. Verification requirement check before advancing:
@@ -399,6 +405,30 @@ export function calculateRepeatabilityStatistics(
     assessmentNote
   };
 }
+
+/**
+ * Convenience helper to compute repeatability directly from a LabSession
+ */
+export function computeSessionRepeatability(session: LabSession): LabRepeatabilityAnalysis {
+  const vals: number[] = [];
+  for (const rep of session.replicates) {
+    if (rep.calculatedResult?.primaryValue !== undefined) {
+      vals.push(rep.calculatedResult.primaryValue);
+    } else {
+      for (const stepRun of Object.values(rep.stepsData)) {
+        for (const pVal of Object.values(stepRun.parameterValues)) {
+          if (pVal && typeof pVal.value === 'number' && !isNaN(pVal.value)) {
+            vals.push(pVal.value);
+            break;
+          }
+        }
+      }
+    }
+  }
+  return calculateRepeatabilityStatistics(vals);
+}
+
+export const evaluateStandardConformance = evaluateSessionStandardConformance;
 
 /**
  * Evaluates the full session against the chosen standard acceptable limits
@@ -508,5 +538,145 @@ export function evaluateSessionStandardConformance(session: LabSession): LabStan
       ? `تمامی ${evaluatedCount} شاخص ارزیابی‌شده در محدوده مجاز استاندارد ${session.standardNumber || ''} قرار دارند.`
       : `یک یا چند شاخص اندازه‌گیری‌شده خارج از حدود مجاز استاندارد ${session.standardNumber || ''} ثبت شده‌اند.`,
     evaluatedLimits
+  };
+}
+
+export interface StageValidationResult {
+  stage: string;
+  canAdvance: boolean;
+  errors: string[];
+  warnings: string[];
+  explanation: string;
+}
+
+/**
+ * Validates a workflow stage before advancing to the next stage (Part 34 of 40)
+ * Evaluates mandatory prerequisites, calibration checks, reagents, sample preparation,
+ * step execution, and repeatability with clear explanations without forcing guessed data.
+ */
+export function validateWorkflowStage(stage: string, session: LabSession): StageValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  let explanation = '';
+
+  switch (stage) {
+    case 'start_objective': {
+      if (!session.sampleName || session.sampleName.trim() === '') {
+        errors.push('نام نمونه غذایی ثبت نشده است.');
+      }
+      if (!session.sampleCode || session.sampleCode.trim() === '') {
+        errors.push('کد ردیابی نمونه در سیستم آزمایشگاه خالی است.');
+      }
+      if (!session.operatorName || session.operatorName.trim() === '') {
+        errors.push('نام کارشناس / آنالیزور آزمایشگاه مشخص نشده است.');
+      }
+      if (!session.batchNumber) {
+        warnings.push('شماره بهر / لات نامشخص است (توصیه می‌شود جهت قابلیت ردیابی وارد گردد).');
+      }
+      explanation = errors.length > 0
+        ? 'برای ثبت رسمی ردپای آزمون (GLP Chain of Custody)، مشخصات شناسنامه نمونه و کارشناس باید کامل باشد.'
+        : 'اطلاعات اولیه و هدف علمی آزمون معتبر و مورد تایید است.';
+      break;
+    }
+
+    case 'equipment_calibration': {
+      const totalEq = session.requiredEquipment.length;
+      const verifiedEq = session.requiredEquipment.filter((e) => e.isPrepared).length;
+      if (totalEq > 0 && verifiedEq < totalEq) {
+        warnings.push(
+          `تعداد ${totalEq - verifiedEq} قلم از تجهیزات پروتکل هنوز تصدیق کالیبراسیون و رواداری نشده‌اند.`
+        );
+        explanation = 'طبق بندهای استاندارد ISO 17025، استفاده از تجهیز بدون برچسب کالیبراسیون معتبر یا عدم صفر کردن ترازو می‌تواند سبب خطای سیستماتیک در نتایج شود.';
+      } else {
+        explanation = 'کلیه ابزارها و تجهیزات آزمون کالیبره و آماده به کار هستند.';
+      }
+      break;
+    }
+
+    case 'reagents_solutions': {
+      const totalReag = session.reagentsAndChemicals.length;
+      const verifiedReag = session.reagentsAndChemicals.filter((r) => r.isPrepared).length;
+      if (totalReag > 0 && verifiedReag < totalReag) {
+        warnings.push(
+          `تعداد ${totalReag - verifiedReag} معرف یا محلول شیمیایی بررسی و تأیید نشده باقی مانده‌اند.`
+        );
+        explanation = 'کیفیت و درجه خلوص معرف‌ها (مانند تیترانت‌ها و شناساگرها) در درستی محاسبات استوکیومتری تأثیر مستقیم دارد.';
+      } else {
+        explanation = 'معرف‌ها، محلول‌های استاندارد و نکات ایمنی مرتبط با مواد شیمیایی تایید شده‌اند.';
+      }
+      break;
+    }
+
+    case 'sample_preparation': {
+      if (!session.samplePrepData?.isPrepared) {
+        errors.push('فرآیند آماده‌سازی و همگن‌سازی اولیه نمونه غذایی هنوز تایید نشده است.');
+        explanation = 'آزمون بر روی نمونه همگن‌نشده به دلیل عدم تجانس فازها، منجر به خطای نمونه‌برداری و رد آزمون در تکرارها می‌گردد.';
+      } else {
+        explanation = 'نمونه غذایی با موفقیت همگن، توزین و آماده اجرای فرآیند آزمون گردیده است.';
+      }
+      break;
+    }
+
+    case 'step_procedure': {
+      const currentRep = session.replicates.find((r) => r.replicateNumber === session.currentReplicateNumber) || session.replicates[0];
+      if (currentRep) {
+        const incompleteSteps: number[] = [];
+        for (const step of session.steps) {
+          const stepRun = currentRep.stepsData[step.stepNumber];
+          const val = validateStepRun(step, stepRun, session.standardSnapshot);
+          if (!val.canAdvanceToNext) {
+            incompleteSteps.push(step.stepNumber);
+            errors.push(`گام ${step.stepNumber} («${step.titleFa}»): ${val.blockingReasons.join(' | ')}`);
+          }
+        }
+        if (incompleteSteps.length > 0) {
+          explanation = 'لطفاً مقادیر گام‌های ناقص را ثبت کنید یا در صورت عدم انجام، گزینه «عدم نیاز به اندازه‌گیری در این مرحله (بدون حدس زدن)» را علامت بزنید.';
+        } else {
+          explanation = 'تمامی مراحل اجرایی تکرار جاری با موفقیت اعتبارسنجی و ثبت شدند.';
+        }
+      }
+      break;
+    }
+
+    case 'calculation_review': {
+      const hasAnyValue = session.replicates.some((r) =>
+        Object.values(r.stepsData).some((s) =>
+          Object.values(s.parameterValues).some((p) => p && p.value !== '' && p.value !== undefined)
+        )
+      );
+      if (!hasAnyValue) {
+        errors.push('هیچ داده عددی برای انجام محاسبات و ارزیابی استاندارد در تکرارها یافت نشد.');
+        explanation = 'جهت اجرای فرمول‌های استاندارد و تحلیل آماری، حداقل یک مقدار عددی یا تیتراسیون الزامی است.';
+      } else {
+        if (session.repeatabilityAnalysis && session.repeatabilityAnalysis.relativeStandardDeviationPercent !== undefined) {
+          if (session.repeatabilityAnalysis.relativeStandardDeviationPercent > 5) {
+            warnings.push(
+              `انحراف معیار نسبی تکرارها (${session.repeatabilityAnalysis.relativeStandardDeviationPercent.toFixed(2)}%) بیش از ۵٪ است که ممکن است نشان‌دهنده پراکندگی بیش از حد مجاز باشد.`
+            );
+          }
+        }
+        explanation = 'محاسبات استوکیومتری و انطباق با حدود مجاز استاندارد ملی با موفقیت استخراج گردید.';
+      }
+      break;
+    }
+
+    case 'finalize': {
+      if (session.status !== 'completed' && session.status !== 'running') {
+        warnings.push('وضعیت نشست آزمایش در حالت معلق یا پیش‌نویس است.');
+      }
+      explanation = 'تمامی مراحل هفت‌گانه آزمون تکمیل شده و آماده صدور کارنامه رسمی و بایگانی است.';
+      break;
+    }
+
+    default:
+      explanation = 'مرحله مورد نظر معتبر است.';
+  }
+
+  return {
+    stage,
+    canAdvance: errors.length === 0,
+    errors,
+    warnings,
+    explanation
   };
 }

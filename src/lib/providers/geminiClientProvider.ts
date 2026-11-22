@@ -1,4 +1,5 @@
 import { ClientAIProvider, ClientChatRequest, ClientChatResponse, ClientStreamChunk } from './types';
+import { isCapacitorNative } from '../pwa';
 
 /**
  * GeminiServerClientProvider
@@ -9,12 +10,33 @@ export class GeminiServerClientProvider implements ClientAIProvider {
   public id = 'gemini-server';
   public name = 'Google Gemini AI (Server-Proxy)';
 
+  private static readonly OFFLINE_ERROR_FA =
+    'اتصال اینترنت برقرار نیست. ارسال پرسش جدید به دستیار هوش مصنوعی Gemini نیازمند اتصال سرور است؛ اما مشاهده تاریخچه مکالمات، محاسبات مهندسی، آزمایشگاه و محیط Python/SciPy به صورت کامل در حالت آفلاین در دسترس هستند.';
+
+  private static readonly NATIVE_NO_API_BASE_ERROR_FA =
+    'در این بسته اندرویدی آفلاین، نشانی سرور هوش مصنوعی (VITE_API_BASE_URL) تنظیم نشده است. تمام محاسبات مهندسی، آزمایشگاه، استانداردها و Python/SciPy به‌صورت کاملاً آفلاین در دسترس هستند؛ برای فعال‌سازی چت آنلاین Gemini در APK باید با تنظیم VITE_API_BASE_URL روی نشانی HTTPS سرور خروجی بگیرید.';
+
+  private static getApiEndpoint(path: string): string {
+    const rawBase =
+      typeof import.meta !== 'undefined'
+        ? (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_API_BASE_URL
+        : undefined;
+    const base = rawBase ? rawBase.trim().replace(/\/+$/, '') : '';
+    if (!base && isCapacitorNative()) {
+      throw new Error(GeminiServerClientProvider.NATIVE_NO_API_BASE_ERROR_FA);
+    }
+    return base ? `${base}${path}` : path;
+  }
+
   /**
    * Non-streaming HTTP POST /api/chat
    */
   public async sendMessage(request: ClientChatRequest, signal?: AbortSignal): Promise<ClientChatResponse> {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      throw new Error(GeminiServerClientProvider.OFFLINE_ERROR_FA);
+    }
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch(GeminiServerClientProvider.getApiEndpoint('/api/chat'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,6 +80,9 @@ export class GeminiServerClientProvider implements ClientAIProvider {
       if (err instanceof DOMException && err.name === 'AbortError') {
         throw new Error('درخواست توسط کاربر لغو گردید.');
       }
+      if (err instanceof TypeError || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+        throw new Error(GeminiServerClientProvider.OFFLINE_ERROR_FA);
+      }
       throw err;
     }
   }
@@ -70,8 +95,11 @@ export class GeminiServerClientProvider implements ClientAIProvider {
     onChunk: (chunk: ClientStreamChunk) => void,
     signal?: AbortSignal
   ): Promise<ClientChatResponse> {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      throw new Error(GeminiServerClientProvider.OFFLINE_ERROR_FA);
+    }
     try {
-      const response = await fetch('/api/chat/stream', {
+      const response = await fetch(GeminiServerClientProvider.getApiEndpoint('/api/chat/stream'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,6 +201,9 @@ export class GeminiServerClientProvider implements ClientAIProvider {
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
         throw new Error('تولید پاسخ متوقف گردید.');
+      }
+      if (err instanceof TypeError || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+        throw new Error(GeminiServerClientProvider.OFFLINE_ERROR_FA);
       }
       throw err;
     }

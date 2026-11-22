@@ -19,7 +19,21 @@ import { ChatInput } from '../../components/chat/ChatInput';
 import { ChatEmptyState } from '../../components/chat/ChatEmptyState';
 import { ChatErrorBanner } from '../../components/chat/ChatErrorBanner';
 import { sendChatMessage, ClientStreamChunk } from '../../lib/providers';
+import { analyzeScientificResponse } from '../../lib/scientificSourceEngine';
+import { runRagPipeline } from '../../lib/rag/ragEngine';
+import { loadRagSettings, saveRagSettings, RagConfiguration } from '../../lib/rag/ragSettingsStorage';
+import { RagSettingsDrawer } from '../../components/chat/RagSettingsDrawer';
 import { Loader2 } from 'lucide-react';
+import { 
+  AttachedPdfDocument, 
+  PdfAnalysisAction, 
+  detectPdfActionFromQuery, 
+  getPromptForAction, 
+  extractStructuredPdfAnalysisResult 
+} from '../../lib/pdfAnalysis';
+import { ChatPdfUploadModal } from '../../components/chat/ChatPdfUploadModal';
+import { AttachedPdfBanner } from '../../components/chat/AttachedPdfBanner';
+import { ChatPdfReaderModal } from '../../components/chat/ChatPdfReaderModal';
 
 export const ChatPage: React.FC = () => {
   const { isOnline } = useOnlineStatus();
@@ -33,6 +47,13 @@ export const ChatPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [ragConfig, setRagConfig] = useState<RagConfiguration>(loadRagSettings);
+  const [isRagDrawerOpen, setIsRagDrawerOpen] = useState(false);
+
+  // PDF Analysis in Chat States (Part 24 of 30)
+  const [attachedPdfs, setAttachedPdfs] = useState<AttachedPdfDocument[]>([]);
+  const [isPdfUploadModalOpen, setIsPdfUploadModalOpen] = useState(false);
+  const [readerModalDoc, setReaderModalDoc] = useState<{ docId: string; pageNumber?: number } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -78,7 +99,40 @@ export const ChatPage: React.FC = () => {
           metadata: {
             model: 'Google Gemini 3.7 Flash',
             offlineGenerated: false,
-            referenceDocs: ['INSO-Catalog', 'AOAC-19th', 'Codex Alimentarius']
+            referenceDocs: ['INSO-Catalog', 'AOAC-19th', 'Codex Alimentarius'],
+            confidenceLevel: 'verified',
+            citedSources: [
+              {
+                id: 'src-inso-2406',
+                title: 'استاندارد ملی ۲۴۰۶ شیر پاستوریزه',
+                standardNumber: 'INSO 2406',
+                sourceType: 'inso_standard',
+                year: '1394',
+                authorOrOrganization: 'سازمان ملی استاندارد ایران',
+                hasPdf: true,
+                confidenceLevel: 'verified'
+              },
+              {
+                id: 'src-iso-22000',
+                title: 'سیستم‌های مدیریت ایمنی غذا ISO 22000:2018',
+                standardNumber: 'ISO 22000:2018',
+                sourceType: 'iso_standard',
+                year: '2018',
+                authorOrOrganization: 'ISO',
+                hasPdf: true,
+                confidenceLevel: 'verified'
+              },
+              {
+                id: 'src-codex-192',
+                title: 'استاندارد عمومی کدکس برای افزودنی‌های غذایی',
+                standardNumber: 'CODEX STAN 192-1995',
+                sourceType: 'codex_standard',
+                year: '1995',
+                authorOrOrganization: 'Codex Alimentarius',
+                hasPdf: true,
+                confidenceLevel: 'verified'
+              }
+            ]
           }
         });
         setConversations([initial]);
@@ -184,10 +238,25 @@ export const ChatPage: React.FC = () => {
     }
   };
 
+  // Handle Trigger Structured PDF Analysis Action (Part 24 of 30)
+  const handleTriggerPdfAction = (action: PdfAnalysisAction) => {
+    if (attachedPdfs.length === 0 || loading) return;
+    const promptText = getPromptForAction(action, attachedPdfs);
+    executeSendMessage(promptText, action);
+  };
+
   // Handle Send Message with Streaming
-  const executeSendMessage = async (textToSend: string) => {
+  const executeSendMessage = async (textToSend: string, explicitPdfAction?: PdfAnalysisAction) => {
     const trimmed = textToSend.trim();
     if (!trimmed || loading) return;
+
+    if (!isOnline || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      setLastFailedMessage(trimmed);
+      setError(
+        'حالت آفلاین فعال است: دستیار هوش مصنوعی Gemini برای پاسخ به پرسش جدید نیازمند اینترنت است. گفتگوهای قبلی شما در همین صفحه قابل مطالعه هستند و ابزارهای محاسبات مهندسی، آزمایشگاه، استانداردها و Python/SciPy کاملاً آفلاین کار می‌کنند.'
+      );
+      return;
+    }
 
     let targetConvId = activeConvId;
 
@@ -218,11 +287,26 @@ export const ChatPage: React.FC = () => {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
+    // Determine PDF analysis action if PDFs attached
+    const determinedPdfAction: PdfAnalysisAction | undefined = explicitPdfAction || (
+      attachedPdfs.length > 0 ? detectPdfActionFromQuery(trimmed, attachedPdfs.length) : undefined
+    );
+
     try {
-      // 1. Persist user message to IndexedDB immediately
+      // 1. Persist user message to IndexedDB immediately (with attached PDF metadata if present)
       const userMsg = await addMessage(targetConvId, {
         role: 'user',
-        content: trimmed
+        content: trimmed,
+        metadata: attachedPdfs.length > 0 ? {
+          attachedPdfs: attachedPdfs.map((p) => ({
+            id: p.id,
+            title: p.title,
+            fileName: p.fileName,
+            pageCount: p.pageCount,
+            fileSizeFormatted: p.fileSizeFormatted,
+            isScanned: p.isScanned
+          }))
+        } : undefined
       });
       setMessages((prev) => [...prev, userMsg]);
       setTimeout(() => scrollToBottom('smooth'), 50);
@@ -245,7 +329,17 @@ export const ChatPage: React.FC = () => {
         timestamp: m.timestamp
       }));
 
-      // 4. Request streaming chat response from AI Provider
+      // 4. Food Science Specialized RAG Pipeline Execution
+      let ragResult: Awaited<ReturnType<typeof runRagPipeline>> | null = null;
+      if (ragConfig.enabled) {
+        try {
+          ragResult = await runRagPipeline(trimmed, ragConfig);
+        } catch (ragErr) {
+          console.warn('Food Science RAG pipeline execution error:', ragErr);
+        }
+      }
+
+      // 5. Request streaming chat response from AI Provider
       let finalAccumulatedText = '';
       let finalModel = 'Google Gemini';
       let finalReferences: string[] | undefined;
@@ -254,7 +348,50 @@ export const ChatPage: React.FC = () => {
         {
           conversationId: targetConvId,
           message: trimmed,
-          history: historyPayload
+          history: historyPayload,
+          context: {
+            ...(attachedPdfs.length > 0 ? {
+              attachedPdfs: attachedPdfs.map((p) => ({
+                id: p.id,
+                title: p.title,
+                fileName: p.fileName,
+                pageCount: p.pageCount,
+                isScanned: p.isScanned,
+                pages: p.pages.map((pg) => ({
+                  pageNumber: pg.pageNumber,
+                  sectionHeading: pg.sectionHeading,
+                  text: pg.text,
+                  isOcr: pg.isOcr
+                }))
+              })),
+              pdfExtractionAction: determinedPdfAction
+            } : {}),
+            ...(ragResult ? {
+              ragGrounding: {
+                intentLabelFa: ragResult.intent.labelFa,
+                intentType: ragResult.intent.type,
+                evidenceLevel: ragResult.evidenceValidation.level,
+                evidenceScore: ragResult.evidenceValidation.score,
+                warningNoticeFa: ragResult.evidenceValidation.warningNoticeFa,
+                groundingPromptAugmentation: ragResult.groundingPromptAugmentation,
+                augmentedSystemInstruction: ragResult.augmentedSystemInstruction,
+                citedSources: ragResult.citedSources.map((s) => ({
+                  id: s.id,
+                  title: s.title,
+                  standardNumber: s.standardNumber,
+                  sourceType: s.sourceType,
+                  year: s.year,
+                  authorOrOrganization: s.authorOrOrganization,
+                  hasPdf: s.hasPdf,
+                  confidenceLevel: s.confidenceLevel,
+                  pageNumber: s.pageNumber,
+                  pdfDocumentId: s.pdfDocumentId,
+                  snippet: s.snippet,
+                  isOcr: s.isOcr
+                }))
+              }
+            } : {})
+          }
         },
         {
           useStreaming: true,
@@ -281,14 +418,94 @@ export const ChatPage: React.FC = () => {
 
       const replyContent = chatResponse.reply || finalAccumulatedText || 'پاسخی از مدل دریافت نشد.';
 
-      // 5. Persist AI assistant response to IndexedDB
+      // Scientific Source & Verification Analysis
+      const sciAnalysis = analyzeScientificResponse(replyContent, trimmed);
+
+      // Extract Structured PDF Analysis Results if PDF attached (Part 24 of 30)
+      let pdfAnalysisResult = undefined;
+      if (attachedPdfs.length > 0) {
+        pdfAnalysisResult = extractStructuredPdfAnalysisResult(
+          replyContent,
+          attachedPdfs,
+          determinedPdfAction || 'qa'
+        );
+      }
+
+      // Merge cited sources: Prioritize high-quality RAG grounded sources, supplemented by extracted sources
+      type CitedSourceEntry = NonNullable<NonNullable<ChatMessage['metadata']>['citedSources']>[number];
+
+      const ragSourcesMapped: CitedSourceEntry[] = (ragResult?.citedSources || []).map((s) => ({
+        id: s.id,
+        title: s.title,
+        standardNumber: s.standardNumber,
+        sourceType: s.sourceType,
+        year: s.year,
+        authorOrOrganization: s.authorOrOrganization,
+        hasPdf: s.hasPdf,
+        confidenceLevel: s.confidenceLevel,
+        pageNumber: s.pageNumber,
+        pdfDocumentId: s.pdfDocumentId,
+        snippet: s.snippet,
+        isOcr: s.isOcr
+      }));
+
+      // Combine sources without duplicates by standardNumber or id
+      const combinedSources: CitedSourceEntry[] = [...ragSourcesMapped];
+      for (const sciSrc of sciAnalysis.citedSources) {
+        const alreadyExists = combinedSources.some(
+          (cs) => cs.id === sciSrc.id || (cs.standardNumber && cs.standardNumber === sciSrc.standardNumber)
+        );
+        if (!alreadyExists) {
+          combinedSources.push(sciSrc as CitedSourceEntry);
+        }
+      }
+
+      // Determine confidence level: If RAG provides an evidence level, use it to accurately reflect grounding
+      let evaluatedConfidence = sciAnalysis.confidenceLevel;
+      if (ragResult) {
+        if (ragResult.evidenceValidation.level === 'sufficient') {
+          evaluatedConfidence = 'verified';
+        } else if (ragResult.evidenceValidation.level === 'partial') {
+          evaluatedConfidence = 'partially_supported';
+        } else if (ragResult.evidenceValidation.level === 'insufficient') {
+          evaluatedConfidence = 'unverified';
+        }
+      }
+
+      // 6. Persist AI assistant response to IndexedDB
       const assistantMsg = await addMessage(targetConvId, {
         role: 'assistant',
         content: replyContent,
         metadata: {
           model: chatResponse.model || finalModel,
           offlineGenerated: !isOnline,
-          referenceDocs: chatResponse.references || finalReferences || []
+          referenceDocs: chatResponse.references || finalReferences || [],
+          confidenceLevel: evaluatedConfidence,
+          citedSources: combinedSources,
+          discrepancyAlerts: sciAnalysis.discrepancyAlerts,
+          attachedPdfs: attachedPdfs.length > 0 ? attachedPdfs.map((p) => ({
+            id: p.id,
+            title: p.title,
+            fileName: p.fileName,
+            pageCount: p.pageCount,
+            fileSizeFormatted: p.fileSizeFormatted,
+            isScanned: p.isScanned
+          })) : undefined,
+          pdfAnalysisResult,
+          ragPipeline: ragResult ? {
+            intentLabelFa: ragResult.intent.labelFa,
+            intentType: ragResult.intent.type,
+            searchMode: ragConfig.searchMode,
+            evidenceScore: ragResult.evidenceValidation.score,
+            evidenceLevel: ragResult.evidenceValidation.level,
+            groundingStrategy: ragResult.evidenceValidation.strategy,
+            missingFactors: ragResult.evidenceValidation.missingFactors,
+            warningNoticeFa: ragResult.evidenceValidation.warningNoticeFa,
+            retrievedChunksCount: ragResult.rankedChunks.length,
+            rankedSourcesCount: ragResult.citedSources.length,
+            executionTimeMs: ragResult.trace.executionTimeMs,
+            stepTrace: ragResult.trace
+          } : undefined
         }
       });
 
@@ -381,6 +598,8 @@ export const ChatPage: React.FC = () => {
             }}
             onClearMessages={handleClearMessages}
             onNewChat={handleNewChat}
+            onOpenRagSettings={() => setIsRagDrawerOpen(true)}
+            ragEnabled={ragConfig.enabled}
           />
 
           {/* Error Banner */}
@@ -401,6 +620,7 @@ export const ChatPage: React.FC = () => {
                     key={msg.id}
                     message={msg}
                     onSelectPrompt={handleSelectPrompt}
+                    onOpenPdfReader={(docId, pageNumber) => setReaderModalDoc({ docId, pageNumber })}
                   />
                 ))}
 
@@ -418,6 +638,7 @@ export const ChatPage: React.FC = () => {
                         referenceDocs: streamingMetadata?.references
                       }
                     }}
+                    onOpenPdfReader={(docId, pageNumber) => setReaderModalDoc({ docId, pageNumber })}
                   />
                 )}
 
@@ -429,7 +650,11 @@ export const ChatPage: React.FC = () => {
                     </div>
                     <div className="px-4 py-2.5 rounded-2xl rounded-tl-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 text-xs shadow-2xs flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                      <span>اتصال به Google Gemini و تحلیل داده‌های صنایع غذایی...</span>
+                      <span>
+                        {attachedPdfs.length > 0
+                          ? `تحلیل علمی و استخراج داده‌های مستند از ${attachedPdfs.length} سند PDF پیوست...`
+                          : 'اتصال به Google Gemini و تحلیل داده‌های صنایع غذایی...'}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -439,7 +664,19 @@ export const ChatPage: React.FC = () => {
             )}
           </div>
 
-          {/* Multiline Chat Input with Stop button */}
+          {/* Attached PDF Banner & Action Chips (Part 24 of 30) */}
+          <div className="w-full max-w-4xl mx-auto shrink-0 px-3 sm:px-0">
+            <AttachedPdfBanner
+              attachedPdfs={attachedPdfs}
+              onRemovePdf={(id) => setAttachedPdfs((prev) => prev.filter((p) => p.id !== id))}
+              onOpenPdfReader={(pdf) => setReaderModalDoc({ docId: pdf.id, pageNumber: 1 })}
+              onOpenUploadModal={() => setIsPdfUploadModalOpen(true)}
+              onTriggerAction={handleTriggerPdfAction}
+              disabled={loading}
+            />
+          </div>
+
+          {/* Multiline Chat Input with Stop button & PDF attachment trigger */}
           <div className="w-full max-w-4xl mx-auto shrink-0">
             <ChatInput
               input={inputText}
@@ -449,10 +686,39 @@ export const ChatPage: React.FC = () => {
               loading={loading}
               maxLength={4000}
               onSelectPrompt={handleSelectPrompt}
+              onOpenPdfUploadModal={() => setIsPdfUploadModalOpen(true)}
+              attachedPdfCount={attachedPdfs.length}
             />
           </div>
         </div>
       </div>
+
+      {/* Food Science RAG Settings Drawer */}
+      <RagSettingsDrawer
+        isOpen={isRagDrawerOpen}
+        onClose={() => setIsRagDrawerOpen(false)}
+        config={ragConfig}
+        onConfigChange={(newCfg) => {
+          setRagConfig(newCfg);
+          saveRagSettings(newCfg);
+        }}
+      />
+
+      {/* Chat PDF Upload / Library Selection Modal (Part 24 of 30) */}
+      <ChatPdfUploadModal
+        isOpen={isPdfUploadModalOpen}
+        onClose={() => setIsPdfUploadModalOpen(false)}
+        attachedPdfs={attachedPdfs}
+        onAttachPdfs={setAttachedPdfs}
+      />
+
+      {/* Chat In-line PDF Reader Modal for Evidence Verification (Part 24 of 30) */}
+      <ChatPdfReaderModal
+        isOpen={!!readerModalDoc}
+        onClose={() => setReaderModalDoc(null)}
+        docId={readerModalDoc?.docId || null}
+        initialPageNumber={readerModalDoc?.pageNumber || 1}
+      />
     </div>
   );
 };

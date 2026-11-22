@@ -14,6 +14,27 @@ async function startServer() {
   app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true }));
 
+  // Allow Capacitor Android WebView origins (https://localhost, capacitor://localhost) to call online AI endpoints
+  const ALLOWED_CAPACITOR_ORIGINS = new Set([
+    'https://localhost',
+    'http://localhost',
+    'capacitor://localhost',
+  ]);
+  app.use('/api', (req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && ALLOWED_CAPACITOR_ORIGINS.has(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+    }
+    if (req.method === 'OPTIONS') {
+      res.status(204).end();
+      return;
+    }
+    next();
+  });
+
   // API Routes
   app.get('/api/health', (_req, res) => {
     res.json({
@@ -25,6 +46,27 @@ async function startServer() {
   });
 
   app.use('/api/chat', chatRouter);
+
+  // Serve local Pyodide WebAssembly static assets
+  app.use('/pyodide', express.static(path.join(process.cwd(), 'public/pyodide'), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.wasm')) {
+        res.setHeader('Content-Type', 'application/wasm');
+      } else if (filePath.endsWith('.mjs') || filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (filePath.endsWith('.whl') || filePath.endsWith('.zip')) {
+        res.setHeader('Content-Type', 'application/octet-stream');
+      }
+    }
+  }));
+
+  // Prevent missing /pyodide/* assets from falling through to SPA index.html (silent 200 OK HTML bug)
+  app.use('/pyodide', (req, res) => {
+    res.status(404).json({
+      error: 'Pyodide asset not found',
+      path: req.originalUrl
+    });
+  });
 
   // Vite middleware for development vs Static files in production
   if (process.env.NODE_ENV !== 'production') {

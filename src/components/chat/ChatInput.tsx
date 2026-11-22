@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, AlertCircle, CornerDownLeft, X, Square } from 'lucide-react';
+import { Send, Loader2, Sparkles, AlertCircle, CornerDownLeft, X, Square, Paperclip, FileText } from 'lucide-react';
 
 interface ChatInputProps {
   input: string;
@@ -9,6 +9,8 @@ interface ChatInputProps {
   loading: boolean;
   maxLength?: number;
   onSelectPrompt?: (prompt: string) => void;
+  onOpenPdfUploadModal?: () => void;
+  attachedPdfCount?: number;
 }
 
 const STARTER_PROMPTS = [
@@ -25,7 +27,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onStop,
   loading,
   maxLength = 4000,
-  onSelectPrompt
+  onSelectPrompt,
+  onOpenPdfUploadModal,
+  attachedPdfCount = 0
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -90,6 +94,35 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               : 'border-stone-300 dark:border-stone-700 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20'
           }`}
         >
+          {/* PDF Attachment Trigger Button */}
+          {onOpenPdfUploadModal && (
+            <div className="flex items-center self-end pb-1 pl-1">
+              <button
+                type="button"
+                onClick={onOpenPdfUploadModal}
+                className={`p-2 rounded-xl transition-all flex items-center gap-1 cursor-pointer shrink-0 ${
+                  attachedPdfCount > 0
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shadow-2xs'
+                    : 'text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-stone-200/50 dark:hover:bg-stone-800'
+                }`}
+                title={
+                  attachedPdfCount > 0
+                    ? `مدیریت اسناد پیوست (${attachedPdfCount} سند پیوست شده)`
+                    : 'پیوست فایل یا مقاله PDF به گفتگو (جهت استخراج روش، خلاصه‌سازی و مقایسه)'
+                }
+              >
+                <Paperclip className="w-4 h-4" />
+                {attachedPdfCount > 0 ? (
+                  <span className="text-[10px] font-bold font-mono px-1 rounded-full bg-emerald-700 text-white">
+                    {attachedPdfCount}
+                  </span>
+                ) : (
+                  <span className="text-[10px] hidden md:inline font-medium">پیوست PDF</span>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* Multiline Textarea */}
           <textarea
             ref={textareaRef}

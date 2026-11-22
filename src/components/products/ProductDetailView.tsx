@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import {
   ArrowRight,
+  ArrowLeftRight,
   Sparkles,
   Layers,
   Scale,
@@ -29,7 +30,11 @@ import {
   TrendingUp,
   Percent,
   Sliders,
-  ChevronDown
+  ChevronDown,
+  Lightbulb,
+  BookOpen,
+  FileCheck,
+  Microscope
 } from 'lucide-react';
 import {
   ProductDevelopmentProject,
@@ -52,6 +57,8 @@ import {
 } from '../../lib/products/formulationEngine';
 import { MultiFormulationCompareModal } from './MultiFormulationCompareModal';
 import { AiProductAdvisorModal } from './AiProductAdvisorModal';
+import { BatchScalingCostingView } from './BatchScalingCostingView';
+import { IntelligentLabAnalysisModal } from './IntelligentLabAnalysisModal';
 
 interface ProductDetailViewProps {
   project: ProductDevelopmentProject;
@@ -90,6 +97,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   // Modals
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   const [isAiAdvisorOpen, setIsAiAdvisorOpen] = useState(false);
+  const [isLabAnalysisModalOpen, setIsLabAnalysisModalOpen] = useState(false);
+  const [selectedTestResultForAnalysis, setSelectedTestResultForAnalysis] = useState<TestResultEntry | undefined>(undefined);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
 
   // Active formulation
@@ -185,7 +194,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     updateIngredients(normalized);
   };
 
-  // Add new Formulation Version
+  // Add new Formulation Version (Formula Versioning: Formula v1, v2, v3...)
   const handleAddNewFormulationVersion = () => {
     const versionNum = currentProject.formulations.length + 1;
     const newFormId = `form_${Date.now()}_v${versionNum}`;
@@ -193,9 +202,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
     const newVersion: FormulationVersion = {
       id: newFormId,
-      versionCode: `F-0${versionNum} (نسخه جدید)`,
-      title: `فرمولاسیون شماره ${versionNum}`,
+      versionCode: `Formula v${versionNum} (نسخه جدید)`,
+      versionNumber: versionNum,
+      title: `فرمولاسیون نسخه ${versionNum}`,
       isBaseline: false,
+      baseVersionId: activeFormulation?.id,
+      changeLogSummary: `ایجاد نسخه فرمولاسیون جدید شماره ${versionNum} بر پایه ${activeFormulation?.versionCode || 'فرمول اولیه'}.`,
       ingredients: baseIngredients,
       totalPercentage: 100.0,
       totalDryMatterPercent: 10.0,
@@ -220,8 +232,11 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     const copy: FormulationVersion = {
       ...JSON.parse(JSON.stringify(activeFormulation)),
       id: newFormId,
-      versionCode: `${activeFormulation.versionCode} (کپی)`,
+      versionCode: `Formula v${versionNum} (انشعاب از ${activeFormulation.versionCode})`,
+      versionNumber: versionNum,
       isBaseline: false,
+      baseVersionId: activeFormulation.id,
+      changeLogSummary: `تکثیر نسخه از ${activeFormulation.versionCode} جهت اصلاح درصدها و آزمون متغیرها.`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -415,7 +430,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           }`}
         >
           <Scale className="w-4 h-4" />
-          <span>محاسبات Scale Up / Down بچ</span>
+          <span>Scale-up، Costing و اقتصاد محصول</span>
         </button>
 
         <button
@@ -482,11 +497,70 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       {/* TAB 1: FORMULATION & INGREDIENT PERCENTAGES */}
       {activeTab === 'formulation' && activeFormulation && (
         <div className="space-y-6">
-          {/* Formulation Version Selector Bar */}
+          {/* Product Idea & Target Specifications Card */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-amber-500" />
+                <h3 className="text-sm font-black text-stone-900 dark:text-stone-100">
+                  ایده محصول و مشخصات هدف کیفیت (Product Idea & Target Specs)
+                </h3>
+              </div>
+              <span className="text-[11px] font-mono text-stone-500">
+                INSO / CODEX Compliant
+              </span>
+            </div>
+
+            {/* Product Idea Description */}
+            <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/50">
+              <span className="text-[11px] font-bold text-amber-900 dark:text-amber-300 block mb-1">
+                ایده نوآورانه و مفهوم محصول (Product Concept):
+              </span>
+              <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed font-medium">
+                {currentProject.productIdea ||
+                  currentProject.executiveSummaryFa ||
+                  'فرمولاسیون صنعتی غذایی با اهداف تغذیه‌ای و رئولوژیکی مشخص'}
+              </p>
+            </div>
+
+            {/* Target Specifications Grid */}
+            {currentProject.targetSpecifications && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                  <span className="text-[10px] text-stone-500 block">pH هدف:</span>
+                  <span className="text-xs font-bold font-mono text-stone-900 dark:text-stone-100">
+                    {currentProject.targetSpecifications.targetPh || '۳.۹۰ - ۴.۱۵'}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                  <span className="text-[10px] text-stone-500 block">بریکس هدف (°Brix):</span>
+                  <span className="text-xs font-bold font-mono text-stone-900 dark:text-stone-100">
+                    {currentProject.targetSpecifications.targetBrix || '۳.۲ - ۳.۵°'}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                  <span className="text-[10px] text-stone-500 block">پروتئین و چربی هدف:</span>
+                  <span className="text-xs font-bold font-mono text-stone-900 dark:text-stone-100">
+                    {currentProject.targetSpecifications.targetProteinPercent || 'حداقل ۱.۲۰٪'}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                  <span className="text-[10px] text-stone-500 block">ماندگاری هدف (Shelf Life):</span>
+                  <span className="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                    {currentProject.targetSpecifications.targetShelfLifeDays
+                      ? `${currentProject.targetSpecifications.targetShelfLifeDays} روز`
+                      : '۲۱ روز در ۴°C'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Formulation Version Selector Bar (Formula v1, Formula v2, Formula v3...) */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold text-stone-700 dark:text-stone-300">
-                نسخه فرمولاسیون:
+                نسخه‌های فرمولاسیون (Versioning):
               </span>
               <div className="flex items-center gap-2 flex-wrap">
                 {currentProject.formulations.map((form) => (
@@ -496,19 +570,34 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                       setActiveFormulationId(form.id);
                       setCurrentProject({ ...currentProject, activeFormulationId: form.id });
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
                       form.id === activeFormulationId
                         ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                         : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-700 hover:border-stone-400'
                     }`}
                   >
-                    {form.versionCode}
+                    <span>{form.versionCode}</span>
+                    {form.isBaseline && (
+                      <span className="text-[10px] font-normal opacity-80">(مرجع)</span>
+                    )}
+                    {form.isAiGenerated && (
+                      <Sparkles className="w-3 h-3 text-amber-300" />
+                    )}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setIsCompareModalOpen(true)}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/50 flex items-center gap-1.5 transition-all shadow-sm"
+                title="مشاهده تفاوت‌های نسخه‌ها (چه چیزی تغییر کرده است؟)"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+                <span>ردیابی تغییرات (Diff)</span>
+              </button>
+
               <button
                 onClick={handleAddNewFormulationVersion}
                 className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 flex items-center gap-1 transition-all"
@@ -525,6 +614,41 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               </button>
             </div>
           </div>
+
+          {/* AI Preliminary Proposal Badge or Change Log Summary for Active Version */}
+          {activeFormulation.isAiGenerated && (
+            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 flex items-start gap-2.5 text-xs">
+              <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold block mb-0.5">
+                  علامت‌گذاری هوش مصنوعی: «پیشنهاد اولیه (Preliminary Proposal)»
+                </span>
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                  {activeFormulation.aiPreliminaryNotice ||
+                    'این فرمولاسیون یک پیشنهاد اولیه محاسباتی بر مبنای استانداردهای ملی و مقالات مرجع است و آزمون عملی آزمایشگاهی الزامی است.'}
+                </p>
+                {activeFormulation.scientificSources && activeFormulation.scientificSources.length > 0 && (
+                  <div className="mt-1.5 pt-1.5 border-t border-amber-200 dark:border-amber-900/60 flex items-center gap-2 flex-wrap text-[10px]">
+                    <span className="font-bold">مراجع مستند:</span>
+                    {activeFormulation.scientificSources.map((s, idx) => (
+                      <span key={idx} className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900 font-mono">
+                        {s.code}: {s.claim}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeFormulation.changeLogSummary && !activeFormulation.isAiGenerated && (
+            <div className="p-3 rounded-xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 flex items-center gap-2 text-xs">
+              <span className="font-bold shrink-0">یادداشت تغییرات این نسخه:</span>
+              <span className="text-stone-600 dark:text-stone-400">
+                {activeFormulation.changeLogSummary}
+              </span>
+            </div>
+          )}
 
           {/* Formulation KPIs Banner */}
           {summary && (
@@ -766,125 +890,16 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         </div>
       )}
 
-      {/* TAB 2: SCALE UP / SCALE DOWN BATCH ENGINE */}
-      {activeTab === 'scaling' && activeFormulation && scalingResult && (
-        <div className="space-y-6">
-          {/* Scaling Parameters Configuration */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <Scale className="w-5 h-5 text-emerald-600" />
-              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                تنظیمات مقیاس تولید و محاسبه بچ (Batch Scaling Engine)
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                  وزن خالص هدف بچ (کیلوگرم)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0.01"
-                  value={targetBatchWeightKg}
-                  onChange={(e) => setTargetBatchWeightKg(parseFloat(e.target.value) || 1)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-sm font-mono font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                />
-                <div className="flex items-center gap-1.5 mt-2">
-                  {[0.5, 5, 25, 100, 500, 1000].map((quickKg) => (
-                    <button
-                      key={quickKg}
-                      onClick={() => setTargetBatchWeightKg(quickKg)}
-                      className="px-2 py-0.5 rounded text-[11px] font-mono bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 transition-colors"
-                    >
-                      {quickKg < 1 ? `${quickKg * 1000}g` : `${quickKg}kg`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                  ضریب تلفات و افت فرآیندی (Process Loss %)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="50"
-                  value={processLossPercent}
-                  onChange={(e) => setProcessLossPercent(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                />
-                <span className="block text-[11px] text-stone-500 mt-1">
-                  ضایعات تبخیر، رسوب در دیواره مخازن و تلفات خط پرکنی
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 flex flex-col justify-center text-center">
-                <span className="text-xs text-stone-500 mb-1">هزینه تمام‌شده کل بچ مواد اولیه</span>
-                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono">
-                  {scalingResult.totalBatchCost.toLocaleString('fa-IR')} تومان
-                </span>
-                <span className="text-[11px] text-stone-500 mt-0.5">
-                  (هر کیلوگرم: {scalingResult.costPerKg.toLocaleString('fa-IR')} تومان)
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Scaled Ingredients Table */}
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-800/60 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                دستور توزین و مقادیر بچ در مقیاس هدف ({targetBatchWeightKg} کیلوگرم)
-              </h3>
-              <span className="text-xs text-stone-500">
-                فرمول فعال: {activeFormulation.versionCode}
-              </span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-right">
-                <thead className="bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold border-b border-stone-200 dark:border-stone-700">
-                  <tr>
-                    <th className="p-3 w-12 text-center">#</th>
-                    <th className="p-3">نام ماده اولیه</th>
-                    <th className="p-3 w-28 text-center">درصد فرمول (%)</th>
-                    <th className="p-3 w-40 text-center">وزن دقیق مورد نیاز</th>
-                    <th className="p-3 w-28 text-center">واحد</th>
-                    <th className="p-3 w-36 text-center">هزینه این ماده در بچ</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-200 dark:divide-stone-800">
-                  {scalingResult.ingredients.map((ing, idx) => (
-                    <tr key={ing.id} className="hover:bg-stone-50 dark:hover:bg-stone-800/40">
-                      <td className="p-3 text-center font-mono text-stone-500">{idx + 1}</td>
-                      <td className="p-3 font-semibold text-stone-900 dark:text-stone-100">
-                        {ing.nameFa}
-                      </td>
-                      <td className="p-3 text-center font-mono text-stone-600 dark:text-stone-400">
-                        {ing.percentage.toFixed(2)}%
-                      </td>
-                      <td className="p-3 text-center font-mono font-bold text-emerald-700 dark:text-emerald-300 text-sm">
-                        {ing.requiredWeightFormatted}
-                      </td>
-                      <td className="p-3 text-center font-mono font-medium text-stone-700 dark:text-stone-300">
-                        {ing.unit}
-                      </td>
-                      <td className="p-3 text-center font-mono text-stone-600 dark:text-stone-400">
-                        {ing.estimatedCost > 0
-                          ? `${ing.estimatedCost.toLocaleString('fa-IR')} تومان`
-                          : '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+      {/* TAB 2: SCALE UP, PROCESS YIELD, COSTING & PRODUCT ECONOMICS */}
+      {activeTab === 'scaling' && activeFormulation && (
+        <BatchScalingCostingView
+          activeFormulation={activeFormulation}
+          projectCategory={currentProject.category}
+          onUpdateIngredients={(updatedIngredients) => {
+            updateIngredients(updatedIngredients);
+          }}
+          onAutoBalanceFormulation={handleAutoBalance100}
+        />
       )}
 
       {/* TAB 3: PROCESS ENGINEERING, TEMPERATURE, TIME & EQUIPMENT */}
@@ -1269,33 +1284,62 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       {/* TAB 6: TEST RESULTS & SENSORY LOGGING */}
       {activeTab === 'test_trials' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-emerald-600" />
-              <span>ثبت نتایج بچ‌های آزمایشی و ارزیابی حسی (Pilot Trial Runs Log)</span>
-            </h3>
-            <button
-              onClick={handleAddTestResult}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              <span>ثبت بچ آزمایشی جدید</span>
-            </button>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-emerald-600" />
+                <span>ثبت نتایج بچ‌های آزمایشی، ارزیابی حسی و تحلیل هوشمند آزمایشگاه</span>
+              </h3>
+              <p className="text-xs text-stone-500">
+                بررسی خطاهای چهارگانه اندازه‌گیری (تجهیزات، کالیبراسیون، معرف، آماده‌سازی) و ترندهای آماری
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setSelectedTestResultForAnalysis(undefined);
+                  setIsLabAnalysisModalOpen(true);
+                }}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-1.5 shadow-md shadow-purple-600/20 transition-all"
+              >
+                <Microscope className="w-4 h-4" />
+                <span>تحلیل هوشمند نتیجه آزمایش (Part 29)</span>
+              </button>
+
+              <button
+                onClick={handleAddTestResult}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>ثبت سریع بچ</span>
+              </button>
+            </div>
           </div>
 
           {currentProject.testResults.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-500">
-              هنوز نتیجه آزمایشی برای این پروژه ثبت نشده است. با دکمه بالا اولین بچ آزمایشی را ثبت نمایید.
+            <div className="p-12 text-center rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-500 space-y-3">
+              <p>هنوز نتیجه آزمایشی برای این پروژه ثبت نشده است.</p>
+              <button
+                onClick={() => {
+                  setSelectedTestResultForAnalysis(undefined);
+                  setIsLabAnalysisModalOpen(true);
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white inline-flex items-center gap-2"
+              >
+                <Microscope className="w-4 h-4" />
+                <span>ورود داده و تحلیل هوشمند اولین بچ</span>
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
               {currentProject.testResults.map((tr) => (
                 <div
                   key={tr.id}
-                  className="p-5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm space-y-3"
+                  className="p-5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm space-y-4"
                 >
                   <div className="flex items-center justify-between gap-2 border-b border-stone-100 dark:border-stone-800 pb-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono font-bold text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-lg">
                         {tr.batchNumber}
                       </span>
@@ -1303,18 +1347,78 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                       <span className="text-xs text-stone-500">
                         وزن بچ: {tr.batchSizeKg} کیلوگرم
                       </span>
+                      <span className="text-xs text-stone-500">
+                        آزمون‌گر: {tr.operatorOrScientist}
+                      </span>
                     </div>
 
-                    <span
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                        tr.overallVerdict === 'passed'
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {tr.overallVerdict === 'passed' ? 'تأیید کیفی (Passed)' : 'نیازمند اصلاح'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedTestResultForAnalysis(tr);
+                          setIsLabAnalysisModalOpen(true);
+                        }}
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-purple-700 dark:text-purple-300 flex items-center gap-1 transition-colors"
+                        title="مشاهده گزارش عیب‌یابی و ممیزی کالیبراسیون/معرف"
+                      >
+                        <Microscope className="w-3.5 h-3.5" />
+                        <span>تحلیل آزمایشگاهی</span>
+                      </button>
+
+                      <span
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
+                          tr.overallVerdict === 'passed'
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {tr.overallVerdict === 'passed' ? 'تأیید کیفی (Passed)' : 'نیازمند اصلاح'}
+                      </span>
+                    </div>
                   </div>
+
+                  {/* Intelligent Analysis Diagnostics Summary Banner */}
+                  {tr.intelligentAnalysis && (
+                    <div className="p-3.5 rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50/40 dark:bg-purple-950/20 space-y-2 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                          <span>گزارش تحلیل هوشمند کیفیت: {tr.intelligentAnalysis.overallStatusFa}</span>
+                        </span>
+                        <span className="font-mono text-[10px] text-stone-500">
+                          نرخ انطباق: {tr.intelligentAnalysis.complianceRatePercent}٪
+                        </span>
+                      </div>
+                      <p className="text-stone-700 dark:text-stone-300 text-xs">
+                        {tr.intelligentAnalysis.summaryVerdictFa}
+                      </p>
+
+                      {/* Probable Cause Non-Dogmatic Phrasing Preview */}
+                      {tr.intelligentAnalysis.probableErrorHypotheses.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-purple-100 dark:border-purple-900/60 text-[11px] text-stone-600 dark:text-stone-400">
+                          <strong>تحلیل ریشه‌ای خطا: </strong>
+                          {tr.intelligentAnalysis.probableErrorHypotheses[0].hypothesisStatementFa}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Measured Parameters Grid */}
+                  {Object.keys(tr.measuredParameters).length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                      {Object.entries(tr.measuredParameters).map(([pName, pVal]) => (
+                        <div
+                          key={pName}
+                          className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-800 text-center"
+                        >
+                          <span className="block text-[10px] text-stone-500 truncate">{pName}</span>
+                          <span className="font-bold font-mono text-stone-900 dark:text-stone-100">
+                            {pVal.value} {pVal.unit || ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {tr.sensoryScores && (
                     <div className="grid grid-cols-5 gap-2 p-3 rounded-xl bg-stone-50 dark:bg-stone-800/60 text-center text-xs">
@@ -1352,7 +1456,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   )}
 
                   <p className="text-xs text-stone-600 dark:text-stone-400">
-                    <strong>یادداشت پنل و جمع‌بندی:</strong> {tr.conclusionsAndNextSteps}
+                    <strong>یادداشت و جمع‌بندی:</strong> {tr.conclusionsAndNextSteps}
                   </p>
                 </div>
               ))}
@@ -1417,6 +1521,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           isOpen={isCompareModalOpen}
           onClose={() => setIsCompareModalOpen(false)}
           project={currentProject}
+          initialBaseVersionId={currentProject.formulations[0]?.id}
+          initialTargetVersionId={activeFormulation?.id}
         />
       )}
 
@@ -1426,6 +1532,44 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           onClose={() => setIsAiAdvisorOpen(false)}
           project={currentProject}
           activeFormulation={activeFormulation}
+          onApplyNewVersion={(newVersion) => {
+            const updated = {
+              ...currentProject,
+              formulations: [...currentProject.formulations, newVersion],
+              activeFormulationId: newVersion.id
+            };
+            setCurrentProject(updated);
+            setActiveFormulationId(newVersion.id);
+            onSave(updated);
+          }}
+        />
+      )}
+
+      {isLabAnalysisModalOpen && (
+        <IntelligentLabAnalysisModal
+          isOpen={isLabAnalysisModalOpen}
+          onClose={() => {
+            setIsLabAnalysisModalOpen(false);
+            setSelectedTestResultForAnalysis(undefined);
+          }}
+          project={currentProject}
+          initialTestResult={selectedTestResultForAnalysis}
+          onSaveAnalysisResult={(updatedResult) => {
+            const existingIdx = currentProject.testResults.findIndex((t) => t.id === updatedResult.id);
+            let updatedList: TestResultEntry[];
+            if (existingIdx >= 0) {
+              updatedList = currentProject.testResults.map((t, i) => (i === existingIdx ? updatedResult : t));
+            } else {
+              updatedList = [updatedResult, ...currentProject.testResults];
+            }
+            const updatedProj: ProductDevelopmentProject = {
+              ...currentProject,
+              testResults: updatedList,
+              updatedAt: new Date().toISOString()
+            };
+            setCurrentProject(updatedProj);
+            onSave(updatedProj);
+          }}
         />
       )}
     </div>

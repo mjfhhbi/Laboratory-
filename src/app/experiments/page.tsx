@@ -21,6 +21,8 @@ import { ExperimentCard } from '../../components/experiments/ExperimentCard';
 import { ExperimentsFilterBar } from '../../components/experiments/ExperimentsFilterBar';
 import { ExperimentDetailModal } from '../../components/experiments/ExperimentDetailModal';
 import { ExperimentFormModal } from '../../components/experiments/ExperimentFormModal';
+import { StandardExperimentTemplateModal } from '../../components/experiments/StandardExperimentTemplateModal';
+import { createEmptyStandardExperimentTemplate } from '../../lib/experiments/standardExperimentTemplate';
 import {
   FlaskConical,
   Plus,
@@ -66,6 +68,7 @@ export const ExperimentsPage: React.FC = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExperiment, setEditingExperiment] = useState<FoodExperiment | null>(null);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
   // Notifications / Alerts
   const [actionAlert, setActionAlert] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
@@ -354,6 +357,15 @@ export const ExperimentsPage: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setIsTemplateModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-semibold transition-colors"
+            title="مشاهده ساختار استاندارد ۲۶ فیلد و مقیاس‌پذیری"
+          >
+            <Database className="w-3.5 h-3.5 text-emerald-600" />
+            <span>قالب استاندارد ۲۶ فیلد</span>
+          </button>
+
+          <button
             onClick={handleRestoreSeedData}
             className="flex items-center gap-1.5 px-3 py-2 text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl text-xs font-medium transition-colors"
             title="بازیابی پروتکل‌های استاندارد پیش‌فرض"
@@ -559,6 +571,15 @@ export const ExperimentsPage: React.FC = () => {
         onSave={handleSaveExperiment}
         initialData={editingExperiment}
       />
+
+      {/* Universal 26-Field Standard Template Modal */}
+      {isTemplateModalOpen && (
+        <StandardExperimentTemplateModal
+          isOpen={isTemplateModalOpen}
+          onClose={() => setIsTemplateModalOpen(false)}
+          experiment={selectedExperiment || experiments[0] || createEmptyStandardExperimentTemplate()}
+        />
+      )}
     </div>
   );
 };

@@ -24,22 +24,74 @@ import { VERIFIED_BENCHMARK_EXPERIMENTS } from '../../data/experimentsData';
 export { VERIFIED_BENCHMARK_EXPERIMENTS };
 
 /**
- * Normalizes an experiment record to guarantee complete schema.
+ * Normalizes an experiment record to guarantee complete 26-field standard template schema.
  */
 export function normalizeExperimentRecord(raw: any): FoodExperiment {
+  const normTitle = raw.title || raw.titleFa || '';
+  const normDomain = (raw.domain || raw.category || 'food_chemistry') as ExperimentDomain;
+  const normObjective = raw.objective || raw.purpose || '';
+
   return {
     id: raw.id || `exp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     code: raw.code || 'EXP-GEN-000',
-    titleFa: raw.titleFa || raw.title || '',
+    titleFa: normTitle,
     titleEn: raw.titleEn || raw.englishTitle || '',
-    domain: (raw.domain || 'food_chemistry') as ExperimentDomain,
-    objective: raw.objective || '',
+    domain: normDomain,
+    
+    // 26-field standard template direct mappings
+    title: normTitle,
+    category: normDomain,
+    product: raw.product || '',
+    purpose: normObjective,
+    standardReferences: Array.isArray(raw.standardReferences)
+      ? raw.standardReferences
+      : raw.standardReference
+      ? [raw.standardReference]
+      : [],
+    sourceReferences: Array.isArray(raw.sourceReferences)
+      ? raw.sourceReferences
+      : Array.isArray(raw.sources)
+      ? raw.sources
+      : [],
+    equipmentRequirements: Array.isArray(raw.equipmentRequirements) ? raw.equipmentRequirements : [],
+    reagents: Array.isArray(raw.reagents)
+      ? raw.reagents
+      : Array.isArray(raw.reagentsAndMaterials)
+      ? raw.reagentsAndMaterials
+      : [],
+    solutionPreparation: raw.solutionPreparation || raw.solutionsPreparation || '',
+    acceptanceCriteria: raw.acceptanceCriteria || [],
+    commonErrors: Array.isArray(raw.commonErrors)
+      ? raw.commonErrors
+      : Array.isArray(raw.potentialErrors)
+      ? raw.potentialErrors
+      : [],
+    troubleshooting: Array.isArray(raw.troubleshooting) ? raw.troubleshooting : [],
+    safety: Array.isArray(raw.safety)
+      ? raw.safety
+      : Array.isArray(raw.safetyNotes)
+      ? raw.safetyNotes
+      : [],
+    notes: Array.isArray(raw.notes)
+      ? raw.notes
+      : raw.customNotes
+      ? [raw.customNotes]
+      : [],
+    version: raw.version || '1.0.0',
+    lastVerified: raw.lastVerified || (raw.updatedAt ? raw.updatedAt.split('T')[0] : '2024-05-15'),
+
+    // Core schema fields
+    objective: normObjective,
     scope: raw.scope || '',
     principle: raw.principle || '',
     equipment: Array.isArray(raw.equipment) ? raw.equipment : [],
-    reagentsAndMaterials: Array.isArray(raw.reagentsAndMaterials) ? raw.reagentsAndMaterials : [],
+    reagentsAndMaterials: Array.isArray(raw.reagentsAndMaterials)
+      ? raw.reagentsAndMaterials
+      : Array.isArray(raw.reagents)
+      ? raw.reagents
+      : [],
     samplePreparation: raw.samplePreparation || '',
-    solutionsPreparation: raw.solutionsPreparation || '',
+    solutionsPreparation: raw.solutionsPreparation || raw.solutionPreparation || '',
     environmentalConditions: raw.environmentalConditions || {
       temperatureRange: 'دمای استاندارد آزمایشگاهی',
       relativeHumidity: '',
@@ -51,24 +103,39 @@ export function normalizeExperimentRecord(raw: any): FoodExperiment {
       formulaExpression: '',
       variables: []
     },
+    qualityControl: raw.qualityControl || [],
     reporting: raw.reporting || {
       unitOfMeasurement: '',
       decimalPrecision: 2
     },
-    potentialErrors: Array.isArray(raw.potentialErrors) ? raw.potentialErrors : [],
-    safetyNotes: Array.isArray(raw.safetyNotes) ? raw.safetyNotes : [],
+    potentialErrors: Array.isArray(raw.potentialErrors)
+      ? raw.potentialErrors
+      : Array.isArray(raw.commonErrors)
+      ? raw.commonErrors
+      : [],
+    safetyNotes: Array.isArray(raw.safetyNotes)
+      ? raw.safetyNotes
+      : Array.isArray(raw.safety)
+      ? raw.safety
+      : [],
     standardReference: raw.standardReference || {
       organization: 'Other',
       standardNumber: '',
       jurisdiction: 'iranian_national',
       isOfficialAdopted: false
     },
-    sources: Array.isArray(raw.sources) ? raw.sources : [],
+    sources: Array.isArray(raw.sources)
+      ? raw.sources
+      : Array.isArray(raw.sourceReferences)
+      ? raw.sourceReferences
+      : [],
     verificationStatus: raw.verificationStatus || 'unverified_pending_review',
     reliabilityGrade: raw.reliabilityGrade || 'grade_d',
     tags: Array.isArray(raw.tags) ? raw.tags : [],
     offlineAvailable: raw.offlineAvailable ?? true,
     isVerifiedProtocol: raw.isVerifiedProtocol ?? (raw.verificationStatus === 'verified_standard'),
+    samplePrepMethods: raw.samplePrepMethods,
+    qcSpec: raw.qcSpec,
     customNotes: raw.customNotes || '',
     createdAt: raw.createdAt || new Date().toISOString(),
     updatedAt: raw.updatedAt || new Date().toISOString()

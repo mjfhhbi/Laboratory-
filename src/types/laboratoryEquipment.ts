@@ -331,3 +331,75 @@ export interface EquipmentStatistics {
   offlineCount: number;
   linkedExperimentsCount: number;
 }
+
+/**
+ * Compatibility Result Verdict for Equipment Checklist (Part 35 of 40)
+ */
+export type EquipmentCompatibilityVerdict = 'compatible' | 'not_compatible' | 'unknown';
+
+export interface ParameterCompatibilityDetail {
+  parameterName: 'accuracy' | 'capacity' | 'resolution' | 'workingRange' | 'calibration';
+  labelFa: string;
+  verdict: EquipmentCompatibilityVerdict;
+  required?: string;
+  actual?: string;
+  explanation: string;
+}
+
+/**
+ * Pre-Experiment Equipment Checklist Item (Part 35 of 40)
+ * Each equipment item contains:
+ * - نام (Name)
+ * - نوع (Type)
+ * - ظرفیت (Capacity)
+ * - دقت (Accuracy)
+ * - Resolution
+ * - محدوده کاری (Working Range)
+ * - وضعیت Calibration
+ * - شرایط موردنیاز (Required Conditions)
+ * - Source
+ * With deterministic compatibility verification: Compatible / Not Compatible / Unknown
+ */
+export interface EquipmentChecklistItem {
+  id: string;
+  
+  // Required specs from method/standard
+  equipmentName: string;
+  equipmentType: EquipmentCategory | string;
+  equipmentTypeTitleFa: string;
+  
+  requiredCapacity?: string;
+  requiredAccuracy?: string;
+  requiredResolution?: string;
+  requiredWorkingRange?: string;
+  requiredCalibration?: string;
+  requiredConditions?: string;
+  source?: string;
+  isRequired: boolean;
+
+  // Selected User Equipment (from lab inventory or manually configured)
+  userEquipmentId?: string;
+  userEquipmentCode?: string;
+  userEquipmentName?: string;
+  userEquipmentType?: EquipmentCategory | string;
+  userCapacity?: string;
+  userAccuracy?: string;
+  userResolution?: string;
+  userWorkingRange?: string;
+  userCalibrationStatus?: CalibrationStatus | string;
+  userCalibrationProvider?: string;
+  userLastCalibrationDate?: string;
+  userNextCalibrationDate?: string;
+  userSource?: string;
+
+  // Compatibility Analysis
+  compatibility: EquipmentCompatibilityVerdict;
+  compatibilitySummary: string;
+  parameterDetails: ParameterCompatibilityDetail[];
+  
+  // Operator Verification in Pre-Experiment Checklist
+  isVerifiedByOperator: boolean;
+  verifiedAt?: string;
+  operatorNotes?: string;
+}
+

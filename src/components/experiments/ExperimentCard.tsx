@@ -203,7 +203,7 @@ export const ExperimentCard: React.FC<ExperimentCardProps> = ({
             onClick={() => onSelect(experiment)}
             className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-xl transition-colors"
           >
-            <span>مشاهده پروتکل کامل</span>
+            <span>دستورالعمل آزمون (SOP)</span>
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
         </div>

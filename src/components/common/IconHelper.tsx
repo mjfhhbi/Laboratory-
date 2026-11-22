@@ -52,6 +52,15 @@ import {
   Gauge,
   Thermometer,
   Atom,
+  GraduationCap,
+  Sigma,
+  BarChart2,
+  Terminal,
+  Code2,
+  Droplets,
+  Snowflake,
+  Scale,
+  Package,
   LucideProps
 } from 'lucide-react';
 
@@ -61,6 +70,18 @@ interface IconHelperProps extends LucideProps {
 
 export const IconHelper: React.FC<IconHelperProps> = ({ name, ...props }) => {
   switch (name) {
+    case 'Terminal':
+      return <Terminal {...props} />;
+    case 'Code2':
+      return <Code2 {...props} />;
+    case 'Droplets':
+      return <Droplets {...props} />;
+    case 'Snowflake':
+      return <Snowflake {...props} />;
+    case 'Scale':
+      return <Scale {...props} />;
+    case 'Package':
+      return <Package {...props} />;
     case 'Microscope':
       return <Microscope {...props} />;
     case 'Bug':
@@ -77,6 +98,12 @@ export const IconHelper: React.FC<IconHelperProps> = ({ name, ...props }) => {
       return <Thermometer {...props} />;
     case 'Atom':
       return <Atom {...props} />;
+    case 'GraduationCap':
+      return <GraduationCap {...props} />;
+    case 'Sigma':
+      return <Sigma {...props} />;
+    case 'BarChart2':
+      return <BarChart2 {...props} />;
     case 'LayoutDashboard':
       return <LayoutDashboard {...props} />;
     case 'MessageSquare':

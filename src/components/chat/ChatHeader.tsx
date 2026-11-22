@@ -14,7 +14,8 @@ import {
   Sparkles,
   Layers,
   Database,
-  Cpu
+  Cpu,
+  Sliders
 } from 'lucide-react';
 
 interface ChatHeaderProps {
@@ -23,6 +24,8 @@ interface ChatHeaderProps {
   onRename: (newTitle: string) => void;
   onClearMessages: () => void;
   onNewChat: () => void;
+  onOpenRagSettings?: () => void;
+  ragEnabled?: boolean;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -30,7 +33,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onToggleMobileSidebar,
   onRename,
   onClearMessages,
-  onNewChat
+  onNewChat,
+  onOpenRagSettings,
+  ragEnabled = true
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempTitle, setTempTitle] = useState('');
@@ -169,6 +174,26 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       {/* Left side: Toolbar buttons */}
       <div className="flex items-center gap-1.5 shrink-0">
         <OnlineStatusBadge />
+
+        {/* RAG Settings Trigger */}
+        {onOpenRagSettings && (
+          <button
+            type="button"
+            onClick={onOpenRagSettings}
+            className={`p-2 rounded-xl text-xs inline-flex items-center gap-1.5 border transition-all ${
+              ragEnabled
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/80 shadow-2xs hover:bg-emerald-100'
+                : 'bg-stone-100 dark:bg-stone-800 text-stone-500 border-stone-200 dark:border-stone-700 hover:bg-stone-200'
+            }`}
+            title="تنظیمات و اولویت‌بندی منابع موتور RAG"
+          >
+            <Sliders className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="hidden md:inline font-medium text-[11px]">
+              {ragEnabled ? 'موتور RAG فعال' : 'RAG غیرفعال'}
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          </button>
+        )}
 
         {conversation && conversation.messageCount > 0 && (
           <button

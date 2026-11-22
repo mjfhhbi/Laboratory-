@@ -71,19 +71,19 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
   const specs = equipment.specifications || {};
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 w-full max-w-4xl max-h-[96vh] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto">
         {/* Modal Top Header */}
-        <div className="p-6 border-b border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/40 flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
+        <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/40 flex items-start justify-between gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
             <div
-              className="p-3.5 rounded-xl text-white shadow-md flex-shrink-0"
+              className="p-3 sm:p-3.5 rounded-xl text-white shadow-md shrink-0"
               style={{ backgroundColor: categoryMeta.color }}
             >
-              <Wrench className="w-7 h-7" />
+              <Wrench className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
 
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
                 <span
                   className="text-xs px-2.5 py-0.5 rounded-md font-semibold text-white"
@@ -101,10 +101,10 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
                 </span>
               </div>
 
-              <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">
+              <h2 className="text-base sm:text-xl font-bold text-stone-900 dark:text-stone-100 break-words leading-snug">
                 {equipment.nameFa}
               </h2>
-              <p className="text-xs text-stone-500 font-sans tracking-wide" dir="ltr">
+              <p className="text-xs text-stone-500 font-sans tracking-wide break-words" dir="ltr">
                 {equipment.nameEn}
               </p>
 
@@ -120,17 +120,19 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-200/50 dark:hover:bg-stone-800 rounded-lg transition-colors"
+            className="p-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-200/50 dark:hover:bg-stone-800 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+            title="بستن"
+            aria-label="بستن"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-1 px-6 border-b border-stone-200 dark:border-stone-800 bg-stone-100/60 dark:bg-stone-900/80 overflow-x-auto text-xs font-semibold scrollbar-none">
+        <div className="flex items-center gap-1 px-3 sm:px-6 border-b border-stone-200 dark:border-stone-800 bg-stone-100/60 dark:bg-stone-900/80 overflow-x-auto text-xs font-semibold no-scrollbar">
           <button
             onClick={() => setActiveTab('specs')}
-            className={`py-3 px-3.5 border-b-2 transition-all flex items-center gap-1.5 whitespace-nowrap ${
+            className={`py-3 px-3 sm:px-3.5 border-b-2 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 min-h-[44px] ${
               activeTab === 'specs'
                 ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-stone-900'
                 : 'border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'

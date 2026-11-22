@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { PageHeader } from '../../components/common/PageHeader';
 import { FoodStandardsFilterBar } from '../../components/standards/FoodStandardsFilterBar';
 import { FoodStandardCard } from '../../components/standards/FoodStandardCard';
@@ -204,6 +205,14 @@ export const StandardsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <Link
+            to="/standards/iran"
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>سامانه تخصصی استانداردهای ایران (INSO)</span>
+          </Link>
+
           <button
             type="button"
             onClick={() => {
