@@ -24,9 +24,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         </div>
         
         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-semibold rounded-full mb-3 border border-stone-200 dark:border-stone-700/60">
-          <span>اسکلت ماژولار UI</span>
-          <span>•</span>
-          <span>قسمت ۲ از ۱۰</span>
+          <span>ماژول آماده توسعه</span>
         </div>
 
         <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-2">

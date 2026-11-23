@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { appConfirm } from '../common/DialogProvider';
 import { 
   Archive, 
   Search, 
@@ -66,7 +67,7 @@ export const TroubleshootingHistory: React.FC<Props> = ({ onSelectSession, onNew
 
   const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('آیا از حذف این پرونده عیب‌یابی اطمینان دارید؟')) return;
+    if (!(await appConfirm('آیا از حذف این پرونده عیب‌یابی اطمینان دارید؟'))) return;
     try {
       await deleteItem(STORES.KNOWLEDGE_BASE, id);
       setSessions(prev => prev.filter(s => s.id !== id));

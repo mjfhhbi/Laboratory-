@@ -3,6 +3,7 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import chatRouter from './server/routes/chat';
+import { getAIProvider } from './server/providers';
 
 dotenv.config();
 
@@ -37,11 +38,14 @@ async function startServer() {
 
   // API Routes
   app.get('/api/health', (_req, res) => {
+    const provider = getAIProvider();
     res.json({
       status: 'ok',
       service: 'Food Science AI Server',
       timestamp: new Date().toISOString(),
-      activeProvider: process.env.AI_PROVIDER || 'mock'
+      activeProvider: provider.name,
+      modelId: provider.modelId,
+      hasApiKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '')
     });
   });
 

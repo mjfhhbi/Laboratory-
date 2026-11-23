@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { appAlert } from '../common/DialogProvider';
 import { 
   Plus, 
   Trash2, 
@@ -136,7 +137,7 @@ export const CustomFormulaBuilder: React.FC = () => {
 
   const handleSaveFormula = async () => {
     if (!nameFa.trim() || !expression.trim()) {
-      alert('لطفاً عنوان فرمول و عبارت ریاضی آن را تکمیل نمایید.');
+      appAlert('لطفاً عنوان فرمول و عبارت ریاضی آن را تکمیل نمایید.', 'warning');
       return;
     }
 
@@ -167,7 +168,7 @@ export const CustomFormulaBuilder: React.FC = () => {
       setExpression('');
       setDescriptionFa('');
     } catch (err: unknown) {
-      alert(`خطا در ذخیره فرمول: ${err instanceof Error ? err.message : String(err)}`);
+      appAlert(`خطا در ذخیره فرمول: ${err instanceof Error ? err.message : String(err)}`, 'error');
     }
   };
 

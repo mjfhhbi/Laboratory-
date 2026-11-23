@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { appAlert } from '../common/DialogProvider';
 import {
   FileSpreadsheet,
   Upload,
@@ -208,10 +209,11 @@ export const ScientificDataCenterSuite: React.FC = () => {
           }
         }
       } else {
-        alert('لطفاً یک فایل CSV یا Excel معتبر (.xlsx / .xls) انتخاب فرمایید.');
+        appAlert('لطفاً یک فایل CSV یا Excel معتبر (.xlsx / .xls) انتخاب فرمایید.', 'warning');
       }
-    } catch (err: any) {
-      alert(`خطا در بازخوانی فایل: ${err.message || 'فرمت فایل معتبر نیست'}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'فرمت فایل معتبر نیست';
+      appAlert(`خطا در بازخوانی فایل: ${msg}`, 'error');
     }
   };
 

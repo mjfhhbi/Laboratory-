@@ -286,6 +286,45 @@ async function main() {
     `ps1Count=${expectedPs1.filter((f) => fs.existsSync(path.join(winScriptsDir, f))).length}/9, crossPlatformNpm=${crossPlatformScriptsOk}, gitIgnoreClean=${gitIgnoreCleanOk}, gradle8.11.1=${gradleWrapperOk}, zeroSecrets=${!hasLeakedSecretInBundle}`
   );
 
+  // 11. Runtime Resilience: Zero native alert/confirm/window.open, valid Gemini model, /api/health, ErrorBoundary & QC Persistence
+  const walkSrcFiles = (dir: string, out: string[] = []): string[] => {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) {
+        if (ent.name === 'test-suite') continue;
+        walkSrcFiles(full, out);
+      } else if (/\.(ts|tsx)$/.test(ent.name)) {
+        out.push(full);
+      }
+    }
+    return out;
+  };
+  const srcFiles = walkSrcFiles(path.resolve(root, 'src'));
+  const nativeDialogOffenders = srcFiles.filter((fp) => {
+    const txt = fs.readFileSync(fp, 'utf8');
+    return /\balert\s*\(|\bconfirm\s*\(|window\.open\s*\(/.test(txt);
+  });
+  const geminiProviderTxt = fs.readFileSync(path.resolve(root, 'server/providers/geminiProvider.ts'), 'utf8');
+  const appTsxTxt = fs.readFileSync(path.resolve(root, 'src/App.tsx'), 'utf8');
+  const appLayoutTxt = fs.readFileSync(path.resolve(root, 'src/components/layout/AppLayout.tsx'), 'utf8');
+  const qcPageTxt = fs.readFileSync(path.resolve(root, 'src/app/quality-control/page.tsx'), 'utf8');
+
+  const geminiModelValid =
+    geminiProviderTxt.includes("'gemini-4-hydrogen'") && !geminiProviderTxt.includes("'gemini-3.8-flash'");
+  const healthDelegatesProvider =
+    serverText.includes('getAIProvider()') && serverText.includes('activeProvider: provider.name');
+  const resilienceWired =
+    appTsxTxt.includes('<ErrorBoundary>') &&
+    appLayoutTxt.includes('<DialogHost />') &&
+    qcPageTxt.includes('loadQCWorkspace') &&
+    qcPageTxt.includes('saveQCWorkspace');
+
+  record(
+    '11. Runtime Resilience (Zero Native Dialogs, Gemini 4 Model, Health API, ErrorBoundary & QC Persistence)',
+    nativeDialogOffenders.length === 0 && geminiModelValid && healthDelegatesProvider && resilienceWired,
+    `nativeDialogOffenders=${nativeDialogOffenders.length}, gemini4Model=${geminiModelValid}, healthLiveProvider=${healthDelegatesProvider}, resilienceWired=${resilienceWired}`
+  );
+
   const passed = checks.filter((c) => c.passed).length;
   const failed = checks.length - passed;
   console.log(`\nSUMMARY: ${passed}/${checks.length} Passed, ${failed} Failed`);

@@ -20,6 +20,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
+import { appConfirm } from '../../components/common/DialogProvider';
 import {
   LabSession,
   LabStepRunData,
@@ -602,7 +603,7 @@ export const LaboratoryPage: React.FC = () => {
 
   // Delete Session
   const handleDeleteSession = async (sessionId: string) => {
-    if (!confirm('آیا از حذف این گزارش آزمایشگاهی اطمینان دارید؟ این عملیات غیرقابل بازگشت است.')) return;
+    if (!(await appConfirm('آیا از حذف این گزارش آزمایشگاهی اطمینان دارید؟ این عملیات غیرقابل بازگشت است.'))) return;
     try {
       await deleteLabSession(sessionId);
       if (activeSession?.id === sessionId) {
@@ -633,7 +634,7 @@ export const LaboratoryPage: React.FC = () => {
 
   // Clear Only Test Mock Sessions
   const handleClearTestMocks = async () => {
-    if (!confirm('آیا از حذف کلیه نمونه‌های تستی [TEST-MOCK] اطمینان دارید؟ داده‌های واقعی حفظ خواهند شد.')) return;
+    if (!(await appConfirm('آیا از حذف کلیه نمونه‌های تستی [TEST-MOCK] اطمینان دارید؟ داده‌های واقعی حفظ خواهند شد.'))) return;
     try {
       const count = await clearAllTestMockSessions();
       if (activeSession && (activeSession.isDemoOrTest || activeSession.testTag === 'TEST-MOCK')) {

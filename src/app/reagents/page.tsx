@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { appConfirm } from '../../components/common/DialogProvider';
 import {
   ChemicalReagent,
   PreparedSolution,
@@ -131,7 +132,7 @@ export const ReagentsPage: React.FC = () => {
 
   // Handle Delete Prepared Solution
   const handleDeleteSolution = async (id: string) => {
-    if (window.confirm('آیا از حذف این محلول از دفترچه آزمایشگاه اطمینان دارید؟')) {
+    if (await appConfirm('آیا از حذف این محلول از دفترچه آزمایشگاه اطمینان دارید؟')) {
       await deletePreparedSolution(id);
       showNotification('محلول با موفقیت حذف شد.');
       await loadData();
@@ -154,7 +155,12 @@ export const ReagentsPage: React.FC = () => {
 
   // Handle Reset to Benchmark
   const handleResetBenchmark = async () => {
-    if (window.confirm('آیا مایل به بازنشانی بانک مواد شیمیایی به دیتابیس مرجع و اولیه هستید؟')) {
+    if (
+      await appConfirm(
+        'آیا مایل به بازنشانی بانک مواد شیمیایی به دیتابیس مرجع و اولیه هستید؟',
+        { title: 'بازنشانی بانک مواد شیمیایی', confirmLabel: 'بازنشانی', destructive: false }
+      )
+    ) {
       await resetReagentStore();
       showNotification('بانک مواد و معرف‌ها با موفقیت به داده‌های مرجع استاندارد بازنشانی شد.');
       await loadData();
@@ -169,8 +175,10 @@ export const ReagentsPage: React.FC = () => {
     const a = document.createElement('a');
     a.href = url;
     a.download = `foodscience-reagents-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return (

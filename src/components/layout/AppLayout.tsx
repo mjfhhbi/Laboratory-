@@ -5,6 +5,7 @@ import { ThemeProvider } from '../../lib/theme';
 import { OfflineAlertBanner } from '../common/OfflineAlertBanner';
 
 import { SectionSubNav } from './SectionSubNav';
+import { DialogHost } from '../common/DialogProvider';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -40,6 +41,7 @@ const AppLayoutInner: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
         </footer>
       </div>
+      <DialogHost />
     </div>
   );
 };

@@ -11,7 +11,7 @@ export class GeminiAIProvider implements AIProvider {
   private client: GoogleGenAI | null = null;
 
   public get modelId(): string {
-    return process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+    return process.env.GEMINI_MODEL || 'gemini-4-hydrogen';
   }
 
   private getClient(): GoogleGenAI {

@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { appConfirm } from '../common/DialogProvider';
 import {
   FlaskConical,
   Scale,
@@ -107,9 +108,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </button>
             <button
               title="حذف پروژه"
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.stopPropagation();
-                if (window.confirm(`آیا از حذف پروژه "${project.productNameFa}" اطمینان دارید؟`)) {
+                if (await appConfirm(`آیا از حذف پروژه "${project.productNameFa}" اطمینان دارید؟`)) {
                   onDelete(project.id);
                 }
               }}

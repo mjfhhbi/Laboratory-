@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
+import { appConfirm } from '../../components/common/DialogProvider';
 import { 
   UnifiedScientificSource, 
   ScientificSourceType, 
@@ -159,7 +160,7 @@ export const SourcesPage: React.FC = () => {
   }, [sources, typeFilter, confidenceFilter, query]);
 
   const handleDeleteSource = async (src: UnifiedScientificSource) => {
-    if (!window.confirm(`آیا از حذف منبع «${src.title}» اطمینان دارید؟`)) return;
+    if (!(await appConfirm(`آیا از حذف منبع «${src.title}» اطمینان دارید؟`))) return;
     try {
       await deleteUnifiedSource(src.id);
       setSources((prev) => prev.filter((s) => s.id !== src.id));

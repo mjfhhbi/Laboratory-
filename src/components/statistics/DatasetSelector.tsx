@@ -1,4 +1,5 @@
 import React from 'react';
+import { appConfirm } from '../common/DialogProvider';
 import { 
   Database, 
   Plus, 
@@ -89,9 +90,9 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
               {!ds.id.startsWith('sample-') && (
                 <button
                   type="button"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation();
-                    if (confirm('آیا از حذف این دیتاست اطمینان دارید؟')) {
+                    if (await appConfirm('آیا از حذف این دیتاست اطمینان دارید؟')) {
                       onDeleteDataset(ds.id);
                     }
                   }}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../components/common/PageHeader';
+import { appConfirm } from '../../components/common/DialogProvider';
 import { FoodStandardsFilterBar } from '../../components/standards/FoodStandardsFilterBar';
 import { FoodStandardCard } from '../../components/standards/FoodStandardCard';
 import { FoodStandardDetailModal } from '../../components/standards/FoodStandardDetailModal';
@@ -96,7 +97,7 @@ export const StandardsPage: React.FC = () => {
 
   // Handlers
   const handleDeleteStandard = async (std: FoodStandard) => {
-    if (window.confirm(`آیا از حذف استاندارد «${std.standardNumber || std.titleFa}» اطمینان دارید؟`)) {
+    if (await appConfirm(`آیا از حذف استاندارد «${std.standardNumber || std.titleFa}» اطمینان دارید؟`)) {
       await deleteStandard(std.id);
       loadData();
     }
@@ -110,7 +111,7 @@ export const StandardsPage: React.FC = () => {
   };
 
   const handleDeleteSource = async (source: ScientificSource) => {
-    if (window.confirm(`آیا از حذف منبع «${source.title}» اطمینان دارید؟`)) {
+    if (await appConfirm(`آیا از حذف منبع «${source.title}» اطمینان دارید؟`)) {
       await deleteSource(source.id);
       setSelectedSource(null);
       loadData();

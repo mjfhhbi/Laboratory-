@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { appConfirm } from '../../components/common/DialogProvider';
 import { 
   getAllResearchProjects, 
   saveResearchProject, 
@@ -100,7 +101,7 @@ export default function ResearchPage() {
 
   const handleDeleteProject = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm('آیا از حذف این پروژه تحقیقاتی اطمینان دارید؟')) return;
+    if (!(await appConfirm('آیا از حذف این پروژه تحقیقاتی اطمینان دارید؟'))) return;
     await deleteResearchProject(id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
     if (selectedProjectId === id) {

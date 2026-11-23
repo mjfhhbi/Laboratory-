@@ -1,4 +1,5 @@
 import React from 'react';
+import { appConfirm } from '../common/DialogProvider';
 import {
   FoodExperiment,
   EXPERIMENT_DOMAINS,
@@ -186,9 +187,9 @@ export const ExperimentCard: React.FC<ExperimentCardProps> = ({
 
           {onDelete && (
             <button
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.stopPropagation();
-                if (confirm(`آیا از حذف پروتکل «${experiment.titleFa}» اطمینان دارید؟`)) {
+                if (await appConfirm(`آیا از حذف پروتکل «${experiment.titleFa}» اطمینان دارید؟`)) {
                   onDelete(experiment.id);
                 }
               }}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { appAlert } from '../common/DialogProvider';
 import {
   FoodStandard,
   FoodStandardSector,
@@ -223,7 +224,7 @@ export const FoodStandardFormModal: React.FC<FoodStandardFormModalProps> = ({
 
     // Check duplicate
     if (sources.some((s) => s.sourceId === selectedSourceId)) {
-      alert('این منبع قبلاً اضافه شده است.');
+      appAlert('این منبع قبلاً اضافه شده است.', 'warning');
       return;
     }
 

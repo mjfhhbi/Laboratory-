@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { appAlert } from '../common/DialogProvider';
 import { 
   Sparkles, 
   Layers, 
@@ -176,7 +177,7 @@ export const FormulationOptimizerSuite: React.FC = () => {
   // Remove ingredient
   const handleRemoveIngredient = (idx: number) => {
     if (currentProblem.ingredients.length <= 2) {
-      alert('حداقل دو ماده اولیه برای حل برنامه‌ریزی خطی لازم است.');
+      appAlert('حداقل دو ماده اولیه برای حل برنامه‌ریزی خطی لازم است.', 'warning');
       return;
     }
     setCurrentProblem(prev => ({

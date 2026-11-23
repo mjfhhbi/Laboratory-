@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { appAlert } from '../common/DialogProvider';
 import { UploadCloud, FileText, Trash2, Copy, Check, Info } from 'lucide-react';
 
 interface PythonFileUploaderProps {
@@ -21,7 +22,7 @@ export const PythonFileUploader: React.FC<PythonFileUploaderProps> = ({
 
     // Check size limit (max 10MB)
     if (selected.size > 10 * 1024 * 1024) {
-      alert('حداکثر حجم مجاز فایل داده ۱۰ مگابایت است.');
+      appAlert('حداکثر حجم مجاز فایل داده ۱۰ مگابایت است.', 'warning');
       return;
     }
 

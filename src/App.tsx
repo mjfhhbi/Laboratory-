@@ -6,6 +6,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { DashboardPage } from './app/page';
 import { ChatPage } from './app/chat/page';
 import { LaboratoryPage } from './app/laboratory/page';
@@ -39,7 +40,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppLayout>
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/laboratory" element={<LaboratoryPage />} />
@@ -71,7 +73,8 @@ export default function App() {
           <Route path="/settings" element={<SettingsPage />} />
           {/* Catch-all route redirecting back to dashboard */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+          </Routes>
+        </ErrorBoundary>
       </AppLayout>
     </BrowserRouter>
   );

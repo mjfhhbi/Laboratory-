@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
+import { appConfirm } from '../../components/common/DialogProvider';
 import {
   FoodExperiment,
   ExperimentDomain,
@@ -154,7 +155,7 @@ export const ExperimentsPage: React.FC = () => {
   };
 
   const handleDeleteExperiment = async (id: string) => {
-    if (!window.confirm('آیا از حذف این پروتکل آزمایشگاهی اطمینان دارید؟')) return;
+    if (!(await appConfirm('آیا از حذف این پروتکل آزمایشگاهی اطمینان دارید؟'))) return;
     try {
       await deleteExperiment(id);
       showAlert('پروتکل آزمایش با موفقیت حذف گردید.', 'info');
@@ -167,7 +168,14 @@ export const ExperimentsPage: React.FC = () => {
 
   // Restore Benchmark Seed Data
   const handleRestoreSeedData = async () => {
-    if (!window.confirm('آیا مایلید تمام پروتکل‌های مرجع استاندارد بازنشانی و بارگذاری شوند؟')) return;
+    if (
+      !(await appConfirm('آیا مایلید تمام پروتکل‌های مرجع استاندارد بازنشانی و بارگذاری شوند؟', {
+        title: 'بازنشانی پروتکل‌های مرجع',
+        confirmLabel: 'بازنشانی',
+        destructive: false
+      }))
+    )
+      return;
     setLoading(true);
     try {
       await seedInitialVerifiedExperiments();

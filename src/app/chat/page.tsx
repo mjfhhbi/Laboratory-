@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
+import { appConfirm } from '../../components/common/DialogProvider';
 import {
   getAllConversations,
   getMessagesByConversation,
@@ -97,7 +98,7 @@ export const ChatPage: React.FC = () => {
 
 > برای شروع، می‌توانید یکی از پیشنهادهای زیر را انتخاب کرده یا سوال تخصصی خود را مطرح نمایید.`,
           metadata: {
-            model: 'Google Gemini 3.7 Flash',
+            model: 'Google Gemini 4 Flash',
             offlineGenerated: false,
             referenceDocs: ['INSO-Catalog', 'AOAC-19th', 'Codex Alimentarius'],
             confidenceLevel: 'verified',
@@ -180,7 +181,7 @@ export const ChatPage: React.FC = () => {
 
   // Handle delete conversation
   const handleDeleteConversation = async (id: string) => {
-    if (!window.confirm('آیا از حذف این گفتگو و تمامی پیام‌های آن اطمینان دارید؟')) return;
+    if (!(await appConfirm('آیا از حذف این گفتگو و تمامی پیام‌های آن اطمینان دارید؟'))) return;
     try {
       await deleteConversation(id);
       const updated = conversations.filter((c) => c.id !== id);
@@ -219,7 +220,7 @@ export const ChatPage: React.FC = () => {
   // Handle clear messages in current conversation
   const handleClearMessages = async () => {
     if (!activeConvId) return;
-    if (!window.confirm('آیا از پاکسازی تمام پیام‌های این گفتگو مطمئن هستید؟')) return;
+    if (!(await appConfirm('آیا از پاکسازی تمام پیام‌های این گفتگو مطمئن هستید؟'))) return;
     try {
       await clearConversationMessages(activeConvId);
       setMessages([]);

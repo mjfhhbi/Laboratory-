@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
+import { appConfirm } from '../../components/common/DialogProvider';
 import {
   LaboratoryEquipment,
   EquipmentCategory,
@@ -138,7 +139,7 @@ export const EquipmentPage: React.FC = () => {
 
   // Handle Delete Equipment
   const handleDeleteEquipment = async (item: LaboratoryEquipment) => {
-    if (window.confirm(`آیا از حذف دستگاه "${item.nameFa}" اطمینان دارید؟`)) {
+    if (await appConfirm(`آیا از حذف دستگاه "${item.nameFa}" اطمینان دارید؟`)) {
       try {
         await deleteEquipment(item.id);
         showNotification('دستگاه از پایگاه حذف گردید.');
@@ -159,8 +160,10 @@ export const EquipmentPage: React.FC = () => {
       const a = document.createElement('a');
       a.href = url;
       a.download = `food_science_equipment_catalog_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       showNotification('فایل JSON تجهیزات با موفقیت صادر شد.');
     } catch (error) {
       console.error('Export failed:', error);
@@ -191,8 +194,9 @@ export const EquipmentPage: React.FC = () => {
   // Handle Reset to Benchmark
   const handleResetBenchmark = async () => {
     if (
-      window.confirm(
-        'آیا مایلید پایگاه تجهیزات به کاتالوگ استاندارد اولیه (۱۷ دسته‌بندی تخصصی) بازنشانی شود؟'
+      await appConfirm(
+        'آیا مایلید پایگاه تجهیزات به کاتالوگ استاندارد اولیه (۱۷ دسته‌بندی تخصصی) بازنشانی شود؟',
+        { title: 'بازنشانی پایگاه تجهیزات', confirmLabel: 'بازنشانی', destructive: false }
       )
     ) {
       try {
@@ -235,7 +239,7 @@ export const EquipmentPage: React.FC = () => {
       <PageHeader
         title="تجهیزات و دستگاه‌های تخصصی آزمایشگاهی"
         englishTitle="Food Science Specialized Laboratory Equipment & Instrumentation"
-        description="سامانه جامع مشخصات فنی، دقت، Resolution، کنترل عملکرد روزانه، کالیبراسیون و انطباق دستگاه‌ها با پروتکل‌های آزمون (قسمت ۱۲ از ۲۰)"
+        description="سامانه جامع مشخصات فنی، دقت، Resolution، کنترل عملکرد روزانه، کالیبراسیون و انطباق دستگاه‌ها با پروتکل‌های آزمون"
         breadcrumbs={[
           { title: 'صفحه اصلی', path: '/' },
           { title: 'تجهیزات آزمایشگاهی' }

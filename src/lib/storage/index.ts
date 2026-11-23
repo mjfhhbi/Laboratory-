@@ -353,6 +353,7 @@ export async function requestPersistentStorage(): Promise<boolean> {
 export async function clearAllOfflineData(): Promise<void> {
   const storeNames = Object.values(STORES).filter((s) => s !== STORES.SETTINGS);
   await Promise.all(storeNames.map((s) => clearStore(s).catch(() => {})));
+  await deleteItem(STORES.SETTINGS, 'qc_qa_workspace_v1').catch(() => {});
   // Reset settings
   await putItem<UserSettings>(STORES.SETTINGS, DEFAULT_SETTINGS);
 }
@@ -430,3 +431,4 @@ export * from './experimentStorage';
 export * from './equipmentStorage';
 export * from './reagentStorage';
 export * from './scientificSourcesStorage';
+export * from './qcStorage';
